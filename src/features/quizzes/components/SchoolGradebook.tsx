@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useGradeActions } from "../hooks/use-grade-actions";
 import { toast } from "sonner";
 import React from "react";
+import { ListView } from "@/components/refine/views/list-view";
 
 interface SchoolGradebookProps {
   classId: string;
@@ -20,7 +21,7 @@ interface SchoolGradebookProps {
 /**
  * 🎓 SCHOOL GRADEBOOK
  * Implements Phase 7 Grade Locking with Centralized Actions.
- * Mandate Check: Refine v5 Query Pattern & Header Stability.
+ * Mandate Check: Refine v5 Query Pattern, Header Stability & ListView Wrapper.
  */
 export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
   classId,
@@ -41,6 +42,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
   const isLoading = query.isLoading;
 
   // 🛡️ STABILITY & PERFORMANCE: Compute stable subjects and a status map to avoid O(N*M) lookups
+  // Note: We assume subjects are uniform for a specific class term.
   const { uniqueSubjects, subjectStatusMap } = React.useMemo(() => {
     const subjects = new Set<string>();
     const statusMap: Record<string, string> = {};
@@ -48,7 +50,6 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
     students.forEach((s) => {
       s.subjects?.forEach((sub: any) => {
         subjects.add(sub.name);
-        // If we haven't found a status for this subject yet, or it's 'finalized' (high priority state)
         if (!statusMap[sub.name] || sub.status === "finalized") {
           statusMap[sub.name] = sub.status;
         }
@@ -95,22 +96,15 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
   if (!isSchoolSuite) return null;
 
   return (
-    <div className={cn("space-y-8 text-start animate-in fade-in duration-500", _className)}>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
-              <FileText className="w-6 h-6" />
-            </div>
-            {t("resources.gradebook.label", { defaultValue: "Class Term Gradebook" })}
-          </h2>
-          <p className="text-sm text-muted-foreground font-medium ms-12">
-            {t("classes:gradebook.description", {
-              defaultValue:
-                "Aggregated performance metrics and weighted averages across all subjects.",
-            })}
-          </p>
-        </div>
+    <ListView
+      title={t("resources.gradebook.label", { defaultValue: "Class Term Gradebook" })}
+      breadcrumb={null} // Controlled by parent
+      headerProps={{
+        subtitle: t("classes:gradebook.description", {
+          defaultValue: "Aggregated performance metrics and weighted averages across all subjects.",
+        }),
+      }}
+      headerButtons={
         <div className="flex gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
@@ -136,18 +130,18 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
             </Button>
           )}
         </div>
-      </div>
-
-      <Card className="rounded-[2.5rem] border-border/40 bg-card/40 backdrop-blur-3xl shadow-2xl overflow-hidden group">
+      }
+    >
+      <Card className="rounded-[2.5rem] border-border/40 bg-card/40 backdrop-blur-3xl shadow-2xl overflow-hidden group mt-6">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-border/40 bg-muted/5">
-                  <th className="p-6 text-start text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 w-[300px]">
+                  <th className="p-6 text-start text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 min-w-[250px]">
                     {t("classes:gradebook.columns.student", { defaultValue: "Student" })}
                   </th>
-                  <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                  <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 min-w-[100px]">
                     {t("classes:gradebook.columns.average", { defaultValue: "Average" })}
                   </th>
                   {/* 🛡️ STABILITY: Render headers from the computed stable subject list */}
@@ -155,7 +149,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                     uniqueSubjects.map((subName) => (
                       <th
                         key={subName}
-                        className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
+                        className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 min-w-[120px]"
                       >
                         <div className="flex flex-col items-center gap-1">
                           {subName}
@@ -231,7 +225,8 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                             variant="ghost"
                             size="sm"
                             className="h-9 px-3 rounded-xl font-black uppercase tracking-widest text-[8px] gap-2 hover:bg-primary/10 text-primary"
-                            onClick={() => handleAction("submit", row.studentId)}
+                            // 🛡️ REFIX: Pass 'studentId' explicitly for the submission resource
+                            onClick={() => handleAction("submit", row.studentId, "studentId")}
                             disabled={isPending}
                           >
                             {isPending ? (
@@ -263,6 +258,6 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>
+    </ListView>
   );
 };

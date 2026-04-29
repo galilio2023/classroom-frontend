@@ -10,14 +10,25 @@ import { handleError } from "@/providers/utils/api-errors";
  */
 export const useGradeActions = (
   resource: "submissions" | "quizzes",
-  queriesToRefetch: UseCustomReturnType<any, any>[] = []
+  queriesToRefetch: UseCustomReturnType<any, any>[] = [],
 ) => {
   const { t } = useTranslation();
   const { mutate, mutation } = useCustomMutation();
 
-  const handleAction = (type: "submit" | "finalize", parentId: string | number) => {
+  /**
+   * Performs a grade-related action (submit or finalize).
+   * @param type The action type.
+   * @param parentId The ID of the target resource.
+   * @param customPayloadKey Optional override for the payload key (e.g., 'studentId' vs 'assignmentId').
+   */
+  const handleAction = (
+    type: "submit" | "finalize",
+    parentId: string | number,
+    customPayloadKey?: string
+  ) => {
     const endpoint = type === "submit" ? "submit-grades" : "finalize-grades";
-    const payloadKey = resource === "quizzes" ? "quizId" : "assignmentId";
+    const defaultKey = resource === "quizzes" ? "quizId" : "assignmentId";
+    const payloadKey = customPayloadKey || defaultKey;
 
     mutate(
       {
@@ -30,7 +41,7 @@ export const useGradeActions = (
           toast.success(
             t(`classes.gradebook.toasts.${type}Success`, {
               defaultValue: `Grades ${type}d successfully!`,
-            })
+            }),
           );
           queriesToRefetch.forEach((q) => q.refetch());
         },
@@ -42,7 +53,7 @@ export const useGradeActions = (
               : undefined,
           });
         },
-      }
+      },
     );
   };
 
