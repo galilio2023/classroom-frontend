@@ -1,4 +1,4 @@
-import { useCustom } from "@refinedev/core";
+import { useCustom, HttpError } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { useCapabilities } from "@/hooks/use-capabilities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { useGradeActions } from "../hooks/use-grade-actions";
+import { toast } from "sonner";
 
 interface SchoolGradebookProps {
   classId: string;
@@ -26,7 +27,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
   const { t } = useTranslation();
   const { isSchoolSuite, isPrincipal, isTeacher } = useCapabilities();
 
-  const { query } = useCustom<any>({
+  const query = useCustom<any, HttpError>({
     url: `${import.meta.env.VITE_API_URL}/reports/class/${classId}/term-grades`,
     method: "get",
   });
@@ -50,7 +51,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
             variant="outline"
             className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[8px] uppercase font-black"
           >
-            {t("classes.gradebook.status.pending", { defaultValue: "Pending Approval" })}
+            {t("classes:gradebook.status.pending", { defaultValue: "Pending Approval" })}
           </Badge>
         );
       case "finalized":
@@ -59,7 +60,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
             variant="outline"
             className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[8px] uppercase font-black"
           >
-            {t("classes.gradebook.status.finalized", { defaultValue: "Finalized" })}
+            {t("classes:gradebook.status.finalized", { defaultValue: "Finalized" })}
           </Badge>
         );
       default:
@@ -80,7 +81,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
             {t("resources.gradebook.label", { defaultValue: "Class Term Gradebook" })}
           </h2>
           <p className="text-sm text-muted-foreground font-medium ms-12">
-            {t("classes.gradebook.description", {
+            {t("classes:gradebook.description", {
               defaultValue:
                 "Aggregated performance metrics and weighted averages across all subjects.",
             })}
@@ -90,7 +91,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
             <Input
-              placeholder={t("common.search", "Search students...")}
+              placeholder={t("common.search", { defaultValue: "Search students..." })}
               className="pl-10 h-11 rounded-2xl bg-muted/20 border-none shadow-inner"
             />
           </div>
@@ -106,7 +107,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
               ) : (
                 <ShieldCheck className="w-4 h-4" />
               )}
-              {t("buttons.finalizeTerm", "Finalize Term")}
+              {t("buttons.finalizeTerm", { defaultValue: "Finalize Term" })}
             </Button>
           )}
         </div>
@@ -119,11 +120,12 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
               <thead>
                 <tr className="border-b border-border/40 bg-muted/5">
                   <th className="p-6 text-start text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 w-[300px]">
-                    {t("classes.gradebook.columns.student", { defaultValue: "Student" })}
+                    {t("classes:gradebook.columns.student", { defaultValue: "Student" })}
                   </th>
                   <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                    {t("classes.gradebook.columns.average", { defaultValue: "Average" })}
+                    {t("classes:gradebook.columns.average", { defaultValue: "Average" })}
                   </th>
+                  {/* 🛡️ STABILITY: Derive headers from class metadata or provide stable empty state */}
                   {students.length > 0 && students[0]?.subjects ? (
                     students[0].subjects.map((sub: any) => (
                       <th
@@ -137,13 +139,12 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                       </th>
                     ))
                   ) : (
-                    // Fallback headers if student list is empty (Rule Fix)
                     <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                      {t("classes.gradebook.columns.subjects", { defaultValue: "Subjects" })}
+                      {t("classes:gradebook.columns.subjects", { defaultValue: "Subjects" })}
                     </th>
                   )}
                   <th className="p-6 text-end text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                    {t("common.actions", { defaultValue: "Actions" })}
+                    {t("common:actions", { defaultValue: "Actions" })}
                   </th>
                 </tr>
               </thead>
@@ -182,7 +183,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                             variant="outline"
                             className={cn(
                               "h-8 px-3 rounded-xl font-black text-sm border-none shadow-sm",
-                              getScoreColor(row.average)
+                              getScoreColor(row.average),
                             )}
                           >
                             {row.average}%

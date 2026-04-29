@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Users } from "lucide-react";
-import { useGo } from "@refinedev/core";
+import { useGo, useCustomMutation } from "@refinedev/core";
 import { QuizResult } from "@/features/ai/components/quiz-result";
 import { useQuiz } from "@/features/quizzes/hooks/use-quiz";
 import { QuizProgress } from "@/features/ai/components/quiz-progress";
@@ -31,6 +31,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   const { t } = useTranslation();
   const { width, height } = useWindowSize();
   const go = useGo();
+  const { mutate: logTelemetry } = useCustomMutation();
   const {
     questions,
     currentStep,
@@ -55,23 +56,30 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     const handleVisibilityChange = () => {
       if (document.hidden) {
         toast.error(
-          t(
-            "classes.quiz.examModeWarning",
-            "Tab-switch detected! This action has been logged for review."
-          ),
+          t("classes.quiz.examModeWarning", {
+            defaultValue: "Tab-switch detected! This action has been logged for review.",
+          }),
           {
             duration: 10000,
             icon: "🛡️",
           }
         );
 
-        // 🚀 AUDIT: This is where we would dispatch a focus_loss event via socket or API
+        // 🚀 TELEMETRY: Persist focus loss to backend (Rule 6 Enhancement)
+        logTelemetry({
+          url: `/quizzes/${assignmentId}/telemetry`,
+          method: "post",
+          values: { event: "focus_loss", timestamp: new Date().toISOString() },
+        });
+
+        // 🛡️ PRIVACY: Stop active speech or recording (Rule 6 Mandate)
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [examMode, isFinished, t]);
+  }, [examMode, isFinished, t, assignmentId, logTelemetry]);
 
   if (questions.length === 0) return null;
 

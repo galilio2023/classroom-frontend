@@ -1,4 +1,4 @@
-import { useCustom, useNavigation } from "@refinedev/core";
+import { useCustom, useNavigation, HttpError } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import { QuizAttempt, Quiz } from "@/types/quiz";
 import { Card } from "@/components/ui/card";
@@ -23,6 +23,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { useGradeActions } from "../hooks/use-grade-actions";
+import { handleError } from "@/providers/utils/api-errors";
+import { toast } from "sonner";
 
 /**
  * 📊 QUIZ RESULTS PAGE
@@ -35,17 +37,23 @@ const QuizResults = () => {
   const [search, setSearch] = useState("");
   const { isPrincipal, isTeacher } = useCapabilities();
 
+  // 🛡️ SAFETY: Guard against malformed routes
+  if (!id) {
+    list("classes");
+    return null;
+  }
+
   // Fetch Quiz Details
-  const { query: quizQuery } = useCustom<Quiz>({
+  const quizQuery = useCustom<Quiz, HttpError>({
     url: `/quizzes/${id}`,
     method: "get",
   });
 
   // Fetch Quiz Results (Attempts & Analytics)
-  const { query: resultsQuery } = useCustom<{
+  const resultsQuery = useCustom<{
     attempts: QuizAttempt[];
     analytics: any[];
-  }>({
+  }, HttpError>({
     url: `/quizzes/${id}/results`,
     method: "get",
   });
@@ -107,11 +115,7 @@ const QuizResults = () => {
               onClick={() => handleAction("submit", id!)}
               disabled={isPending}
             >
-              {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Lock className="h-4 w-4" />
-              )}
+              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
               {t("buttons.submitGrades", { defaultValue: "Submit Grades" })}
             </Button>
           )}
