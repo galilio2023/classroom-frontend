@@ -107,6 +107,33 @@ const AIMetrics = React.lazy(() => import("@/features/ai/pages/ai-metrics"));
 const AdminImportPage = React.lazy(() => import("@/features/schools/pages/import"));
 const ApprovalsPage = React.lazy(() => import("@/features/schools/pages/approvals"));
 
+// FEATURE: ACADEMIC
+const AcademicYearsList = React.lazy(() => import("@/features/academic/pages/years/list"));
+const AcademicYearPlannerPage = React.lazy(
+  () => import("@/features/academic/pages/years/AcademicYearPlanner")
+);
+const DeptSemesterPlannerPage = React.lazy(
+  () => import("@/features/academic/pages/departments/DeptSemesterPlanner")
+);
+const BellSchedulePage = React.lazy(
+  () => import("@/features/academic/pages/timetable/bell-schedule")
+);
+const TeacherSchedulePage = React.lazy(
+  () => import("@/features/academic/pages/timetable/teacher-schedule")
+);
+const LecturerWeeklySchedulePage = React.lazy(
+  () => import("@/features/academic/pages/timetable/lecturer-schedule-view")
+);
+const ExamSchedulePage = React.lazy(
+  () => import("@/features/academic/pages/timetable/exam-schedule")
+);
+const LectureSchedulePage = React.lazy(
+  () => import("@/features/academic/pages/timetable/lecture-schedule")
+);
+
+// FEATURE: ONBOARDING
+const SelectSuitePage = React.lazy(() => import("@/features/onboarding/pages/SelectSuitePage"));
+
 const StudentReportCard = React.lazy(() => import("@/features/users/pages/student/report-card"));
 const StudentProgress = React.lazy(() => import("@/features/users/pages/progress/list"));
 const TeacherChannelPage = React.lazy(() => import("@/features/users/pages/teacher-channel/index"));
@@ -165,6 +192,7 @@ const ErrorComponent = () => {
 };
 
 import { useCapabilities } from "@/hooks/use-capabilities";
+import { OnboardingGuard } from "@/features/onboarding/components/onboarding-guard";
 
 export const AppRouter = () => {
   const { isSchoolMode, isFacultyMode, isStaff, isAdmin } = useCapabilities();
@@ -215,14 +243,17 @@ export const AppRouter = () => {
             </Authenticated>
           }
         >
+          <Route path="/onboarding/select-suite" element={<SelectSuitePage />} />
           <Route path="/pending-verification" element={<PendingVerification />} />
           <Route
             element={
-              <VerificationGuard>
-                <Layout>
-                  <Outlet />
-                </Layout>
-              </VerificationGuard>
+              <OnboardingGuard>
+                <VerificationGuard>
+                  <Layout>
+                    <Outlet />
+                  </Layout>
+                </VerificationGuard>
+              </OnboardingGuard>
             }
           >
             <Route
@@ -627,6 +658,14 @@ export const AppRouter = () => {
                     }
                   />
                   <Route
+                    path="planner"
+                    element={
+                      <AuthorizedRoute resource="departments" action="list">
+                        <DeptSemesterPlannerPage />
+                      </AuthorizedRoute>
+                    }
+                  />{" "}
+                  <Route
                     path="create"
                     element={
                       <AuthorizedRoute resource="departments" action="create">
@@ -670,7 +709,63 @@ export const AppRouter = () => {
                   />
                 </Route>
                 <Route
-                  path="/terms"
+                  path="/academic-years"
+                  element={
+                    <AuthorizedRoute resource="academic-years" action="list">
+                      <AcademicYearsList />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/academic-years/planner"
+                  element={
+                    <AuthorizedRoute resource="academic-years" action="list">
+                      <AcademicYearPlannerPage />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/timetable/bell"
+                  element={
+                    <AuthorizedRoute resource="timetable" action="list">
+                      <BellSchedulePage />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/timetable/teacher"
+                  element={
+                    <AuthorizedRoute resource="timetable" action="list">
+                      <TeacherSchedulePage />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/timetable/lecture"
+                  element={
+                    <AuthorizedRoute resource="timetable" action="list">
+                      <LectureSchedulePage />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/timetable/lecturer-weekly"
+                  element={
+                    <AuthorizedRoute resource="timetable" action="list">
+                      <LecturerWeeklySchedulePage />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/timetable/exam"
+                  element={
+                    <AuthorizedRoute resource="timetable" action="list">
+                      <ExamSchedulePage />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/academic-terms"
                   element={
                     <AuthorizedRoute resource="academic-terms" action="list">
                       <TermsList />

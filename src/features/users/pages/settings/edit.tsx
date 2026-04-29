@@ -1,5 +1,5 @@
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
-import { Settings as SettingsIcon, Loader2, History } from "lucide-react";
+import { Settings as SettingsIcon, Loader2, History, Layout } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import usePageTitle from "@/hooks/use-page-title";
 import { motion } from "framer-motion";
@@ -31,8 +31,9 @@ import { toast } from "sonner";
 import { useOne, useUpdate } from "@refinedev/core";
 import { useEffect } from "react";
 import { UserRole } from "@/types";
-import {} from "@/lib/utils";
+import { useCapabilities } from "@/hooks/use-capabilities";
 import { SettingsAuditLog } from "./components/audit-log";
+import { HubSuiteSettings } from "@/features/onboarding/components/HubSuiteSettings";
 
 // Define the schema for global settings
 const settingsSchema = z.object({
@@ -52,6 +53,7 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 const SettingsEditPage = () => {
   const { t } = useTranslation();
+  const { isOwner } = useCapabilities();
   usePageTitle(t("settings.title"));
 
   const SETTINGS_ID = "global-settings";
@@ -141,6 +143,15 @@ const SettingsEditPage = () => {
                 <SettingsIcon className="h-3.5 w-3.5" />
                 General
               </TabsTrigger>
+              {isOwner && (
+                <TabsTrigger
+                  value="hub"
+                  className="px-6 py-2.5 rounded-full font-black uppercase tracking-widest text-[10px] transition-all duration-300 gap-2 h-10 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
+                >
+                  <Layout className="h-3.5 w-3.5" />
+                  Hub Suite
+                </TabsTrigger>
+              )}
               <TabsTrigger
                 value="audit"
                 className="px-6 py-2.5 rounded-full font-black uppercase tracking-widest text-[10px] transition-all duration-300 gap-2 h-10 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
@@ -336,6 +347,12 @@ const SettingsEditPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {isOwner && (
+            <TabsContent value="hub" className="mt-0 focus-visible:outline-none">
+              <HubSuiteSettings />
+            </TabsContent>
+          )}
 
           <TabsContent value="audit" className="mt-0 focus-visible:outline-none">
             <SettingsAuditLog />

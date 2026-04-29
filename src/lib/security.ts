@@ -50,6 +50,9 @@ export const SENSITIVE_DATA_KEYS = [
   "national_id",
   "cookie",
   "set-cookie",
+  "stack",
+  "stackTrace",
+  "stack_trace",
 ];
 
 /**

@@ -218,7 +218,7 @@ export const BasicDetailsSection = ({
                       <SelectValue
                         placeholder={
                           terms.length === 0
-                            ? t("terms.noTermsFound")
+                            ? t("terms.noTermsFound" as any)
                             : t("classes.form.selectTerm")
                         }
                       />

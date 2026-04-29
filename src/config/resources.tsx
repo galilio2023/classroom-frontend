@@ -175,8 +175,44 @@ export const resources: ResourceProps[] = [
 
   // --- ACADEMIC ---
   {
+    name: "academic-years",
+    list: "/academic-years",
+    meta: {
+      group: "groups.academic",
+      label: "resources.academic-years.label",
+      icon: <TrendingUp />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
+    },
+  },
+  {
+    name: "timetable",
+    list: "/timetable/bell",
+    meta: {
+      group: "groups.academic",
+      label: "resources.timetable.label",
+      icon: <Clock />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
+    },
+  },
+  {
+    name: "timetable/dept-planner",
+    list: "/timetable/dept-planner",
+    meta: {
+      hide: true,
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
+    },
+  },
+  {
+    name: "timetable/available-sections",
+    list: "/timetable/available-sections",
+    meta: {
+      hide: true,
+      roles: [UserRole.STUDENT],
+    },
+  },
+  {
     name: "academic-terms",
-    list: "/terms",
+    list: "/academic-terms",
     meta: {
       group: "groups.academic",
       label: "resources.academic-terms.label",

@@ -193,9 +193,39 @@ export const resourceFilterMappings: Record<string, any> = {
   },
 };
 
+/**
+ * 🔑 CACHE KEY GENERATOR
+ * Mandate Review #15: Ensures stable identifiers for IndexedDB lookups.
+ */
+const getCacheKey = (resource: string, params: unknown) => {
+  const p = params as { meta?: Record<string, unknown> };
+  // Filter out non-serializable/dynamic meta fields like signals
+  const { signal, abortSignal, ...stableMeta } = p.meta || {};
+  return `${resource}:${JSON.stringify({ ...(p as any), meta: stableMeta })}`;
+};
+
 export const dataProvider: DataProvider = {
   getList: async ({ resource, pagination, filters, sorters, meta }) => {
-    const urlPath = getResourcePath(resource);
+    const cacheKey = getCacheKey(resource, { pagination, filters, sorters, meta });
+
+    // 🛡️ OFFLINE RETRIEVAL: Try cache first if network is down
+    if (isOffline()) {
+      const cached = await offlineDB.resource_cache.get(cacheKey);
+      if (cached) {
+        const data = cached.data as any[];
+        return { data, total: cached.total ?? data.length };
+      }
+      // If no cache and offline, throw a specialized error
+      throw new Error("No offline data available for this request.");
+    }
+
+    let urlPath = getResourcePath(resource);
+
+    // 🚀 DYNAMIC PATHS: Support /resource/:id sub-resource lists (Review #15)
+    if (meta?.id) {
+      urlPath = `${urlPath}/${meta.id}`;
+    }
+
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
 
     const withRelations = meta?.with || meta?.populate;
@@ -278,10 +308,28 @@ export const dataProvider: DataProvider = {
     const data = json.data ?? (Array.isArray(json) ? json : []);
     const total = json.pagination?.total ?? data.length;
 
+    // 🛡️ CACHE PERSISTENCE: Store for rural Egypt/offline use
+    await offlineDB.resource_cache.put({
+      key: cacheKey,
+      data,
+      total,
+      updatedAt: Date.now(),
+    });
+
     return { data, total };
   },
 
   getOne: async ({ resource, id, meta }) => {
+    const cacheKey = getCacheKey(resource, { id, meta });
+
+    if (isOffline()) {
+      const cached = await offlineDB.resource_cache.get(cacheKey);
+      if (cached) {
+        return { data: cached.data as any };
+      }
+      throw new Error("No offline data available for this request.");
+    }
+
     const urlPath = getResourcePath(resource);
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}/${id}`);
 
@@ -303,9 +351,16 @@ export const dataProvider: DataProvider = {
     }
 
     const json = await response.json();
-    return {
-      data: json.data ?? json,
-    };
+    const data = json.data ?? json;
+
+    // 🛡️ CACHE PERSISTENCE
+    await offlineDB.resource_cache.put({
+      key: cacheKey,
+      data,
+      updatedAt: Date.now(),
+    });
+
+    return { data };
   },
 
   create: async ({ resource, variables, meta }) => {
@@ -476,7 +531,7 @@ export const dataProvider: DataProvider = {
         meta: meta as any,
       });
       toast.warning("📴 Offline: Action saved locally.");
-      return { data: {} as any };
+      return { data: { offline: true } as any };
     }
 
     let requestUrl = url;

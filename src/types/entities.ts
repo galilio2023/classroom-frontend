@@ -14,14 +14,6 @@ export interface AIResponse<T> {
 
 export type SignUpPayload = z.infer<typeof signUpFormSchema>;
 
-export enum UserRole {
-  ADMIN = "admin",
-  TEACHER = "teacher",
-  TA = "ta",
-  STUDENT = "student",
-  PARENT = "parent",
-}
-
 export enum UserStatus {
   ACTIVE = "active",
   INACTIVE = "inactive",
@@ -61,6 +53,8 @@ export interface User {
   parentPhone: string | null;
   inviteCode: string | null;
   planType: "basic" | "faculty" | "school";
+  suiteType: "private" | "school" | "faculty" | "corporate";
+  suiteOnboardingComplete: boolean;
   verificationStatus: VerificationStatus;
   verificationDocumentUrl: string | null;
   verificationDocumentCldPubId: string | null;
@@ -82,6 +76,7 @@ export interface User {
   };
   enrollments?: Enrollment[];
   teacherChannel?: TeacherChannel;
+  school?: School;
   persona?: {
     learningDNA: string;
     preferredTone: string;
@@ -89,6 +84,76 @@ export interface User {
   };
   stripeAccountId?: string | null;
   stripeOnboardingComplete?: boolean;
+}
+
+export type SuiteType = "private" | "school" | "faculty" | "corporate";
+
+export enum UserRole {
+  STUDENT = "student",
+  TEACHER = "teacher",
+  TA = "ta",
+  ADMIN = "admin",
+  PARENT = "parent",
+  PRINCIPAL = "principal",
+  DEPT_HEAD = "deptHead",
+  REGISTRAR = "registrar",
+  MANAGER = "manager",
+}
+
+export interface BrandingConfig {
+  primaryColor?: string;
+  logoUrl?: string;
+  theme?: "light" | "dark" | "system";
+  accentColor?: string;
+}
+
+export interface School extends BaseRecord {
+  id: string;
+  name: string;
+  slug: string;
+  brandingConfig: BrandingConfig;
+  planType: "basic" | "faculty" | "school";
+  suiteType: "private" | "school" | "faculty" | "corporate";
+  suiteActivatedAt?: string;
+  previousSuiteType?: string;
+  suiteUpgradedAt?: string;
+  suiteOnboardingComplete: boolean;
+  ownerId: string | null;
+  isActive: boolean;
+  aiTokensUsed: string;
+  aiMonthlyLimit: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AcademicYear extends BaseRecord {
+  id: number;
+  tenantId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: "active" | "inactive";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TimetableSlot extends BaseRecord {
+  id: number;
+  tenantId: string;
+  academicYearId: number;
+  termId?: number;
+  scheduleType: "bell" | "lecture" | "exam";
+  classId?: number;
+  subjectId?: number;
+  teacherId: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  roomId?: string;
+  status: "active" | "inactive";
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PresenceUser {

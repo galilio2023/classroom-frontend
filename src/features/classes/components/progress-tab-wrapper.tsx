@@ -3,8 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AnalyticsTab } from "../pages/analytics-tab";
 import { LeaderboardTab } from "../pages/leaderboard-tab";
-import { BarChart3, Trophy } from "lucide-react";
+import { BarChart3, Trophy, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCapabilities } from "@/hooks/use-capabilities";
+import { SchoolGradebook } from "@/features/quizzes/components/SchoolGradebook";
 
 interface ProgressTabWrapperProps {
   classId: string;
@@ -21,6 +23,7 @@ export const ProgressTabWrapper: React.FC<ProgressTabWrapperProps> = ({
   setSearchParams,
 }) => {
   const { t } = useTranslation();
+  const { isSchoolSuite } = useCapabilities();
 
   const handleSubTabChange = (value: string) => {
     setSearchParams(
@@ -39,6 +42,15 @@ export const ProgressTabWrapper: React.FC<ProgressTabWrapperProps> = ({
       label: t("classes.show.tabs.analytics"),
       icon: BarChart3,
     },
+    ...(isSchoolSuite
+      ? [
+          {
+            id: "gradebook",
+            label: "Gradebook",
+            icon: FileText,
+          },
+        ]
+      : []),
     {
       id: "leaderboard",
       label: t("classes.show.tabs.leaderboard"),
@@ -80,6 +92,12 @@ export const ProgressTabWrapper: React.FC<ProgressTabWrapperProps> = ({
         <TabsContent value="leaderboard" className="mt-8">
           {activeSubTab === "leaderboard" && <LeaderboardTab classId={classId} />}
         </TabsContent>
+
+        {isSchoolSuite && (
+          <TabsContent value="gradebook" className="mt-8">
+            {activeSubTab === "gradebook" && <SchoolGradebook classId={classId} />}
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

@@ -1,0 +1,40 @@
+{
+  "onboarding": {
+    "title": "Choose your Tablawy Suite",
+    "subtitle": "Every organization has its own DNA. Select the suite that fits your structure best.",
+    "confirm": "Activate My Suite",
+    "footer": "Tablawy OS · Hub Suite Selection · 2026",
+    "suiteSuccess": "Suite activated successfully!",
+    "suiteError": "Failed to activate suite.",
+    "suites": {
+      "private": {
+        "title": "Tablawy Private",
+        "tagline": "Teacher-first. Quick start.",
+        "feature1": "Live sessions with AI highlights",
+        "feature2": "One-on-one AI tutor bot",
+        "feature3": "Simple gamification (XP & Streaks)"
+      },
+      "school": {
+        "title": "Tablawy School",
+        "tagline": "Principal-first. Full K-12 management.",
+        "feature1": "Weekly parent DNA digests",
+        "feature2": "Bell schedule & attendance sync",
+        "feature3": "Gradebooks & term reports"
+      },
+      "faculty": {
+        "title": "Tablawy Faculty",
+        "tagline": "Lecture-first. Higher Ed logic.",
+        "feature1": "Credit hour & elective management",
+        "feature2": "GPA calculation & transcripts",
+        "feature3": "Lecture scheduling with conflicts"
+      },
+      "corporate": {
+        "title": "Tablawy Corporate",
+        "tagline": "Manager-first. Compliance-ready.",
+        "feature1": "Program certificate tracking",
+        "feature2": "Compliance & safety monitoring",
+        "feature3": "External manager audit portal"
+      }
+    }
+  }
+}

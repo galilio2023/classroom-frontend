@@ -19,6 +19,19 @@ export const AI_API = {
   FEEDBACK: "/ai/feedback",
   GOVERNANCE: "/settings/global-settings",
   HAGER_EXPORT: "/ai/hager-export",
-  OTP_SEND: "/auth/otp/send",
-  OTP_VERIFY: "/auth/otp/verify",
+};
+
+export const OTP_API = {
+  SEND: "/auth/otp/send",
+  VERIFY: "/auth/otp/verify",
+};
+
+/**
+ * ⚡ PERFORMANCE: Centralized Query/Mutation Settings
+ * Mandate Review #15: Single Source of Truth for caching and stale times.
+ */
+export const QUERY_SETTINGS = {
+  STALE_TIME_HIGH_STAKES: 5 * 60 * 1000, // 5 mins (e.g. Dept Planner)
+  STALE_TIME_DEFAULT: 10 * 60 * 1000, // 10 mins (e.g. Section Picker)
+  CACHE_TIME_PERSISTENT: 24 * 60 * 60 * 1000, // 24 hours for offline datasets
 };
