@@ -1,4 +1,4 @@
-import { useCustom, useNavigation, useCustomMutation } from "@refinedev/core";
+import { useCustom, useNavigation } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import { QuizAttempt, Quiz } from "@/types/quiz";
 import { Card } from "@/components/ui/card";
@@ -20,15 +20,20 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { QuizAnalytics } from "@/features/classes/components/quiz-analytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
+import { useGradeActions } from "../hooks/use-grade-actions";
 
+/**
+ * 📊 QUIZ RESULTS PAGE
+ * Centralizes high-stakes quiz analytics and Phase 7 locking.
+ */
 const QuizResults = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const { list } = useNavigation();
   const [search, setSearch] = useState("");
   const { isPrincipal, isTeacher } = useCapabilities();
-  const { mutate, mutation: mutationResult } = useCustomMutation();
 
   // Fetch Quiz Details
   const { query: quizQuery } = useCustom<Quiz>({
@@ -45,26 +50,10 @@ const QuizResults = () => {
     method: "get",
   });
 
-  const handleAction = async (type: "submit" | "finalize") => {
-    const endpoint = type === "submit" ? "submit-grades" : "finalize-grades";
-    mutate(
-      {
-        url: `${import.meta.env.VITE_API_URL}/quizzes/${endpoint}`,
-        method: "post",
-        values: { quizId: id },
-      },
-      {
-        onSuccess: () => {
-          toast.success(`Quiz grades ${type}d successfully!`);
-          resultsQuery.refetch();
-          quizQuery.refetch();
-        },
-        onError: () => {
-          toast.error(`Failed to ${type} quiz grades.`);
-        },
-      }
-    );
-  };
+  const { handleAction, isPending } = useGradeActions("quizzes", [
+    () => resultsQuery.refetch(),
+    () => quizQuery.refetch(),
+  ]);
 
   const quiz = quizQuery.data?.data;
   const data = resultsQuery.data?.data;
@@ -90,7 +79,7 @@ const QuizResults = () => {
     quiz.questions?.reduce((acc: number, q: any) => acc + (q.points || 1), 0) || 0;
 
   return (
-    <div className="container mx-auto py-10 px-4 space-y-8 max-w-7xl">
+    <div className="container mx-auto py-10 px-4 space-y-8 max-w-7xl text-start">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <Button
@@ -103,7 +92,11 @@ const QuizResults = () => {
           </Button>
           <div>
             <h1 className="text-3xl font-black tracking-tight">{quiz.title}</h1>
-            <p className="font-bold text-muted-foreground/60">Class Performance Analytics</p>
+            <p className="font-bold text-muted-foreground/60">
+              {t("classes.quiz.performanceAnalytics", {
+                defaultValue: "Class Performance Analytics",
+              })}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -111,43 +104,43 @@ const QuizResults = () => {
             <Button
               variant="outline"
               className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 text-primary hover:bg-primary/5"
-              onClick={() => handleAction("submit")}
-              disabled={mutationResult.isPending}
+              onClick={() => handleAction("submit", id!)}
+              disabled={isPending}
             >
-              {mutationResult.isPending ? (
+              {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Lock className="h-4 w-4" />
               )}
-              Submit Grades
+              {t("buttons.submitGrades", { defaultValue: "Submit Grades" })}
             </Button>
           )}
           {isPrincipal && (
             <Button
               variant="default"
               className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
-              onClick={() => handleAction("finalize")}
-              disabled={mutationResult.isPending}
+              onClick={() => handleAction("finalize", id!)}
+              disabled={isPending}
             >
-              {mutationResult.isPending ? (
+              {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <ShieldCheck className="w-4 h-4" />
+                <ShieldCheck className="h-4 w-4" />
               )}
-              Finalize & Lock
+              {t("buttons.finalizeLock", { defaultValue: "Finalize & Lock" })}
             </Button>
           )}
           <Badge
             variant="secondary"
             className="text-xs px-4 py-2 rounded-xl bg-primary/10 text-primary border-none font-black uppercase tracking-widest"
           >
-            {attempts.length} Submissions
+            {attempts.length} {t("classes.quiz.submissions", { defaultValue: "Submissions" })}
           </Badge>
           <Badge
             variant="secondary"
             className="text-xs px-4 py-2 rounded-xl bg-primary/10 text-primary border-none font-black uppercase tracking-widest"
           >
-            {totalPoints} Total Points
+            {totalPoints} {t("classes.quiz.totalPoints", { defaultValue: "Total Points" })}
           </Badge>
         </div>
       </div>
@@ -159,14 +152,14 @@ const QuizResults = () => {
             className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
           >
             <LayoutDashboard className="h-4 w-4" />
-            Analytics
+            {t("classes.quiz.tabs.analytics", { defaultValue: "Analytics" })}
           </TabsTrigger>
           <TabsTrigger
             value="submissions"
             className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
           >
             <ListChecks className="h-4 w-4" />
-            Student List
+            {t("classes.quiz.tabs.studentList", { defaultValue: "Student List" })}
           </TabsTrigger>
         </TabsList>
 
@@ -179,7 +172,9 @@ const QuizResults = () => {
             <div className="relative group max-w-md">
               <Search className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <Input
-                placeholder="Search student results..."
+                placeholder={t("classes.quiz.searchPlaceholder", {
+                  defaultValue: "Search students...",
+                })}
                 className="ps-12 h-14 rounded-2xl bg-card/50 border-none shadow-sm focus-visible:ring-primary/20 font-bold"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -215,7 +210,7 @@ const QuizResults = () => {
                     <div className="px-6 pb-6 pt-0 flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                          Raw Score
+                          {t("classes.quiz.rawScore", { defaultValue: "Raw Score" })}
                         </span>
                         <p className="text-2xl font-black text-primary">
                           {attempt.score}
@@ -235,7 +230,9 @@ const QuizResults = () => {
               ) : (
                 <div className="col-span-full text-center py-20 border-2 border-dashed border-primary/10 rounded-[3rem] opacity-40">
                   <User className="h-12 w-12 mx-auto mb-4" />
-                  <p className="font-black uppercase tracking-widest">No student results found</p>
+                  <p className="font-black uppercase tracking-widest">
+                    {t("classes.quiz.noResults", { defaultValue: "No student results found" })}
+                  </p>
                 </div>
               )}
             </div>

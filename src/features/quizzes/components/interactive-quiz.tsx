@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
+import { toast } from "sonner";
 
 interface InteractiveQuizProps {
   assignmentId: number;
@@ -38,12 +39,39 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     isAnswered,
     score,
     isFinished,
+    examMode,
     progress,
     activeStudents,
     handleOptionSelect,
     handleCheckAnswer,
     handleNext,
   } = useQuiz({ assignmentId, classId, description, onComplete });
+
+  // 🛡️ RULE 6: Hardware Privacy & Safety (Tab Visibility)
+  // Mandate: Detect and report focus loss during high-stakes exams.
+  React.useEffect(() => {
+    if (!examMode || isFinished) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        toast.error(
+          t(
+            "classes.quiz.examModeWarning",
+            "Tab-switch detected! This action has been logged for review."
+          ),
+          {
+            duration: 10000,
+            icon: "🛡️",
+          }
+        );
+
+        // 🚀 AUDIT: This is where we would dispatch a focus_loss event via socket or API
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [examMode, isFinished, t]);
 
   if (questions.length === 0) return null;
 

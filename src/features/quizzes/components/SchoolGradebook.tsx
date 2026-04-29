@@ -1,85 +1,40 @@
-import { useCustom, useCustomMutation } from "@refinedev/core";
+import { useCustom } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  FileText,
-  TrendingUp,
-  Download,
-  Search,
-  User as UserIcon,
-  ChevronRight,
-  Sparkles,
-  Layers,
-  MoreHorizontal,
-  Lock,
-  ShieldCheck,
-  Loader2,
-} from "lucide-react";
-import { motion } from "framer-motion";
-import usePageTitle from "@/hooks/use-page-title";
-import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
-import { ListView } from "@/components/refine/views/list-view";
+import { Card, CardContent } from "@/components/ui/card";
+import { FileText, Search, Lock, ShieldCheck, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { useGradeActions } from "../hooks/use-grade-actions";
 
 interface SchoolGradebookProps {
   classId: string;
   className?: string;
 }
 
+/**
+ * 🎓 SCHOOL GRADEBOOK
+ * Implements Phase 7 Grade Locking with Centralized Actions.
+ */
 export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
   classId,
   className: _className,
 }) => {
   const { t } = useTranslation();
   const { isSchoolSuite, isPrincipal, isTeacher } = useCapabilities();
-  const { mutate, mutation: mutationResult } = useCustomMutation();
 
-  const {
-    data: queryData,
-    isLoading,
-    query,
-  } = useCustom({
+  const { query } = useCustom<any>({
     url: `${import.meta.env.VITE_API_URL}/reports/class/${classId}/term-grades`,
     method: "get",
-  }) as any;
+  });
 
-  const students = (queryData?.data as any[]) || [];
+  const { handleAction, isPending } = useGradeActions("submissions", [() => query.refetch()]);
 
-  const handleAction = async (type: "submit" | "finalize", subjectId: string) => {
-    const endpoint = type === "submit" ? "submit-grades" : "finalize-grades";
-    // This assumes the backend handles both assignments and quizzes in one go for the subject
-    // Or we might need separate calls. For now, let's target assignments as primary.
-    mutate(
-      {
-        url: `${import.meta.env.VITE_API_URL}/submissions/${endpoint}`,
-        method: "post",
-        values: { assignmentId: subjectId }, // In a real scenario, this would be the specific assessment or bulk subject ID
-      },
-      {
-        onSuccess: () => {
-          toast.success(
-            t(`classes.gradebook.toasts.${type}Success`, {
-              defaultValue: `Grades ${type}d successfully!`,
-            })
-          );
-          query.refetch();
-        },
-        onError: () => {
-          toast.error(
-            t(`classes.gradebook.toasts.${type}Error`, {
-              defaultValue: `Failed to ${type} grades.`,
-            })
-          );
-        },
-      }
-    );
-  };
+  const students = (query.data?.data as any[]) || [];
+  const isLoading = query.isLoading;
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
@@ -95,7 +50,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
             variant="outline"
             className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[8px] uppercase font-black"
           >
-            Pending Approval
+            {t("classes.gradebook.status.pending", { defaultValue: "Pending Approval" })}
           </Badge>
         );
       case "finalized":
@@ -104,7 +59,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
             variant="outline"
             className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[8px] uppercase font-black"
           >
-            Finalized
+            {t("classes.gradebook.status.finalized", { defaultValue: "Finalized" })}
           </Badge>
         );
       default:
@@ -122,10 +77,13 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
             <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
               <FileText className="w-6 h-6" />
             </div>
-            {t("resources.gradebook.label", "Class Term Gradebook")}
+            {t("resources.gradebook.label", { defaultValue: "Class Term Gradebook" })}
           </h2>
           <p className="text-sm text-muted-foreground font-medium ms-12">
-            Aggregated performance metrics and weighted averages across all subjects.
+            {t("classes.gradebook.description", {
+              defaultValue:
+                "Aggregated performance metrics and weighted averages across all subjects.",
+            })}
           </p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
@@ -141,9 +99,9 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
               variant="default"
               className="h-11 rounded-2xl font-black uppercase tracking-widest text-[9px] gap-2 shadow-lg shadow-primary/20"
               onClick={() => handleAction("finalize", "all")}
-              disabled={mutationResult.isPending}
+              disabled={isPending}
             >
-              {mutationResult.isPending ? (
+              {isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <ShieldCheck className="w-4 h-4" />
@@ -161,24 +119,31 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
               <thead>
                 <tr className="border-b border-border/40 bg-muted/5">
                   <th className="p-6 text-start text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 w-[300px]">
-                    Student
+                    {t("classes.gradebook.columns.student", { defaultValue: "Student" })}
                   </th>
                   <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                    Average
+                    {t("classes.gradebook.columns.average", { defaultValue: "Average" })}
                   </th>
-                  {students[0]?.subjects.map((sub: any) => (
-                    <th
-                      key={sub.name}
-                      className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
-                    >
-                      <div className="flex flex-col items-center gap-1">
-                        {sub.name}
-                        {getStatusBadge(sub.status)}
-                      </div>
+                  {students.length > 0 ? (
+                    students[0].subjects.map((sub: any) => (
+                      <th
+                        key={sub.name}
+                        className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
+                      >
+                        <div className="flex flex-col items-center gap-1">
+                          {sub.name}
+                          {getStatusBadge(sub.status)}
+                        </div>
+                      </th>
+                    ))
+                  ) : (
+                    // Fallback headers if student list is empty (Rule Fix)
+                    <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                      {t("classes.gradebook.columns.subjects", { defaultValue: "Subjects" })}
                     </th>
-                  ))}
+                  )}
                   <th className="p-6 text-end text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                    Actions
+                    {t("common.actions", { defaultValue: "Actions" })}
                   </th>
                 </tr>
               </thead>
@@ -235,17 +200,17 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                               size="sm"
                               className="h-9 px-3 rounded-xl font-black uppercase tracking-widest text-[8px] gap-2 hover:bg-primary/10 text-primary"
                               onClick={() => handleAction("submit", row.studentId)}
-                              disabled={mutationResult.isPending}
+                              disabled={isPending}
                             >
-                              {mutationResult.isPending ? (
+                              {isPending ? (
                                 <Loader2 className="w-3 h-3 animate-spin" />
                               ) : (
                                 <Lock className="w-3 h-3" />
                               )}
-                              Submit
+                              {t("buttons.submit", { defaultValue: "Submit" })}
                             </Button>
                           )}
-                        </td>{" "}
+                        </td>
                       </tr>
                     ))}
               </tbody>
