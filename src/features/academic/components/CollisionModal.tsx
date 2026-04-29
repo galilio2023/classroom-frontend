@@ -29,19 +29,21 @@ interface CollisionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   conflicts: ConflictDetail[];
+  traceId?: string;
 }
 
 export const CollisionModal: React.FC<CollisionModalProps> = ({
   open,
   onOpenChange,
   conflicts,
+  traceId,
 }) => {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="rounded-[2.5rem] border-destructive/20 bg-card/95 backdrop-blur-3xl shadow-2xl p-0 overflow-hidden max-w-xl">
+      <AlertDialogContent className="rounded-[2.5rem] border-destructive/20 bg-card/95 backdrop-blur-md shadow-2xl p-0 overflow-hidden max-w-xl">
         <div className="p-8 md:p-12 space-y-8">
           <AlertDialogHeader className="text-start space-y-4">
             <div className="flex items-center gap-4">
@@ -73,8 +75,13 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
           </AlertDialogHeader>
 
           <div className="space-y-4">
-            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
-              {t("timetable.collision.assignments", "Conflicting Assignments")}
+            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2 flex items-center justify-between">
+              <span>{t("timetable.collision.assignments", "Conflicting Assignments")}</span>
+              {traceId && (
+                <span className="text-muted-foreground/60 lowercase tracking-normal">
+                  Support ID: {traceId.split("-")[0]}
+                </span>
+              )}
             </div>
             <div className="grid gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {conflicts.map((conflict, idx) => (

@@ -8,10 +8,12 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { SuiteIdentityBadge } from "@/features/onboarding/components/SuiteIdentityBadge";
+import { useTranslation } from "react-i18next";
 
 export function SidebarHeader() {
   const { title } = useRefineOptions();
   const { open, isMobile } = useShadcnSidebar();
+  const { t } = useTranslation();
 
   const isCollapsed = !open && !isMobile;
 
@@ -40,7 +42,7 @@ export function SidebarHeader() {
                   {title.text}
                 </h2>
                 <span className="text-[10px] text-muted-foreground/60 font-medium tracking-wide">
-                  Learning Management
+                  {t("app.subtitle", { defaultValue: "Learning Management" })}
                 </span>
               </div>
             </RouterLink>

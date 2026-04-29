@@ -1,42 +1,26 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Clock,
-  MapPin,
-  User as UserIcon,
   CheckCircle2,
   Loader2,
-  Calendar,
   Layers,
   WifiOff,
   RefreshCw,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useList, useCustomMutation, useGo } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
-import { formatTime } from "@/lib/date-utils";
-import { DAYS_SHORT } from "@/constants/calendar";
 import { useNotifyError } from "@/hooks/use-notify-error";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useSchoolTheme } from "@/contexts/school-theme-context";
 import { toast } from "sonner";
 import { QUERY_SETTINGS } from "@/constants/api";
 import { offlineDB } from "@/lib/offline-db";
-
-interface Section {
-  id: string;
-  classId: string;
-  className: string;
-  teacherName: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-  roomId?: string;
-}
+import { SectionCard, type Section } from "./section-card";
 
 interface SectionSelectionResponse {
   success: boolean;
@@ -69,7 +53,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
       },
     ],
     queryOptions: {
-      staleTime: 5 * 60 * 1000, // 🛡️ HUB HARDENING: Reduced to 5 mins for high-traffic enrollment (Review #15)
+      staleTime: QUERY_SETTINGS.STALE_TIME_HIGH_STAKES, // 🛡️ HUB HARDENING: High-traffic enrollment (Review #15)
       gcTime: QUERY_SETTINGS.CACHE_TIME_PERSISTENT,
     },
   });
@@ -196,82 +180,15 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
         <AnimatePresence mode="popLayout">
           {sections.length > 0 ? (
             sections.map((section: Section, idx: number) => (
-              <motion.div
+              <SectionCard
                 key={section.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-              >
-                <Card
-                  onClick={() => setSelectedClassId(section.classId)}
-                  className={cn(
-                    "cursor-pointer transition-all duration-300 border-2 rounded-3xl overflow-hidden group relative",
-                    selectedClassId === section.classId
-                      ? "bg-primary/5 ring-1 ring-primary/10 shadow-lg"
-                      : "border-border/40 hover:border-primary/20 bg-background/40 hover:bg-background/60"
-                  )}
-                  style={{
-                    borderColor: selectedClassId === section.classId ? primaryColor : undefined,
-                  }}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={cn(
-                            "p-3 rounded-2xl border transition-colors",
-                            selectedClassId === section.classId
-                              ? "text-white border-transparent"
-                              : "bg-muted/10 text-muted-foreground border-border/40 group-hover:bg-primary/10 group-hover:text-primary"
-                          )}
-                          style={{
-                            backgroundColor:
-                              selectedClassId === section.classId ? primaryColor : undefined,
-                            borderColor:
-                              selectedClassId === section.classId ? primaryColor : undefined,
-                          }}
-                        >
-                          <Calendar className="w-6 h-6" />
-                        </div>
-                        <div className="space-y-1">
-                          <h4 className="font-black text-lg">{section.className}</h4>
-                          <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {DAYS_SHORT[section.dayOfWeek] ||
-                                t("common.unknown", "Unknown")} • {formatTime(section.startTime)} -{" "}
-                              {formatTime(section.endTime)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {section.roomId ||
-                                t("timetable.section_picker.hall_fallback", "Global Hall")}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <div className="text-end hidden md:block">
-                          <p className="text-[10px] font-black uppercase tracking-tighter text-muted-foreground opacity-50 mb-1">
-                            {t("timetable.section_picker.lecturer", "Lecturer")}
-                          </p>
-                          <div className="flex items-center gap-2 justify-end">
-                            <span className="text-sm font-black">{section.teacherName}</span>
-                            <UserIcon className="w-4 h-4 text-primary" />
-                          </div>
-                        </div>
-
-                        {selectedClassId === section.classId && (
-                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                            <CheckCircle2 className="w-6 h-6" style={{ color: primaryColor }} />
-                          </motion.div>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                section={section}
+                idx={idx}
+                isSelected={selectedClassId === section.classId}
+                primaryColor={primaryColor}
+                onSelect={setSelectedClassId}
+                t={t}
+              />
             ))
           ) : (
             <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 bg-muted/5 rounded-[2.5rem] border border-dashed border-border/60">
