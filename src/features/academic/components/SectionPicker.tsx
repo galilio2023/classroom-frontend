@@ -1,12 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  CheckCircle2,
-  Loader2,
-  Layers,
-  WifiOff,
-  RefreshCw,
-} from "lucide-react";
+import { CheckCircle2, Loader2, Layers, WifiOff, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

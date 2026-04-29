@@ -1,4 +1,4 @@
-import { useCustom, useNavigation } from "@refinedev/core";
+import { useCustom, useNavigation, useCustomMutation } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import { QuizAttempt, Quiz } from "@/types/quiz";
 import { Card } from "@/components/ui/card";
@@ -8,10 +8,11 @@ import {
   ArrowLeft,
   User,
   Calendar,
-  // //   Trophy,
   Search,
   LayoutDashboard,
   ListChecks,
+  Lock,
+  ShieldCheck,
 } from "lucide-react";
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,11 +20,15 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { QuizAnalytics } from "@/features/classes/components/quiz-analytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 const QuizResults = () => {
   const { id } = useParams();
   const { list } = useNavigation();
   const [search, setSearch] = useState("");
+  const { isPrincipal, isTeacher } = useCapabilities();
+  const { mutate, mutation: mutationResult } = useCustomMutation();
 
   // Fetch Quiz Details
   const { query: quizQuery } = useCustom<Quiz>({
@@ -39,6 +44,27 @@ const QuizResults = () => {
     url: `/quizzes/${id}/results`,
     method: "get",
   });
+
+  const handleAction = async (type: "submit" | "finalize") => {
+    const endpoint = type === "submit" ? "submit-grades" : "finalize-grades";
+    mutate(
+      {
+        url: `${import.meta.env.VITE_API_URL}/quizzes/${endpoint}`,
+        method: "post",
+        values: { quizId: id },
+      },
+      {
+        onSuccess: () => {
+          toast.success(`Quiz grades ${type}d successfully!`);
+          resultsQuery.refetch();
+          quizQuery.refetch();
+        },
+        onError: () => {
+          toast.error(`Failed to ${type} quiz grades.`);
+        },
+      }
+    );
+  };
 
   const quiz = quizQuery.data?.data;
   const data = resultsQuery.data?.data;
@@ -81,6 +107,36 @@ const QuizResults = () => {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {isTeacher && (
+            <Button
+              variant="outline"
+              className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 text-primary hover:bg-primary/5"
+              onClick={() => handleAction("submit")}
+              disabled={mutationResult.isPending}
+            >
+              {mutationResult.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Lock className="h-4 w-4" />
+              )}
+              Submit Grades
+            </Button>
+          )}
+          {isPrincipal && (
+            <Button
+              variant="default"
+              className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
+              onClick={() => handleAction("finalize")}
+              disabled={mutationResult.isPending}
+            >
+              {mutationResult.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ShieldCheck className="w-4 h-4" />
+              )}
+              Finalize & Lock
+            </Button>
+          )}
           <Badge
             variant="secondary"
             className="text-xs px-4 py-2 rounded-xl bg-primary/10 text-primary border-none font-black uppercase tracking-widest"
