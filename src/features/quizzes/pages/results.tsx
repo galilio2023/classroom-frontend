@@ -44,13 +44,13 @@ const QuizResults = () => {
   }
 
   // Fetch Quiz Details
-  const quizQuery = useCustom<Quiz, HttpError>({
+  const { query: quizQuery } = useCustom<Quiz, HttpError>({
     url: `/quizzes/${id}`,
     method: "get",
   });
 
   // Fetch Quiz Results (Attempts & Analytics)
-  const resultsQuery = useCustom<{
+  const { query: resultsQuery } = useCustom<{
     attempts: QuizAttempt[];
     analytics: any[];
   }, HttpError>({
@@ -70,7 +70,7 @@ const QuizResults = () => {
   const isLoading = quizQuery.isLoading || resultsQuery.isLoading;
 
   const filteredAttempts = attempts.filter((attempt: QuizAttempt) =>
-    attempt.student?.name.toLowerCase().includes(search.toLowerCase())
+    attempt.student?.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   if (isLoading) {
@@ -115,7 +115,11 @@ const QuizResults = () => {
               onClick={() => handleAction("submit", id!)}
               disabled={isPending}
             >
-              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Lock className="h-4 w-4" />
+              )}
               {t("buttons.submitGrades", { defaultValue: "Submit Grades" })}
             </Button>
           )}

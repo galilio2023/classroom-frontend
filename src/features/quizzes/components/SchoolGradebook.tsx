@@ -9,7 +9,6 @@ import { useCapabilities } from "@/hooks/use-capabilities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { useGradeActions } from "../hooks/use-grade-actions";
-import { toast } from "sonner";
 
 interface SchoolGradebookProps {
   classId: string;
@@ -19,6 +18,7 @@ interface SchoolGradebookProps {
 /**
  * 🎓 SCHOOL GRADEBOOK
  * Implements Phase 7 Grade Locking with Centralized Actions.
+ * Mandate Check: Refine v5 Query Pattern & Header Stability.
  */
 export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
   classId,
@@ -27,7 +27,8 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
   const { t } = useTranslation();
   const { isSchoolSuite, isPrincipal, isTeacher } = useCapabilities();
 
-  const query = useCustom<any, HttpError>({
+  // 🛠️ v5 Pattern: Destructure { query }
+  const { query } = useCustom<any, HttpError>({
     url: `${import.meta.env.VITE_API_URL}/reports/class/${classId}/term-grades`,
     method: "get",
   });
@@ -125,7 +126,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                   <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                     {t("classes:gradebook.columns.average", { defaultValue: "Average" })}
                   </th>
-                  {/* 🛡️ STABILITY: Derive headers from class metadata or provide stable empty state */}
+                  {/* 🛡️ STABILITY: Safe navigation for dynamic subject headers */}
                   {students.length > 0 && students[0]?.subjects ? (
                     students[0].subjects.map((sub: any) => (
                       <th

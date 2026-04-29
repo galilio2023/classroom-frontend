@@ -8,14 +8,11 @@ import { handleError } from "@/providers/utils/api-errors";
  * Centralizes Submission and Finalization logic with Standardized Error Handling.
  * Mandate Rules 5 & 8: Traceability and Error UX.
  */
-export const useGradeActions = (
-  resource: "submissions" | "quizzes",
-  refetchCallbacks: (() => void)[]
-) => {
+export const useGradeActions = (resource: "submissions" | "quizzes", refetchCallbacks: (() => void)[]) => {
   const { t } = useTranslation();
   const { mutate, mutation } = useCustomMutation();
 
-  const handleAction = (type: "submit" | "finalize", parentId: string) => {
+  const handleAction = (type: "submit" | "finalize", parentId: string | number) => {
     const endpoint = type === "submit" ? "submit-grades" : "finalize-grades";
     const payloadKey = resource === "quizzes" ? "quizId" : "assignmentId";
 
