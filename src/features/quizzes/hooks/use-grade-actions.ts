@@ -1,4 +1,4 @@
-import { useCustomMutation } from "@refinedev/core";
+import { useCustomMutation, UseCustomReturnType } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { handleError } from "@/providers/utils/api-errors";
@@ -8,7 +8,10 @@ import { handleError } from "@/providers/utils/api-errors";
  * Centralizes Submission and Finalization logic with Standardized Error Handling.
  * Mandate Rules 5 & 8: Traceability and Error UX.
  */
-export const useGradeActions = (resource: "submissions" | "quizzes", refetchCallbacks: (() => void)[]) => {
+export const useGradeActions = (
+  resource: "submissions" | "quizzes",
+  queriesToRefetch: UseCustomReturnType<any, any>[] = []
+) => {
   const { t } = useTranslation();
   const { mutate, mutation } = useCustomMutation();
 
@@ -29,7 +32,7 @@ export const useGradeActions = (resource: "submissions" | "quizzes", refetchCall
               defaultValue: `Grades ${type}d successfully!`,
             })
           );
-          refetchCallbacks.forEach((cb) => cb());
+          queriesToRefetch.forEach((q) => q.refetch());
         },
         onError: async (err) => {
           const httpError = await handleError(err);

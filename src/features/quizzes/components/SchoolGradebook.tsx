@@ -33,10 +33,17 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
     method: "get",
   });
 
-  const { handleAction, isPending } = useGradeActions("submissions", [() => query.refetch()]);
+  const { handleAction, isPending } = useGradeActions("submissions", [query]);
 
   const students = (query.data?.data as any[]) || [];
   const isLoading = query.isLoading;
+
+  // 🛡️ STABILITY: Compute a stable unique list of subjects from all students to prevent brittle headers
+  const uniqueSubjects = React.useMemo(() => {
+    const subjects = new Set<string>();
+    students.forEach((s) => s.subjects?.forEach((sub: any) => subjects.add(sub.name)));
+    return Array.from(subjects);
+  }, [students]);
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
@@ -126,19 +133,26 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                   <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                     {t("classes:gradebook.columns.average", { defaultValue: "Average" })}
                   </th>
-                  {/* 🛡️ STABILITY: Safe navigation for dynamic subject headers */}
-                  {students.length > 0 && students[0]?.subjects ? (
-                    students[0].subjects.map((sub: any) => (
-                      <th
-                        key={sub.name}
-                        className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
-                      >
-                        <div className="flex flex-col items-center gap-1">
-                          {sub.name}
-                          {getStatusBadge(sub.status)}
-                        </div>
-                      </th>
-                    ))
+                  {/* 🛡️ STABILITY: Render headers from the computed stable subject list */}
+                  {uniqueSubjects.length > 0 ? (
+                    uniqueSubjects.map((subName) => {
+                      // Find status from any student who has this subject (as status is usually per-subject-class)
+                      const subjectStatus = students
+                        .find((s) => s.subjects?.find((sub: any) => sub.name === subName))
+                        ?.subjects?.find((sub: any) => sub.name === subName)?.status;
+
+                      return (
+                        <th
+                          key={subName}
+                          className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
+                        >
+                          <div className="flex flex-col items-center gap-1">
+                            {subName}
+                            {subjectStatus && getStatusBadge(subjectStatus)}
+                          </div>
+                        </th>
+                      );
+                    })
                   ) : (
                     <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                       {t("classes:gradebook.columns.subjects", { defaultValue: "Subjects" })}
@@ -184,17 +198,22 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                             variant="outline"
                             className={cn(
                               "h-8 px-3 rounded-xl font-black text-sm border-none shadow-sm",
-                              getScoreColor(row.average),
+                              getScoreColor(row.average)
                             )}
                           >
                             {row.average}%
                           </Badge>
                         </td>
-                        {row.subjects.map((sub: any) => (
-                          <td key={sub.name} className="p-6 text-center">
-                            <span className="font-bold text-sm">{sub.score}%</span>
-                          </td>
-                        ))}
+                        {uniqueSubjects.map((subName) => {
+                          const sub = row.subjects?.find((s: any) => s.name === subName);
+                          return (
+                            <td key={subName} className="p-6 text-center">
+                              <span className="font-bold text-sm">
+                                {sub ? `${sub.score}%` : "-"}
+                              </span>
+                            </td>
+                          );
+                        })}
                         <td className="p-6 text-end">
                           {isTeacher && (
                             <Button

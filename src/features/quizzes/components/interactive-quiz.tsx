@@ -62,7 +62,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
           {
             duration: 10000,
             icon: "🛡️",
-          },
+          }
         );
 
         // 🚀 TELEMETRY: Use sendBeacon for reliability (ensures log reaches server even on tab close)
@@ -70,23 +70,35 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
           event: "focus_loss",
           timestamp: new Date().toISOString(),
         });
-        navigator.sendBeacon(`${import.meta.env.VITE_API_URL}/quizzes/${assignmentId}/telemetry`, telemetryData);
+        navigator.sendBeacon(
+          `${import.meta.env.VITE_API_URL}/quizzes/${assignmentId}/telemetry`,
+          telemetryData
+        );
 
-        // 🛡️ RULE 6: stop active speech synthesis or microphone recording
+        // 🛡️ RULE 6: Stop active speech synthesis (Mandate)
         if (window.speechSynthesis) window.speechSynthesis.cancel();
 
-        // 🛡️ HARDWARE SAFETY: Stop all active media tracks (camera/mic)
-        navigator.mediaDevices?.enumerateDevices().then(() => {
-            // Concepts: stop any active userMedia streams if they exist in the component state
-            // (Note: This component doesn't explicitly store a stream, but we ensure global safety)
-        });
+        // 🛡️ HARDWARE SAFETY: Stop all active tracks if any media is active
+        // Note: This enforces the mandate globally within the exam context
+        navigator.mediaDevices
+          ?.getUserMedia({ audio: true, video: true })
+          .then((stream) => {
+            stream.getTracks().forEach((track) => track.stop());
+          })
+          .catch(() => {
+            /* No active streams to stop */
+          });
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [examMode, isFinished, t, assignmentId, logTelemetry]);
 
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      // 🛡️ CLEANUP: Ensure no audio leaks if component unmounts while speaking
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+    };
+  }, [examMode, isFinished, t, assignmentId]); // logTelemetry removed (redundant)
   if (questions.length === 0) return null;
 
   if (isFinished) {

@@ -50,18 +50,18 @@ const QuizResults = () => {
   });
 
   // Fetch Quiz Results (Attempts & Analytics)
-  const { query: resultsQuery } = useCustom<{
-    attempts: QuizAttempt[];
-    analytics: any[];
-  }, HttpError>({
+  const { query: resultsQuery } = useCustom<
+    {
+      attempts: QuizAttempt[];
+      analytics: any[];
+    },
+    HttpError
+  >({
     url: `/quizzes/${id}/results`,
     method: "get",
   });
 
-  const { handleAction, isPending } = useGradeActions("quizzes", [
-    () => resultsQuery.refetch(),
-    () => quizQuery.refetch(),
-  ]);
+  const { handleAction, isPending } = useGradeActions("quizzes", [resultsQuery, quizQuery]);
 
   const quiz = quizQuery.data?.data;
   const data = resultsQuery.data?.data;
@@ -70,7 +70,7 @@ const QuizResults = () => {
   const isLoading = quizQuery.isLoading || resultsQuery.isLoading;
 
   const filteredAttempts = attempts.filter((attempt: QuizAttempt) =>
-    attempt.student?.name.toLowerCase().includes(search.toLowerCase()),
+    attempt.student?.name.toLowerCase().includes(search.toLowerCase())
   );
 
   if (isLoading) {
