@@ -40,11 +40,25 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
   const students = (query.data?.data as any[]) || [];
   const isLoading = query.isLoading;
 
-  // 🛡️ STABILITY: Compute a stable unique list of subjects from all students to prevent brittle headers
-  const uniqueSubjects = React.useMemo(() => {
+  // 🛡️ STABILITY & PERFORMANCE: Compute stable subjects and a status map to avoid O(N*M) lookups
+  const { uniqueSubjects, subjectStatusMap } = React.useMemo(() => {
     const subjects = new Set<string>();
-    students.forEach((s) => s.subjects?.forEach((sub: any) => subjects.add(sub.name)));
-    return Array.from(subjects);
+    const statusMap: Record<string, string> = {};
+
+    students.forEach((s) => {
+      s.subjects?.forEach((sub: any) => {
+        subjects.add(sub.name);
+        // If we haven't found a status for this subject yet, or it's 'finalized' (high priority state)
+        if (!statusMap[sub.name] || sub.status === "finalized") {
+          statusMap[sub.name] = sub.status;
+        }
+      });
+    });
+
+    return {
+      uniqueSubjects: Array.from(subjects),
+      subjectStatusMap: statusMap,
+    };
   }, [students]);
 
   const getScoreColor = (score: number) => {
@@ -102,6 +116,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
             <Input
               placeholder={t("common.search", { defaultValue: "Search students..." })}
+              aria-label={t("common.search", { defaultValue: "Search students" })}
               className="pl-10 h-11 rounded-2xl bg-muted/20 border-none shadow-inner"
             />
           </div>
@@ -137,24 +152,17 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                   </th>
                   {/* 🛡️ STABILITY: Render headers from the computed stable subject list */}
                   {uniqueSubjects.length > 0 ? (
-                    uniqueSubjects.map((subName) => {
-                      // Find status from any student who has this subject (as status is usually per-subject-class)
-                      const subjectStatus = students.find((s) =>
-                        s.subjects?.find((sub: any) => sub.name === subName),
-                      )?.subjects?.find((sub: any) => sub.name === subName)?.status;
-
-                      return (
-                        <th
-                          key={subName}
-                          className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
-                        >
-                          <div className="flex flex-col items-center gap-1">
-                            {subName}
-                            {subjectStatus && getStatusBadge(subjectStatus)}
-                          </div>
-                        </th>
-                      );
-                    })
+                    uniqueSubjects.map((subName) => (
+                      <th
+                        key={subName}
+                        className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60"
+                      >
+                        <div className="flex flex-col items-center gap-1">
+                          {subName}
+                          {subjectStatusMap[subName] && getStatusBadge(subjectStatusMap[subName])}
+                        </div>
+                      </th>
+                    ))
                   ) : (
                     <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                       {t("classes:gradebook.columns.subjects", { defaultValue: "Subjects" })}

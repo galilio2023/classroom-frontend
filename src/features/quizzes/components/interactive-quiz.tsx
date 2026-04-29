@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { toast } from "sonner";
+import { offlineDB } from "@/lib/offline-db";
 
 interface InteractiveQuizProps {
   assignmentId: number;
@@ -65,15 +66,26 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
           },
         );
 
-        // 🚀 TELEMETRY: Use sendBeacon for reliability (ensures log reaches server even on tab close)
-        const telemetryData = JSON.stringify({
+        // 🚀 TELEMETRY: Reliability + Rural Hardening (Rule 4)
+        const telemetryData = {
           event: "focus_loss",
           timestamp: new Date().toISOString(),
-        });
-        navigator.sendBeacon(
-          `${import.meta.env.VITE_API_URL}/quizzes/${assignmentId}/telemetry`,
-          telemetryData,
-        );
+          assignmentId,
+        };
+
+        if (navigator.onLine) {
+          navigator.sendBeacon(
+            `${import.meta.env.VITE_API_URL}/quizzes/${assignmentId}/telemetry`,
+            JSON.stringify(telemetryData),
+          );
+        } else {
+          // 📶 OFFLINE: Queue for later sync via useOfflineSync logic
+          void offlineDB.queue({
+            resource: "quizzes",
+            action: "custom",
+            variables: { ...telemetryData, path: "telemetry" },
+          });
+        }
 
         // 🛡️ RULE 6: Stop active speech synthesis (Mandate)
         if (window.speechSynthesis) window.speechSynthesis.cancel();
