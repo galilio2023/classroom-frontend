@@ -80,8 +80,8 @@ export const usePulseNotifications = () => {
 
       // 🚀 LIVE GLOBAL PULSE: "JOIN NOW" TOAST
       socket.on(
-        "class:live:started",
-        (data: { classId: number; className: string; teacherName: string }) => {
+        "live_session_started",
+        (data: { classId: string; className: string; teacherName: string }) => {
           open?.({
             type: "success",
             message: t("notifications.liveStarted.title", { defaultValue: "Class is LIVE!" }),
@@ -158,7 +158,7 @@ export const usePulseNotifications = () => {
 
       return () => {
         socket.off("lifecycle:pulse");
-        socket.off("class:live:started");
+        socket.off("live_session_started");
         socket.off("submission:graded");
         socket.off("notification");
         socket.off("agent_alert");

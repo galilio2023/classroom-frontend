@@ -63,7 +63,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
           {
             duration: 10000,
             icon: "🛡️",
-          },
+          }
         );
 
         // 🚀 TELEMETRY: Reliability + Rural Hardening (Rule 4)
@@ -76,7 +76,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
         if (navigator.onLine) {
           navigator.sendBeacon(
             `${import.meta.env.VITE_API_URL}/quizzes/${assignmentId}/telemetry`,
-            JSON.stringify(telemetryData),
+            JSON.stringify(telemetryData)
           );
         } else {
           // 📶 OFFLINE: Queue for later sync via useOfflineSync logic
@@ -89,7 +89,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
 
         // 🛡️ RULE 6: Stop active speech synthesis (Mandate)
         if (window.speechSynthesis) window.speechSynthesis.cancel();
-        
+
         // 🚀 AUDIT: Telemetry sent via beacon to ensure persistence
       }
     };

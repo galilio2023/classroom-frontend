@@ -2,7 +2,17 @@ import { useOne, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { Resource, User } from "@/types";
-import { Loader2, ArrowLeft, MessageSquare, Sparkles, Send, BookOpen, X } from "lucide-react";
+import {
+  Loader2,
+  ArrowLeft,
+  MessageSquare,
+  Sparkles,
+  Send,
+  BookOpen,
+  X,
+  WifiOff,
+  Database,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +21,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
+import { offlineDB as db } from "@/lib/offline-db";
+import { Badge } from "@/components/ui/badge";
 
 export const LessonReader = () => {
   const { t, i18n } = useTranslation();
@@ -26,14 +38,48 @@ export const LessonReader = () => {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Offline State
+  const [offlineResource, setOfflineResource] = useState<any>(null);
+  const [isOfflineMode, setIsOfflineMode] = useState(!navigator.onLine);
+
   const { query } = useOne<Resource>({
     resource: "resources",
     id: resourceId,
-    queryOptions: { enabled: !!resourceId },
+    queryOptions: {
+      enabled: !!resourceId && navigator.onLine,
+    },
   });
 
-  const resource = query.data?.data;
-  const isLoading = query.isLoading;
+  useEffect(() => {
+    if (query.isError && !navigator.onLine) {
+      setIsOfflineMode(true);
+    }
+  }, [query.isError]);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOfflineMode(false);
+    const handleOffline = () => setIsOfflineMode(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    const checkOfflineCache = async () => {
+      if (isOfflineMode && resourceId) {
+        const cached = await db.lessons.get(resourceId);
+        if (cached) {
+          setOfflineResource(cached);
+        }
+      }
+    };
+    void checkOfflineCache();
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [isOfflineMode, resourceId]);
+
+  const resource = isOfflineMode ? offlineResource : query.data?.data;
+  const isLoading = query.isLoading && !offlineResource;
 
   const { mutate: chatMutation } = useCustomMutation();
 
@@ -146,6 +192,15 @@ export const LessonReader = () => {
               <h1 className="font-black text-sm md:text-lg truncate max-w-50 xs:max-w-50 sm:max-w-md tracking-tight">
                 {resource.title}
               </h1>
+              {isOfflineMode && (
+                <Badge
+                  variant="outline"
+                  className="h-6 rounded-full border-primary/20 bg-primary/5 text-primary font-black uppercase text-[8px] tracking-widest gap-1 px-2"
+                >
+                  <Database className="h-2.5 w-2.5" />
+                  Offline Study
+                </Badge>
+              )}
             </div>
           </div>
           <Button

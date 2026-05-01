@@ -66,6 +66,7 @@ export interface User {
   currentStreak: number;
   longestStreak: number;
   lastActiveAt: string | null;
+  brandingConfig?: BrandingConfig;
   aiTokensUsed?: number;
   aiMonthlyLimit?: number;
   aiConsentVersion?: string;
@@ -102,6 +103,7 @@ export enum UserRole {
 
 export interface BrandingConfig {
   primaryColor?: string;
+  secondaryColor?: string;
   logoUrl?: string;
   theme?: "light" | "dark" | "system";
   accentColor?: string;

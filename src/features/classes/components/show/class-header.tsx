@@ -26,7 +26,8 @@ export const ClassHeader = ({ classId, isOwner }: ClassHeaderProps) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const { mutate: customMutation, isLoading: isGenerating } = useCustomMutation() as any;
+  const { mutate: customMutation, mutation: genMutation } = useCustomMutation() as any;
+  const isGenerating = genMutation.isPending;
   const { addJob } = useJobs();
 
   const handleGenerateSummary = () => {

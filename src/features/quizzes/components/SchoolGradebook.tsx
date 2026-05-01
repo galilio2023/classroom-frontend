@@ -203,7 +203,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                           variant="outline"
                           className={cn(
                             "h-8 px-3 rounded-xl font-black text-sm border-none shadow-sm",
-                            getScoreColor(row.average),
+                            getScoreColor(row.average)
                           )}
                         >
                           {row.average}%
@@ -213,9 +213,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                         const sub = row.subjects?.find((s: any) => s.name === subName);
                         return (
                           <td key={subName} className="p-6 text-center">
-                            <span className="font-bold text-sm">
-                              {sub ? `${sub.score}%` : "-"}
-                            </span>
+                            <span className="font-bold text-sm">{sub ? `${sub.score}%` : "-"}</span>
                           </td>
                         );
                       })}

@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Zap, ChevronRight, Sparkles, Users, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { LandingHero } from "@/features/landing/components/hero";
+import { LandingHero } from "../components/hero";
 import { cn } from "@/lib/utils";
+import { Helmet } from "react-helmet-async";
 
 const LandingPage = () => {
   const { t, i18n } = useTranslation();
@@ -56,6 +57,16 @@ const LandingPage = () => {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/10 selection:text-primary overflow-x-hidden">
+      <Helmet>
+        <title>Tablawy OS | The AI-Evolved Learning Ecosystem</title>
+        <meta
+          name="description"
+          content="Empowering the next generation of learners in Egypt with AI-assisted classrooms, real-time live sessions, and a thriving teacher marketplace."
+        />
+        <meta property="og:title" content="Tablawy OS | AI-Powered Education" />
+        <meta property="og:type" content="website" />
+      </Helmet>
+
       <div className="noise-overlay" />
 
       {/* Designer Background */}

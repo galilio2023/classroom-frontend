@@ -89,6 +89,14 @@ export interface ResourceCache {
   updatedAt: number;
 }
 
+export interface AttachmentBlob {
+  id?: number;
+  resourceId: string;
+  blob: Blob;
+  fileName: string;
+  contentType: string;
+}
+
 export class OfflineDB extends Dexie {
   lessons!: Table<CachedLesson>;
   quizzes!: Table<PendingQuizSubmission>;
@@ -100,10 +108,11 @@ export class OfflineDB extends Dexie {
   study_plans!: Table<StudyPlanRecord>;
   pending_xp!: Table<PendingXpGain>;
   resource_cache!: Table<ResourceCache>;
+  attachment_blobs!: Table<AttachmentBlob>;
 
   constructor() {
     super("TablawyOfflineDB");
-    this.version(6)
+    this.version(7)
       .stores({
         lessons: "id, classId",
         quizzes: "++id, quizId, userId",
@@ -115,10 +124,11 @@ export class OfflineDB extends Dexie {
         study_plans: "id",
         pending_xp: "++id",
         resource_cache: "key",
+        attachment_blobs: "++id, resourceId",
       })
       .upgrade((tx) => {
-        // Version 6: Added resource_cache
-        return tx.table("resource_cache").toCollection().count();
+        // Version 7: Added attachment_blobs
+        return tx.table("attachment_blobs").toCollection().count();
       });
   }
 

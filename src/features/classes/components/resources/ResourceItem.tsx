@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { usePersistentLive } from "@/features/classes/hooks/use-persistent-live";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { offlineDB as db } from "@/lib/offline-db";
 
 interface ResourceItemProps {
   res: Resource;
@@ -49,6 +50,27 @@ export const ResourceItem = ({
   const { setActiveVideo } = usePersistentLive();
   const { downloadLesson } = useOfflineSync();
   const isAr = i18n.language === "ar";
+
+  const handleOpenResource = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // 1. Check for local blob cache
+    try {
+      const cachedBlob = await db.attachment_blobs.get({ resourceId: String(res.id) });
+      if (cachedBlob) {
+        const localUrl = URL.createObjectURL(cachedBlob.blob);
+        window.open(localUrl, "_blank");
+        return;
+      }
+    } catch (err) {
+      console.warn("Failed to check offline cache:", err);
+    }
+
+    // 2. Fallback to network URL
+    if (res.url) {
+      window.open(res.url, "_blank");
+    }
+  };
 
   return (
     <div className="flex items-center justify-between p-4 rounded-2xl border border-black/3 dark:border-white/3 bg-muted/20 hover:bg-primary/5 transition-all cursor-pointer group/item">
@@ -215,13 +237,11 @@ export const ResourceItem = ({
           <Button
             variant="ghost"
             size="sm"
-            asChild
+            onClick={handleOpenResource}
             className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-muted transition-all"
           >
-            <a href={res.url} target="_blank" rel="noreferrer">
-              <ExternalLink className="h-3.5 w-3.5" />
-              {t("buttons.view")}
-            </a>
+            <ExternalLink className="h-3.5 w-3.5" />
+            {t("buttons.view")}
           </Button>
         )}
         {isTeacher && (

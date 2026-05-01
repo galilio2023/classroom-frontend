@@ -39,14 +39,14 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
     void connectSocket().then(() => {
       socket.emit("join_class", { classId });
 
-      socket.on("attendance_scanned", (data: { studentName: string }) => {
+      socket.on("attendance_marked", (data: { studentName: string }) => {
         setScannedCount((prev) => prev + 1);
         toast.success(`${data.studentName} checked in!`);
       });
     });
 
     return () => {
-      socket.off("attendance_scanned");
+      socket.off("attendance_marked");
       socket.emit("leave_class", { classId });
     };
   }, [isActive, classId]);

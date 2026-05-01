@@ -1,4 +1,4 @@
-import { useCustomMutation, UseCustomReturnType } from "@refinedev/core";
+import { useCustomMutation } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { handleError } from "@/providers/utils/api-errors";
@@ -10,7 +10,7 @@ import { handleError } from "@/providers/utils/api-errors";
  */
 export const useGradeActions = (
   resource: "submissions" | "quizzes",
-  queriesToRefetch: UseCustomReturnType<any, any>[] = [],
+  queriesToRefetch: any[] = []
 ) => {
   const { t } = useTranslation();
   const { mutate, mutation } = useCustomMutation();
@@ -41,9 +41,12 @@ export const useGradeActions = (
           toast.success(
             t(`classes.gradebook.toasts.${type}Success`, {
               defaultValue: `Grades ${type}d successfully!`,
-            }),
+            })
           );
-          queriesToRefetch.forEach((q) => q.refetch());
+          queriesToRefetch.forEach((q) => {
+            if (q.refetch) q.refetch();
+            else if (q.query?.refetch) q.query.refetch();
+          });
         },
         onError: async (err) => {
           const httpError = await handleError(err);
@@ -53,7 +56,7 @@ export const useGradeActions = (
               : undefined,
           });
         },
-      },
+      }
     );
   };
 

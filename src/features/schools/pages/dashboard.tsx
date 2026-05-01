@@ -15,6 +15,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import {
   AreaChart,
@@ -27,6 +28,10 @@ import {
 } from "recharts";
 import { HagerModeExport } from "@/features/ai/components/hager-mode-export";
 import { InstitutionalHealthCard } from "../components/institutional-health-card";
+import { AtRiskStudentsList } from "../components/AtRiskStudentsList";
+import { useNavigation } from "@refinedev/core";
+import { Settings2, Paintbrush } from "lucide-react";
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 const StatCard = ({
   title,
@@ -67,6 +72,8 @@ const StatCard = ({
 const SchoolAdminDashboard = () => {
   const { data: identity } = useGetIdentity<User>();
   const { t, i18n } = useTranslation();
+  const { push } = useNavigation() as any;
+  const { canCustomBrand } = useCapabilities();
   const isAr = i18n.language === "ar";
   const { query: statsQuery } = useCustom({
     url: `/schools/stats/${identity?.schoolId}`,
@@ -290,19 +297,57 @@ const SchoolAdminDashboard = () => {
           {identity?.schoolId && <InstitutionalHealthCard schoolId={identity.schoolId} />}
 
           <Card className="glass-card border-none p-8 space-y-8">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-black uppercase tracking-widest text-start">
+                Student Interventions
+              </h3>
+              <Badge className="bg-destructive/10 text-destructive border-none font-black text-[9px] uppercase tracking-widest px-3 py-1">
+                At Risk
+              </Badge>
+            </div>
+            <AtRiskStudentsList />
+          </Card>
+
+          <Card className="glass-card border-none p-8 space-y-8">
             <h3 className="text-xl font-black uppercase tracking-widest text-start">
               Quick Actions
             </h3>
 
             <div className="space-y-4">
-              <button className="w-full h-12 rounded-xl border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all text-start px-4 text-xs font-bold flex items-center justify-between group">
+              <button
+                className="w-full h-12 rounded-xl border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all text-start px-4 text-xs font-bold flex items-center justify-between group"
+                onClick={() => push("/admin/import")}
+              >
                 {t("schools.dashboard.actions.bulk_onboard", "Bulk Onboard Students")}
                 <Users className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
               </button>
-              <button className="w-full h-12 rounded-xl border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all text-start px-4 text-xs font-bold flex items-center justify-between group">
+              <button
+                className="w-full h-12 rounded-xl border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all text-start px-4 text-xs font-bold flex items-center justify-between group"
+                onClick={() => push("/departments")}
+              >
                 {t("schools.dashboard.actions.manage_departments", "Manage Departments")}
                 <SchoolIcon className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
               </button>
+
+              {identity?.role === "admin" && (
+                <button
+                  className="w-full h-12 rounded-xl border border-border/50 hover:border-amber-500/50 hover:bg-amber-500/5 transition-all text-start px-4 text-xs font-bold flex items-center justify-between group"
+                  onClick={() => push("/admin/settings")}
+                >
+                  {t("schools.dashboard.actions.platform_governance", "Platform Governance")}
+                  <Settings2 className="h-3 w-3 text-muted-foreground group-hover:text-amber-500 transition-colors" />
+                </button>
+              )}
+
+              {canCustomBrand && (
+                <button
+                  className="w-full h-12 rounded-xl border border-border/50 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all text-start px-4 text-xs font-bold flex items-center justify-between group"
+                  onClick={() => push("/school/branding")}
+                >
+                  {t("schools.dashboard.actions.branding_settings", "Branding Settings")}
+                  <Paintbrush className="h-3 w-3 text-muted-foreground group-hover:text-indigo-500 transition-colors" />
+                </button>
+              )}
 
               <div className="pt-2">
                 <HagerModeExport

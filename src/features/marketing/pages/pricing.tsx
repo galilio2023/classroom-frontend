@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useGetIdentity, useCustomMutation } from "@refinedev/core";
+import { useGetIdentity } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import {
   Check,
@@ -10,138 +10,26 @@ import {
   BrainCircuit,
   MessageSquare,
   HelpCircle,
-  Plus,
-  Minus,
   Store,
 } from "lucide-react";
 import { User } from "@/types";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { KioskPaymentModal } from "@/features/payments/components/KioskPaymentModal";
 import { PaymobCheckoutModal } from "@/features/payments/components/PaymobCheckoutModal";
-
-const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div className="border-b border-border/40 last:border-0 overflow-hidden">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-8 flex items-center justify-between text-start group transition-all"
-      >
-        <span className="text-lg md:text-xl font-bold tracking-tight group-hover:text-primary transition-colors pe-4">
-          {question}
-        </span>
-        <div
-          className={cn(
-            "p-2.5 rounded-full bg-muted/30 border border-border/50 transition-all duration-500 shrink-0",
-            isOpen &&
-              "rotate-180 bg-primary text-primary-foreground shadow-lg shadow-primary/20 border-primary"
-          )}
-        >
-          {isOpen ? (
-            <Minus className="h-4 w-4 md:h-5 md:w-5" />
-          ) : (
-            <Plus className="h-4 w-4 md:h-5 md:w-5" />
-          )}
-        </div>
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <p className="pb-8 text-base md:text-lg text-muted-foreground/80 font-medium leading-relaxed max-w-3xl">
-              {answer}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
+import { useCheckout } from "@/features/payments/hooks/use-checkout";
+import { FAQItem } from "../components/faq-item";
+import { Helmet } from "react-helmet-async";
 
 const Pricing = () => {
   const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
-  const { mutate: createOrder } = useCustomMutation<{
-    id: string;
-    referenceCode?: string;
-    iframeUrl?: string;
-    amount: number;
-  }>();
   const navigate = useNavigate();
 
-  const [kioskOrder, setKioskOrder] = useState<{
-    id: string;
-    referenceCode: string;
-    amount: number;
-  } | null>(null);
-
-  const [cardOrder, setCardOrder] = useState<{
-    id: string;
-    iframeUrl: string;
-  } | null>(null);
-
-  const handleUpgrade = (priceId: string) => {
-    if (!identity) {
-      toast.info(t("pricing.toasts.loginRequired"));
-      navigate("/register");
-      return;
-    }
-
-    if (priceId === "free") return;
-
-    createOrder(
-      {
-        url: "/payments/create-order",
-        method: "post",
-        values: { provider: "paymob", amount: 200, priceId }, // 200 EGP for Pro
-      },
-      {
-        onSuccess: (data: any) => {
-          if (data.data.iframeUrl) {
-            setCardOrder({
-              id: data.data.id,
-              iframeUrl: data.data.iframeUrl,
-            });
-          }
-        },
-        onError: () => {
-          toast.error(t("pricing.toasts.checkoutError"));
-        },
-      }
-    );
-  };
-
-  const handleKioskUpgrade = (priceId: string) => {
-    if (!identity) {
-      toast.info(t("pricing.toasts.loginRequired"));
-      navigate("/register");
-      return;
-    }
-
-    createOrder(
-      {
-        url: "/payments/create-order",
-        method: "post",
-        values: { provider: "fawry", amount: 200, priceId }, // 200 EGP for Pro
-      },
-      {
-        onSuccess: (data: any) => {
-          setKioskOrder(data.data);
-        },
-        onError: () => {
-          toast.error(t("pricing.toasts.checkoutError"));
-        },
-      }
-    );
-  };
+  const { handleUpgrade, cardOrder, kioskOrder, isPending, clearOrders } = useCheckout();
 
   const plans = [
     {
@@ -177,6 +65,7 @@ const Pricing = () => {
       ],
       cta: t("pricing.upgrade"),
       priceId: "price_1P2k3l4m5n6o7p8q",
+      amount: 200, // Centralized value
       featured: true,
     },
   ];
@@ -201,7 +90,15 @@ const Pricing = () => {
   ];
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/10 selection:text-primary overflow-x-hidden font-sans">
+    <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/10 selection:text-primary overflow-x-hidden font-sans text-start">
+      <Helmet>
+        <title>Pricing | Tablawy OS - Flexible Plans for Every Learner</title>
+        <meta
+          name="description"
+          content="Choose the perfect plan to accelerate your learning journey with AI features and high-definition teacher channels."
+        />
+      </Helmet>
+
       <div className="noise-overlay" />
 
       {/* Cinematic Background */}
@@ -324,8 +221,8 @@ const Pricing = () => {
 
                     <div className="mt-12 pt-8 border-t border-border/40 space-y-4">
                       <Button
-                        onClick={() => handleUpgrade(plan.priceId)}
-                        disabled={identity && plan.priceId === "free"}
+                        onClick={() => handleUpgrade(plan.priceId, plan.amount || 0, "paymob")}
+                        disabled={(identity && plan.priceId === "free") || isPending}
                         size="lg"
                         className={cn(
                           "w-full h-20 rounded-full font-black uppercase tracking-widest text-xs transition-all duration-500",
@@ -334,14 +231,15 @@ const Pricing = () => {
                             : "bg-muted text-muted-foreground hover:bg-foreground hover:text-background"
                         )}
                       >
-                        {plan.cta}
+                        {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : plan.cta}
                         <ArrowRight className="ms-3 h-5 w-5 rtl:rotate-180" />
                       </Button>
 
                       {plan.priceId !== "free" && (
                         <Button
-                          onClick={() => handleKioskUpgrade(plan.priceId)}
+                          onClick={() => handleUpgrade(plan.priceId, plan.amount || 0, "fawry")}
                           variant="outline"
+                          disabled={isPending}
                           className="w-full h-16 rounded-full font-black uppercase tracking-widest text-[10px] border-primary/20 hover:bg-primary/5 transition-all"
                         >
                           <Store className="me-2 h-4 w-4 text-primary" />
@@ -358,7 +256,7 @@ const Pricing = () => {
 
         <KioskPaymentModal
           isOpen={!!kioskOrder}
-          onClose={() => setKioskOrder(null)}
+          onClose={clearOrders}
           orderId={kioskOrder?.id || null}
           referenceCode={kioskOrder?.referenceCode || null}
           amount={kioskOrder?.amount || 0}
@@ -370,7 +268,7 @@ const Pricing = () => {
 
         <PaymobCheckoutModal
           isOpen={!!cardOrder}
-          onClose={() => setCardOrder(null)}
+          onClose={clearOrders}
           orderId={cardOrder?.id || null}
           iframeUrl={cardOrder?.iframeUrl || null}
           onSuccess={() => {
@@ -495,5 +393,7 @@ const Pricing = () => {
     </div>
   );
 };
+
+import { Loader2 } from "lucide-react";
 
 export default Pricing;

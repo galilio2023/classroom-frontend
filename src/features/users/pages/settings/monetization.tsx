@@ -50,7 +50,8 @@ export default function MonetizationSettings() {
 
   const isConnected = user?.stripeOnboardingComplete;
 
-  const { mutate: getOnboardingLink, isLoading: linkLoading } = useCustomMutation() as any;
+  const { mutate: getOnboardingLink, mutation: linkMutation } = useCustomMutation() as any;
+  const linkLoading = linkMutation.isPending;
 
   // --- REAL-TIME DATA ---
   const { data: balanceData, isLoading: balanceLoading } = useCustom({

@@ -3,6 +3,7 @@ import { JourneyFunnelChart } from "./journey-funnel-chart";
 import { PendingGradingList } from "./pending-grading-list";
 import { AtRiskStudents } from "./at-risk-students";
 import { AtRiskGradeWidget } from "./AtRiskGradeWidget";
+import { AtRiskWidget } from "./AtRiskWidget";
 import { PlatformOverview } from "./platform-overview";
 import {} from "./recent-activity";
 import { RLHFAlignmentChart } from "./rlhf-alignment-chart";
@@ -171,6 +172,11 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
             >
+              {isSchoolMode && (
+                <div className="mb-10">
+                  <AtRiskWidget />
+                </div>
+              )}
               {(isSchoolMode || isFacultyMode) && (
                 <div className="mb-16">
                   <AtRiskGradeWidget />

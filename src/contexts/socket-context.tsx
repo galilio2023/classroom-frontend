@@ -16,6 +16,7 @@ const SocketContext = createContext<SocketContextType>({
 export const useSocket = () => useContext(SocketContext);
 
 import { useJobs } from "./job-context";
+import { useStudyPlanToast } from "@/hooks/use-study-plan-toast";
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data: user, isLoading } = useGetIdentity<User>();
@@ -23,6 +24,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const invalidate = useInvalidate();
   const { open } = useNotification();
   const { updateJob, removeJob, syncJobs } = useJobs();
+
+  // 🚀 RULE 5: Standardized Notifications with Action Buttons
+  useStudyPlanToast();
 
   useEffect(() => {
     if (isLoading) return;
@@ -71,6 +75,31 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         });
       });
 
+      socket.on("AI_STUDY_PLAN_COMPLETED", ({ jobId }) => {
+        open?.({
+          type: "success",
+          message: "Your study plan is ready",
+          description: "Your personalized AI study journey has been generated.",
+          // 🚀 RULE 5: Standardized Error Handling/Notifications
+          // We use the notification's ability to show an action button if supported,
+          // or we rely on the user clicking the toast.
+          // Note: Refine's default notification provider might not support custom buttons in the 'open' call directly
+          // depending on the UI kit used. We'll use the description or a custom toast if needed.
+        });
+
+        updateJob(jobId || "study-plan-gen", { status: "completed" });
+
+        // 🔄 REFRESH: Invalidate study plan query
+        void invalidate({
+          resource: "study-planner",
+          invalidates: ["list", "detail", "many"],
+        });
+
+        // 🚀 NAVIGATION: Custom toast via window.dispatchEvent or direct toast if sonner is available
+        // Since we are in a context, we can use window.dispatchEvent to let components handle specific actions
+        window.dispatchEvent(new CustomEvent("AI_STUDY_PLAN_READY"));
+      });
+
       socket.on(
         "magic_builder_progress",
         (data: { step: string; progress: number; classId: number }) => {
@@ -91,7 +120,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       );
 
-      socket.on("AI_ASSIGNMENT_COMPLETED", ({ content }) => {
+      socket.on("AI_ASSIGNMENT_GENERATED", ({ content }) => {
         open?.({
           type: "success",
           message: "Assignment Generated",
@@ -102,7 +131,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         window.dispatchEvent(new CustomEvent("AI_ASSIGNMENT_READY", { detail: { content } }));
       });
 
-      socket.on("AI_QUIZ_COMPLETED", ({ quiz }) => {
+      socket.on("AI_QUIZ_GENERATED", ({ quiz }) => {
         open?.({
           type: "success",
           message: "Quiz Generated",
@@ -161,8 +190,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socket.off("bulk-enroll:completed");
         socket.off("AI_SUMMARY_COMPLETED");
         socket.off("magic_builder_progress");
-        socket.off("AI_ASSIGNMENT_COMPLETED");
-        socket.off("AI_QUIZ_COMPLETED");
+        socket.off("AI_ASSIGNMENT_GENERATED");
+        socket.off("AI_QUIZ_GENERATED");
         socket.off("AI_MAGIC_BUILDER_COMPLETED");
         socket.off("AI_ASSIGNMENT_FAILED");
         socket.off("AI_QUIZ_FAILED");

@@ -13,6 +13,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useOnboarding } from "../hooks/use-onboarding";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
 const SUITES = [
   {
@@ -48,10 +59,34 @@ const SUITES = [
 export const SelectSuitePage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
-  const { handleSuiteSelection, isSelecting } = useOnboarding();
+  const { handleSuiteSelection, handleCorporateActivation, isSelecting } = useOnboarding();
   const [selectedSuite, setSelectedSuite] = React.useState<(typeof SUITES)[number]["id"] | null>(
     null
   );
+
+  const [isCorporateDialogOpen, setIsCorporateDialogOpen] = React.useState(false);
+  const [corporateData, setCorporateData] = React.useState({
+    organizationName: "",
+    hrContactName: "",
+    employeeCount: "",
+  });
+
+  const handleConfirm = () => {
+    if (selectedSuite === "corporate") {
+      setIsCorporateDialogOpen(true);
+    } else if (selectedSuite) {
+      handleSuiteSelection(selectedSuite);
+    }
+  };
+
+  const onCorporateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleCorporateActivation({
+      organizationName: corporateData.organizationName,
+      hrContactName: corporateData.hrContactName,
+      employeeCount: parseInt(corporateData.employeeCount) || 0,
+    });
+  };
 
   const container = {
     hidden: { opacity: 0 },
@@ -179,7 +214,7 @@ export const SelectSuitePage: React.FC = () => {
             size="lg"
             className="h-14 px-10 text-lg rounded-full shadow-lg hover:shadow-primary/20 group transition-all duration-500 gap-2"
             disabled={!selectedSuite || isSelecting}
-            onClick={() => selectedSuite && handleSuiteSelection(selectedSuite)}
+            onClick={handleConfirm}
           >
             {isSelecting ? (
               <motion.div
@@ -202,6 +237,82 @@ export const SelectSuitePage: React.FC = () => {
           </Button>
         </motion.div>
       </div>
+
+      {/* CORPORATE ACTIVATION DIALOG */}
+      <Dialog open={isCorporateDialogOpen} onOpenChange={setIsCorporateDialogOpen}>
+        <DialogContent className="max-w-md rounded-[2rem] border-none shadow-2xl bg-card/60 backdrop-blur-3xl">
+          <DialogHeader>
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <DialogTitle className="text-2xl font-black uppercase tracking-tight">
+              Corporate Suite Activation
+            </DialogTitle>
+            <DialogDescription className="text-sm font-medium">
+              Please provide your organizational details to complete the setup.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={onCorporateSubmit} className="space-y-6 pt-4">
+            <div className="space-y-2 text-start">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ps-1">
+                Organization Name
+              </Label>
+              <Input
+                required
+                value={corporateData.organizationName}
+                onChange={(e) =>
+                  setCorporateData({ ...corporateData, organizationName: e.target.value })
+                }
+                placeholder="e.g. Tablawy Tech Inc."
+                className="h-12 rounded-xl bg-muted/30 border-none px-4"
+              />
+            </div>
+
+            <div className="space-y-2 text-start">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ps-1">
+                HR / Admin Contact Name
+              </Label>
+              <Input
+                required
+                value={corporateData.hrContactName}
+                onChange={(e) =>
+                  setCorporateData({ ...corporateData, hrContactName: e.target.value })
+                }
+                placeholder="e.g. Sarah Ahmed"
+                className="h-12 rounded-xl bg-muted/30 border-none px-4"
+              />
+            </div>
+
+            <div className="space-y-2 text-start">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ps-1">
+                Estimated Employee Count
+              </Label>
+              <Input
+                required
+                type="number"
+                value={corporateData.employeeCount}
+                onChange={(e) =>
+                  setCorporateData({ ...corporateData, employeeCount: e.target.value })
+                }
+                placeholder="e.g. 50"
+                className="h-12 rounded-xl bg-muted/30 border-none px-4"
+              />
+            </div>
+
+            <DialogFooter className="pt-4">
+              <Button
+                type="submit"
+                disabled={isSelecting}
+                className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/20"
+              >
+                {isSelecting ? <Loader2 className="animate-spin mr-2" /> : null}
+                Finalize Activation
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <footer className="mt-auto py-8 text-sm text-muted-foreground/60 text-center">
         {t("onboarding.footer", "Tablawy OS · Hub Suite Selection · 2026")}

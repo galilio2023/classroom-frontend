@@ -82,18 +82,40 @@ export const useOfflineSync = () => {
   }, []);
 
   /**
-   * Caches a lesson for offline study.
+   * Caches a lesson and its attachments for offline study.
    */
   const downloadLesson = async (lesson: any) => {
     try {
+      // 1. Save lesson metadata
       await db.lessons.put({
-        id: lesson.id,
-        classId: lesson.classId,
+        id: String(lesson.id),
+        classId: String(lesson.classId),
         title: lesson.title,
-        content: lesson.content,
+        content: lesson.content || "",
         attachments: lesson.attachments || [],
         cachedAt: Date.now(),
       });
+
+      // 2. Fetch and save attachment blobs (High-Fidelity)
+      if (lesson.attachments && Array.isArray(lesson.attachments)) {
+        for (const attachment of lesson.attachments) {
+          if (attachment.url && (attachment.type === "file" || attachment.type === "image")) {
+            try {
+              const response = await fetch(attachment.url);
+              const blob = await response.blob();
+              await db.attachment_blobs.put({
+                resourceId: String(attachment.id),
+                blob,
+                fileName: attachment.title || "attachment",
+                contentType: blob.type,
+              });
+            } catch (err) {
+              console.warn(`Failed to cache attachment ${attachment.id}:`, err);
+            }
+          }
+        }
+      }
+
       toast.success(t("offline.downloadSuccess", { title: lesson.title }));
     } catch (error) {
       console.error("Failed to download lesson:", error);

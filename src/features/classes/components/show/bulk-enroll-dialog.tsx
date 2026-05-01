@@ -143,8 +143,18 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
           }
         },
         onError: (error: any) => {
-          const message = error.response?.data?.message || t("common.errors.uploadFailed" as any);
-          toast.error(message);
+          const apiError = error.response?.data;
+          if (apiError?.data?.errors) {
+            setResults({
+              created: 0,
+              enrolled: 0,
+              errors: apiError.data.errors,
+            });
+            toast.error(apiError.message || t("common.errors.uploadFailed" as any));
+          } else {
+            const message = apiError?.message || t("common.errors.uploadFailed" as any);
+            toast.error(message);
+          }
           setLoading(false);
         },
       }

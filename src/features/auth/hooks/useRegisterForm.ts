@@ -143,8 +143,20 @@ export const useRegisterForm = () => {
 
   const nextStep = async () => {
     let fieldsToValidate: any[] = [];
+    let targetStep: RegisterStep | null = null;
+
     if (step === REGISTER_STEPS.BASIC_INFO) {
       fieldsToValidate = ["name", "email", "password", "role"];
+
+      const isValid = await form.trigger(fieldsToValidate);
+      if (isValid) {
+        // 🛡️ LAW 151 BYPASS: Skip ID verification for students with an invite code (Private Suite)
+        if (role === "student" && inviteCode) {
+          targetStep = REGISTER_STEPS.CONSENT;
+        } else {
+          targetStep = REGISTER_STEPS.EGYPTIAN_ID;
+        }
+      }
     } else if (step === REGISTER_STEPS.EGYPTIAN_ID) {
       // 🛡️ NORMALIZATION: Immediate feedback (Mandate M-008)
       const currentPhone = normalizeArabicNumerals(form.getValues("phoneNumber"));
@@ -155,23 +167,29 @@ export const useRegisterForm = () => {
       form.setValue("nationalId", currentId, { shouldValidate: true });
 
       fieldsToValidate = ["phoneNumber", "nationalId"];
-      // Soft validation for Egyptian ID
-      const nationalId = form.getValues("nationalId");
-      const validation = validateEgyptianID(nationalId);
-      if (!validation.isValid) {
-        form.setError("nationalId", { message: validation.error });
-        return;
+
+      const isValid = await form.trigger(fieldsToValidate);
+      if (isValid) {
+        // Soft validation for Egyptian ID
+        const nationalId = form.getValues("nationalId");
+        const validation = validateEgyptianID(nationalId);
+        if (!validation.isValid) {
+          form.setError("nationalId", { message: validation.error });
+          return;
+        }
+        targetStep = REGISTER_STEPS.CONSENT;
       }
     } else if (step === REGISTER_STEPS.CONSENT) {
       fieldsToValidate = ["hasAiConsent"];
+      const isValid = await form.trigger(fieldsToValidate);
+      if (isValid) {
+        await sendWhatsAppOtp();
+        targetStep = REGISTER_STEPS.OTP_VERIFY;
+      }
     }
 
-    const isValid = await form.trigger(fieldsToValidate);
-    if (isValid) {
-      if (step === REGISTER_STEPS.CONSENT) {
-        await sendWhatsAppOtp();
-      }
-      setStep((prev) => (prev + 1) as RegisterStep);
+    if (targetStep) {
+      setStep(targetStep);
     }
   };
 

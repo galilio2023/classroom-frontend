@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "@refinedev/core";
+import { useNavigate } from "react-router-dom";
 import { socket } from "@/lib/socket";
 import { Button } from "@/components/ui/button";
 import { Video, X } from "lucide-react";
@@ -17,7 +18,7 @@ interface LiveClass {
 
 export const GlobalLiveIndicator = () => {
   const { t, i18n } = useTranslation();
-  const { show } = useNavigation();
+  const navigate = useNavigate();
   const [liveClasses, setLiveClasses] = useState<LiveClass[]>([]);
   const isArr = i18n.language === "ar";
 
@@ -61,43 +62,30 @@ export const GlobalLiveIndicator = () => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: -20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        className="fixed top-20 start-1/2 -translate-x-1/2 z-[100] w-full max-w-xs md:max-w-sm px-4"
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: "auto", opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        className="w-full bg-live-primary text-white overflow-hidden relative z-50 border-b border-white/10 shadow-lg shadow-live-primary/10"
       >
-        <div className="bg-live-primary text-white rounded-2xl shadow-2xl shadow-live-primary/40 border border-white/20 p-1 flex items-center gap-3 overflow-hidden backdrop-blur-md">
-          <div className="bg-white/20 p-2 rounded-xl animate-pulse">
-            <Video className="h-4 w-4 md:h-5 md:w-5" />
-          </div>
-
-          <div className="flex-1 min-w-0 py-1">
-            <p className="text-[10px] font-black uppercase tracking-widest opacity-80 leading-none">
-              {t("classes.live.indicator.liveNow", "Live Now")}
-            </p>
-            <h4 className="text-xs md:text-sm font-bold truncate pe-2">{currentClass.name}</h4>
+        <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 animate-pulse shrink-0">
+              <Video className="h-4 w-4" />
+            </div>
+            <div className="flex flex-col md:flex-row md:items-center gap-0 md:gap-3 min-w-0">
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/70 whitespace-nowrap">
+                {t("classes.live.indicator.liveNow", "Live Session Active")}
+              </span>
+              <h4 className="text-xs md:text-sm font-bold truncate">{currentClass.name}</h4>
+            </div>
           </div>
 
           <Button
-            variant="ghost"
             size="sm"
-            onClick={() =>
-              show("classes", currentClass.id.toString(), {
-                tab: "live",
-              } as any)
-            }
-            className="h-8 md:h-10 rounded-xl bg-white text-live-primary hover:bg-white/90 font-black text-[10px] uppercase tracking-tighter px-3 md:px-4"
+            onClick={() => navigate(`/classes/show/${currentClass.id}?subtab=live`)}
+            className="rounded-full bg-white text-live-primary hover:bg-white/90 font-black text-[10px] uppercase tracking-widest h-9 px-6 shadow-xl transition-all active:scale-95 shrink-0"
           >
-            {t("notifications.joinNow", "Join")}
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setLiveClasses([])}
-            className="h-8 w-8 rounded-full hover:bg-white/10 text-white/60"
-          >
-            <X className="h-3 w-3" />
+            {t("notifications.joinNow", "Join Now")}
           </Button>
         </div>
       </motion.div>

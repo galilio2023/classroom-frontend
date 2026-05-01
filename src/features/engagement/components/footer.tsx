@@ -83,14 +83,14 @@ export const Footer = () => {
           href: "/#ai",
         },
         {
-          id: "whiteboard",
-          name: t("footer.whiteboard", "Interactive Whiteboard"),
-          href: "#",
+          id: "pricing",
+          name: t("common.pricing", "Pricing"),
+          href: "/pricing",
         },
         {
-          id: "studentProgress",
-          name: t("footer.studentProgress", "Student Progress"),
-          href: "#",
+          id: "discovery",
+          name: t("navigation.discovery", "Discovery"),
+          href: "/discovery",
         },
       ],
     },
@@ -99,47 +99,20 @@ export const Footer = () => {
       title: t("footer.solutions", "Solutions"),
       links: [
         {
-          id: "forSchools",
-          name: t("footer.forSchools", "For Schools"),
-          href: "#",
+          id: "register",
+          name: t("auth.login.signUp", "Sign up"),
+          href: "/register",
         },
         {
-          id: "forTeachers",
-          name: t("footer.forTeachers", "For Teachers"),
-          href: "#",
+          id: "login",
+          name: t("auth.login.signIn", "Sign in"),
+          href: "/login",
         },
         {
-          id: "caseStudies",
-          name: t("footer.caseStudies", "Case Studies"),
-          href: "#",
+          id: "channels",
+          name: t("navigation.channels", "Channels"),
+          href: "/channels",
         },
-        {
-          id: "enterprise",
-          name: t("footer.enterprise", "Enterprise"),
-          href: "#",
-        },
-      ],
-    },
-    {
-      id: "support",
-      title: t("footer.support", "Support"),
-      links: [
-        {
-          id: "helpCenter",
-          name: t("footer.helpCenter", "Help Center"),
-          href: "#",
-        },
-        {
-          id: "community",
-          name: t("footer.community", "Community"),
-          href: "#",
-        },
-        {
-          id: "contactUs",
-          name: t("footer.contactUs", "Contact Us"),
-          href: "#",
-        },
-        { id: "apiDocs", name: t("footer.apiDocs", "API Docs"), href: "#" },
       ],
     },
   ];
@@ -282,12 +255,18 @@ export const Footer = () => {
             >
               {t("footer.terms", "Terms of Service")}
             </Link>
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary cursor-pointer transition-colors">
+            <Link
+              to="/privacy"
+              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+            >
               {t("footer.privacy", "Privacy Policy")}
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary cursor-pointer transition-colors">
+            </Link>
+            <Link
+              to="/cookies"
+              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+            >
               {t("footer.cookie", "Cookie Policy")}
-            </span>
+            </Link>
           </div>
 
           <div className="flex items-center gap-6 opacity-40 grayscale group hover:grayscale-0 hover:opacity-100 transition-all duration-500">

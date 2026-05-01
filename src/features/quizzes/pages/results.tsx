@@ -37,16 +37,13 @@ const QuizResults = () => {
   const [search, setSearch] = useState("");
   const { isPrincipal, isTeacher } = useCapabilities();
 
-  // 🛡️ SAFETY: Guard against malformed routes
-  if (!id) {
-    list("classes");
-    return null;
-  }
-
   // Fetch Quiz Details
   const { query: quizQuery } = useCustom<Quiz, HttpError>({
     url: `/quizzes/${id}`,
     method: "get",
+    queryOptions: {
+      enabled: !!id,
+    },
   });
 
   // Fetch Quiz Results (Attempts & Analytics)
@@ -59,9 +56,18 @@ const QuizResults = () => {
   >({
     url: `/quizzes/${id}/results`,
     method: "get",
+    queryOptions: {
+      enabled: !!id,
+    },
   });
 
   const { handleAction, isPending } = useGradeActions("quizzes", [resultsQuery, quizQuery]);
+
+  // 🛡️ SAFETY: Guard against malformed routes
+  if (!id) {
+    list("classes");
+    return null;
+  }
 
   const quiz = quizQuery.data?.data;
   const data = resultsQuery.data?.data;

@@ -25,6 +25,21 @@ class ErrorBoundaryInner extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
 
+    // 🛡️ PRODUCTION LOGGING: Send to an external service if needed
+    if (import.meta.env.PROD) {
+      // Example: Sentry.captureException(error, { extra: errorInfo });
+      // For now, we use a structured log that could be picked up by log aggregators
+      console.error(
+        JSON.stringify({
+          event: "uncaught_react_error",
+          message: error.message,
+          stack: error.stack,
+          componentStack: errorInfo.componentStack,
+          timestamp: new Date().toISOString(),
+        })
+      );
+    }
+
     // Specifically handle dynamic import (chunk) failures
     if (
       error.name === "ChunkLoadError" ||

@@ -205,7 +205,10 @@ const QuizCreate = () => {
                               {t("classes.quiz.examMode", { defaultValue: "Exam Mode" })}
                             </FormLabel>
                             <p className="text-[10px] font-medium text-muted-foreground">
-                              {t("classes.quiz.examModeDesc", { defaultValue: "Hardened integrity: AI-proctoring, tab-switch detection & no AI assistance." })}
+                              {t("classes.quiz.examModeDesc", {
+                                defaultValue:
+                                  "Hardened integrity: AI-proctoring, tab-switch detection & no AI assistance.",
+                              })}
                             </p>
                           </div>
                           <FormControl>

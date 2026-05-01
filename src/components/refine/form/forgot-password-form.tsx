@@ -77,7 +77,7 @@ export const ForgotPasswordForm = () => {
                   type="submit"
                   className={cn("bg-blue-600", "hover:bg-blue-700", "text-white", "px-6")}
                 >
-                  {t("auth.forgotPassword.send")}
+                  {t("auth.forgotPassword.sendCode")}
                 </Button>
               </div>
             </div>
