@@ -157,43 +157,43 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
 
       socket.on("AI_ASSIGNMENT_FAILED", async ({ error }) => {
+        updateJob("assignment-gen", { status: "failed" });
         const handled = await handleError(error);
         open?.({
           type: "error",
           message: "Assignment Generation Failed",
           description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
         });
-        updateJob("assignment-gen", { status: "failed" });
       });
 
       socket.on("AI_QUIZ_FAILED", async ({ error }) => {
+        updateJob("quiz-gen", { status: "failed" });
         const handled = await handleError(error);
         open?.({
           type: "error",
           message: "Quiz Generation Failed",
           description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
         });
-        updateJob("quiz-gen", { status: "failed" });
       });
 
       socket.on("AI_MAGIC_BUILDER_FAILED", async ({ error, classId }) => {
+        updateJob(`magic-builder-${classId}`, { status: "failed" });
         const handled = await handleError(error);
         open?.({
           type: "error",
           message: "Curriculum Construction Failed",
           description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
         });
-        updateJob(`magic-builder-${classId}`, { status: "failed" });
       });
 
       socket.on("AI_SUMMARY_FAILED", async ({ error, classId }) => {
+        updateJob(`summary-${classId}`, { status: "failed" });
         const handled = await handleError(error);
         open?.({
           type: "error",
           message: "Class Summary Failed",
           description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
         });
-        updateJob(`summary-${classId}`, { status: "failed" });
       });
 
       socket.on("submission:ai-grade:completed", ({ submissionId }) => {

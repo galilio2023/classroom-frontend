@@ -12,6 +12,7 @@ import {
   Search,
   BookOpen,
   Loader2,
+  WifiOff,
 } from "lucide-react";
 import {
   Bar,
@@ -52,6 +53,7 @@ export default function RegistrarDashboardPage() {
   const data = query.data?.data;
   const isLoading = query.isLoading;
   const isError = query.isError;
+  const isPaused = query.isPaused;
   const error = query.error;
 
   const [errorDetails, setErrorDetails] = useState<{
@@ -126,6 +128,11 @@ export default function RegistrarDashboardPage() {
           <h1 className="text-4xl font-black tracking-tighter uppercase flex items-center gap-3">
             <BrainCircuit className="h-8 w-8 text-primary" />
             Registrar Overview
+            {isPaused && (
+              <Badge variant="destructive" className="ml-2 animate-pulse gap-1 rounded-full">
+                <WifiOff className="h-3 w-3" /> Offline
+              </Badge>
+            )}
           </h1>
           <p className="text-muted-foreground font-medium">
             Institutional academic standing and GPA distribution analytics.
