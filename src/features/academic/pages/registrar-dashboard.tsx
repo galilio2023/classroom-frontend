@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useApiUrl, useCustom } from "@refinedev/core";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  GraduationCap,
+  BrainCircuit,
   Users,
   TrendingUp,
   AlertCircle,
@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { handleError } from "@/providers/utils/api-errors";
 
 interface RegistrarSummary {
   standings: Array<{ standing: string; count: number }>;
@@ -51,8 +52,31 @@ export default function RegistrarDashboardPage() {
   const data = query.data?.data;
   const isLoading = query.isLoading;
   const isError = query.isError;
+  const error = query.error;
 
-  const COLORS = ["#10b981", "#f59e0b", "#ef4444", "#6366f1"];
+  const [errorDetails, setErrorDetails] = useState<{
+    message: string;
+    correlationId?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (isError && error) {
+      void handleError(error).then((handled) => {
+        setErrorDetails({
+          message: handled.message,
+          correlationId: handled.meta?.correlationId,
+        });
+      });
+    }
+  }, [isError, error]);
+
+  // 🎨 HUB RULE 7: Analysis features use BrainCircuit and institutional themes.
+  const COLORS = [
+    "hsl(var(--primary))",
+    "hsl(var(--chart-2))",
+    "hsl(var(--chart-3))",
+    "hsl(var(--chart-4))",
+  ];
 
   const chartConfig = {
     count: {
@@ -75,7 +99,14 @@ export default function RegistrarDashboardPage() {
         <AlertCircle className="h-12 w-12 text-destructive/50" />
         <div className="text-center">
           <h3 className="font-black uppercase tracking-tighter text-xl">Data Sync Failed</h3>
-          <p className="text-muted-foreground font-medium">Unable to load registrar analytics.</p>
+          <p className="text-muted-foreground font-medium">
+            {errorDetails?.message || "Unable to load registrar analytics."}
+          </p>
+          {errorDetails?.correlationId && (
+            <p className="text-[10px] font-mono text-muted-foreground/40 mt-2">
+              Support ID: {errorDetails.correlationId}
+            </p>
+          )}
         </div>
         <Button variant="outline" onClick={() => query.refetch()} className="rounded-2xl font-bold">
           Retry Sync
@@ -93,7 +124,7 @@ export default function RegistrarDashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-4xl font-black tracking-tighter uppercase flex items-center gap-3">
-            <GraduationCap className="h-8 w-8 text-primary" />
+            <BrainCircuit className="h-8 w-8 text-primary" />
             Registrar Overview
           </h1>
           <p className="text-muted-foreground font-medium">

@@ -18,6 +18,7 @@ export const useSocket = () => useContext(SocketContext);
 import { useJobs } from "./job-context";
 import { useStudyPlanToast } from "@/hooks/use-study-plan-toast";
 import { handleError } from "@/providers/utils/api-errors";
+import { Sparkles } from "lucide-react";
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data: user, isLoading } = useGetIdentity<User>();
@@ -79,7 +80,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("AI_STUDY_PLAN_COMPLETED", ({ jobId }) => {
         open?.({
           type: "success",
-          message: "Your study plan is ready",
+          message: "✨ Your study plan is ready",
           description: "Your personalized AI study journey has been generated.",
           // 🚀 RULE 5: Standardized Error Handling/Notifications
           // We use the notification's ability to show an action button if supported,
@@ -124,7 +125,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("AI_ASSIGNMENT_GENERATED", ({ content }) => {
         open?.({
           type: "success",
-          message: "Assignment Generated",
+          message: "✨ Assignment Generated",
           description: "Your AI assignment draft is ready!",
         });
         updateJob("assignment-gen", { status: "completed" });
@@ -135,7 +136,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("AI_QUIZ_GENERATED", ({ quiz }) => {
         open?.({
           type: "success",
-          message: "Quiz Generated",
+          message: "✨ Quiz Generated",
           description: "Your AI quiz draft is ready!",
         });
         updateJob("quiz-gen", { status: "completed" });
