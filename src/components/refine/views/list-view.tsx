@@ -39,7 +39,7 @@ export function ListView({
       {(title || breadcrumb || headerButtons) && (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-4 flex-1 text-start">
-            {breadcrumb !== undefined ? breadcrumb : <Breadcrumb />}
+            {breadcrumb ?? <Breadcrumb />}
             {title && <h1 className="page-title mb-0 flex items-center gap-3">{title}</h1>}
             {headerProps?.subtitle && (
               <p className="text-muted-foreground font-medium max-w-2xl">{headerProps.subtitle}</p>

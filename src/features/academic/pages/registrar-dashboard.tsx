@@ -89,8 +89,24 @@ export default function RegistrarDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary/20" />
+      <div className="flex h-96 flex-col items-center justify-center gap-6">
+        <div className="relative">
+          <Loader2 className="h-16 w-16 animate-spin text-ai-primary/20" />
+          <BrainCircuit className="h-6 w-6 text-ai-primary absolute inset-0 m-auto" />
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <p className="font-black uppercase tracking-[0.3em] text-xs text-ai-primary animate-pulse">
+            Analyzing Academic Data
+          </p>
+          <div className="h-1 w-32 bg-ai-primary/10 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-ai-primary"
+              initial={{ x: "-100%" }}
+              animate={{ x: "100%" }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+            />
+          </div>
+        </div>
       </div>
     );
   }
