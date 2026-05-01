@@ -55,6 +55,7 @@ export default function RegistrarDashboardPage() {
   const isError = query.isError;
   const isPaused = query.isPaused;
   const error = query.error;
+  const isFetching = query.isFetching; // 🚀 Rule 4: Background refresh indicator
 
   const [errorDetails, setErrorDetails] = useState<{
     message: string;
@@ -62,23 +63,24 @@ export default function RegistrarDashboardPage() {
   } | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
     if (isError && error) {
       void handleError(error).then((handled) => {
-        setErrorDetails({
-          message: handled.message,
-          correlationId: handled.meta?.correlationId,
-        });
+        if (isMounted) {
+          setErrorDetails({
+            message: handled.message,
+            correlationId: handled.meta?.correlationId,
+          });
+        }
       });
     }
+    return () => {
+      isMounted = false;
+    };
   }, [isError, error]);
 
-  // 🎨 HUB RULE 7: Analysis features use BrainCircuit and institutional themes.
-  const COLORS = [
-    "hsl(var(--primary))",
-    "hsl(var(--chart-2))",
-    "hsl(var(--chart-3))",
-    "hsl(var(--chart-4))",
-  ];
+  // 🎨 HUB RULE 7: Analysis features use ai-primary colors and institutional themes.
+  const COLORS = ["#7c3aed", "#a78bfa", "#c4b5fd", "#ddd6fe", "#ede9fe"];
 
   const chartConfig = {
     count: {

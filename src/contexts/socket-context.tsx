@@ -221,7 +221,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socket.off("AI_MAGIC_BUILDER_FAILED");
         socket.off("AI_SUMMARY_FAILED");
         socket.off("submission:ai-grade:completed");
-        socket.disconnect();
+
+        // 🛡️ SRE: Only disconnect if specifically cleanup for unmount
+        // Better Auth or other tabs might share state; ensure we don't accidentally
+        // leave listeners attached for a different user session.
       };
     } else {
       if (socket.connected) {
