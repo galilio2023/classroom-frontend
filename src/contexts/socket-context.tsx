@@ -17,6 +17,7 @@ export const useSocket = () => useContext(SocketContext);
 
 import { useJobs } from "./job-context";
 import { useStudyPlanToast } from "@/hooks/use-study-plan-toast";
+import { handleError } from "@/providers/utils/api-errors";
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data: user, isLoading } = useGetIdentity<User>();
@@ -154,23 +155,43 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         void invalidate({ resource: "classes", id: classId, invalidates: ["detail"] });
       });
 
-      socket.on("AI_ASSIGNMENT_FAILED", ({ error }) => {
-        open?.({ type: "error", message: "Generation Failed", description: error });
+      socket.on("AI_ASSIGNMENT_FAILED", async ({ error }) => {
+        const handled = await handleError(error);
+        open?.({
+          type: "error",
+          message: "Assignment Generation Failed",
+          description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
+        });
         updateJob("assignment-gen", { status: "failed" });
       });
 
-      socket.on("AI_QUIZ_FAILED", ({ error }) => {
-        open?.({ type: "error", message: "Generation Failed", description: error });
+      socket.on("AI_QUIZ_FAILED", async ({ error }) => {
+        const handled = await handleError(error);
+        open?.({
+          type: "error",
+          message: "Quiz Generation Failed",
+          description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
+        });
         updateJob("quiz-gen", { status: "failed" });
       });
 
-      socket.on("AI_MAGIC_BUILDER_FAILED", ({ error, classId }) => {
-        open?.({ type: "error", message: "Generation Failed", description: error });
+      socket.on("AI_MAGIC_BUILDER_FAILED", async ({ error, classId }) => {
+        const handled = await handleError(error);
+        open?.({
+          type: "error",
+          message: "Curriculum Construction Failed",
+          description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
+        });
         updateJob(`magic-builder-${classId}`, { status: "failed" });
       });
 
-      socket.on("AI_SUMMARY_FAILED", ({ error, classId }) => {
-        open?.({ type: "error", message: "Generation Failed", description: error });
+      socket.on("AI_SUMMARY_FAILED", async ({ error, classId }) => {
+        const handled = await handleError(error);
+        open?.({
+          type: "error",
+          message: "Class Summary Failed",
+          description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
+        });
         updateJob(`summary-${classId}`, { status: "failed" });
       });
 
@@ -189,6 +210,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socket.off("disconnect", onDisconnect);
         socket.off("bulk-enroll:completed");
         socket.off("AI_SUMMARY_COMPLETED");
+        socket.off("AI_STUDY_PLAN_COMPLETED");
         socket.off("magic_builder_progress");
         socket.off("AI_ASSIGNMENT_GENERATED");
         socket.off("AI_QUIZ_GENERATED");

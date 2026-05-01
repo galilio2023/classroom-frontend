@@ -50,6 +50,7 @@ export default function RegistrarDashboardPage() {
 
   const data = query.data?.data;
   const isLoading = query.isLoading;
+  const isError = query.isError;
 
   const COLORS = ["#10b981", "#f59e0b", "#ef4444", "#6366f1"];
 
@@ -67,6 +68,25 @@ export default function RegistrarDashboardPage() {
       </div>
     );
   }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col h-96 items-center justify-center space-y-4">
+        <AlertCircle className="h-12 w-12 text-destructive/50" />
+        <div className="text-center">
+          <h3 className="font-black uppercase tracking-tighter text-xl">Data Sync Failed</h3>
+          <p className="text-muted-foreground font-medium">Unable to load registrar analytics.</p>
+        </div>
+        <Button variant="outline" onClick={() => query.refetch()} className="rounded-2xl font-bold">
+          Retry Sync
+        </Button>
+      </div>
+    );
+  }
+
+  const hasStandings = data?.standings && data.standings.length > 0;
+  const hasGpaData = data?.gpaDistribution && data.gpaDistribution.length > 0;
+  const hasDeptData = data?.departments && data.departments.length > 0;
 
   return (
     <div className="p-8 space-y-10 max-w-7xl mx-auto">
@@ -95,28 +115,35 @@ export default function RegistrarDashboardPage() {
 
       {/* KPI Cards */}
       <div className="grid gap-6 md:grid-cols-4">
-        {data?.standings.map((s, i) => (
-          <Card
-            key={s.standing}
-            className="rounded-3xl border-border/40 shadow-sm overflow-hidden group hover:shadow-xl transition-all duration-500"
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                {s.standing} Standing
-              </CardTitle>
-              <div
-                className="h-2 w-2 rounded-full animate-pulse"
-                style={{ backgroundColor: COLORS[i % COLORS.length] }}
-              />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-black">{s.count}</div>
-              <p className="text-[10px] font-bold text-muted-foreground/60 mt-1 uppercase">
-                Students Enrolled
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+        {hasStandings ? (
+          data?.standings.map((s, i) => (
+            <Card
+              key={s.standing}
+              className="rounded-3xl border-border/40 shadow-sm overflow-hidden group hover:shadow-xl transition-all duration-500"
+            >
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  {s.standing} Standing
+                </CardTitle>
+                <div
+                  className="h-2 w-2 rounded-full animate-pulse"
+                  style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-black">{s.count}</div>
+                <p className="text-[10px] font-bold text-muted-foreground/60 mt-1 uppercase">
+                  Students Enrolled
+                </p>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-4 p-12 border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center text-muted-foreground/40">
+            <Users className="h-12 w-12 mb-4" />
+            <p className="font-black uppercase tracking-widest text-xs">No Student Data Found</p>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-8 md:grid-cols-3">
@@ -132,33 +159,46 @@ export default function RegistrarDashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-0">
-            <div className="h-[350px] w-full">
-              <ChartContainer config={chartConfig}>
-                <BarChart data={data?.gpaDistribution || []}>
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
-                  <XAxis
-                    dataKey="range"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 10, fontWeight: 900, fill: "rgba(0,0,0,0.4)" }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 10, fontWeight: 900, fill: "rgba(0,0,0,0.4)" }}
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" radius={[10, 10, 0, 0]} fill="var(--color-count)">
-                    {(data?.gpaDistribution || []).map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={entry.count > 10 ? "hsl(var(--primary))" : "rgba(0,0,0,0.1)"}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
-            </div>
+            {hasGpaData ? (
+              <div className="h-[350px] w-full">
+                <ChartContainer config={chartConfig}>
+                  <BarChart data={data?.gpaDistribution || []}>
+                    <CartesianGrid
+                      vertical={false}
+                      strokeDasharray="3 3"
+                      stroke="rgba(0,0,0,0.05)"
+                    />
+                    <XAxis
+                      dataKey="range"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 900, fill: "rgba(0,0,0,0.4)" }}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 900, fill: "rgba(0,0,0,0.4)" }}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="count" radius={[10, 10, 0, 0]} fill="var(--color-count)">
+                      {(data?.gpaDistribution || []).map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.count > 10 ? "hsl(var(--primary))" : "rgba(0,0,0,0.1)"}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              </div>
+            ) : (
+              <div className="h-[350px] w-full flex flex-col items-center justify-center text-muted-foreground/20">
+                <BarChart3 className="h-16 w-16 mb-4" />
+                <p className="font-black uppercase tracking-[0.2em] text-[10px]">
+                  Waiting for GPA Data
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -173,47 +213,56 @@ export default function RegistrarDashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-0 flex flex-col items-center">
-            <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={data?.standings || []}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={90}
-                    paddingAngle={8}
-                    dataKey="count"
-                    nameKey="standing"
-                  >
-                    {(data?.standings || []).map((_, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                        stroke="none"
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="w-full space-y-3 mt-8">
-              {data?.standings.map((s, i) => (
-                <div key={s.standing} className="flex items-center justify-between group">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: COLORS[i % COLORS.length] }}
-                    />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
-                      {s.standing}
-                    </span>
-                  </div>
-                  <span className="text-xs font-black">{s.count}</span>
+            {hasStandings ? (
+              <>
+                <div className="h-[250px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={data?.standings || []}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={70}
+                        outerRadius={90}
+                        paddingAngle={8}
+                        dataKey="count"
+                        nameKey="standing"
+                      >
+                        {(data?.standings || []).map((_, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                            stroke="none"
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
-              ))}
-            </div>
+                <div className="w-full space-y-3 mt-8">
+                  {data?.standings.map((s, i) => (
+                    <div key={s.standing} className="flex items-center justify-between group">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                        />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
+                          {s.standing}
+                        </span>
+                      </div>
+                      <span className="text-xs font-black">{s.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="h-[350px] flex flex-col items-center justify-center text-muted-foreground/20">
+                <BarChart3 className="h-16 w-16 mb-4 rotate-90" />
+                <p className="font-black uppercase tracking-[0.2em] text-[10px]">Mix Empty</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -233,36 +282,45 @@ export default function RegistrarDashboardPage() {
           </Badge>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
-          {data?.departments.map((dept) => (
-            <Card
-              key={dept.id}
-              className="rounded-3xl border-border/40 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden relative group"
-            >
-              <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform pointer-events-none">
-                <Users className="h-24 w-24" />
-              </div>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-black uppercase tracking-tight">
-                  {dept.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-end gap-3">
-                  <span className="text-3xl font-black">{dept.studentCount}</span>
-                  <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mb-2">
-                    Total Students
-                  </span>
+          {hasDeptData ? (
+            data?.departments.map((dept) => (
+              <Card
+                key={dept.id}
+                className="rounded-3xl border-border/40 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden relative group"
+              >
+                <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform pointer-events-none">
+                  <Users className="h-24 w-24" />
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full h-10 rounded-xl bg-muted/30 font-black uppercase text-[8px] tracking-[0.2em] group-hover:bg-primary group-hover:text-white transition-all"
-                >
-                  View Dept Roster <ChevronRight className="ms-2 h-3 w-3" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-black uppercase tracking-tight">
+                    {dept.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-end gap-3">
+                    <span className="text-3xl font-black">{dept.studentCount}</span>
+                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mb-2">
+                      Total Students
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full h-10 rounded-xl bg-muted/30 font-black uppercase text-[8px] tracking-[0.2em] group-hover:bg-primary group-hover:text-white transition-all"
+                  >
+                    View Dept Roster <ChevronRight className="ms-2 h-3 w-3" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <div className="col-span-3 p-20 border-2 border-dashed rounded-[3rem] flex flex-col items-center justify-center text-muted-foreground/30">
+              <ShieldAlert className="h-16 w-16 mb-4" />
+              <p className="font-black uppercase tracking-[0.3em] text-[10px]">
+                No Departments Registered
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
