@@ -20,6 +20,9 @@ http {
     # 🛡️ SECURITY: Remove version header
     server_tokens off;
 
+    # 🚀 UPLOADS: Support 5MB+ uploads for Rural Hardening (Mandate Review #12)
+    client_max_body_size 10M;
+
     include /etc/nginx/conf.d/security-headers.conf;
 
     server {
