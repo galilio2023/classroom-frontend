@@ -30,6 +30,7 @@ jobs:
         uses: actions/github-script@v7
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: "gemini-3.1-flash-lite-preview"
         with:
           script: |
             const fs = require('fs');
@@ -39,15 +40,17 @@ jobs:
               console.log("🚀 Starting Gemini Review Script (Frontend)...");
               
               const geminiApiKey = process.env.GEMINI_API_KEY;
+              const geminiModel = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite-preview";
+
               if (!geminiApiKey) {
                 core.warning("⚠️ No GEMINI_API_KEY found. Skipping review.");
                 return;
               }
 
               const genAI = new GoogleGenerativeAI(geminiApiKey);
-              const GEMINI_MODEL = "gemini-3.1-flash-lite-preview";
-              const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+              const model = genAI.getGenerativeModel({ model: geminiModel });
 
+              console.log(`🤖 Using model: ${geminiModel}`);
               console.log("📋 Loading rules and patterns...");
               let rules = `
                 You are an expert code reviewer for Tablawy OS frontend.
@@ -85,10 +88,21 @@ jobs:
                 return;
               }
 
-              console.log("📝 Generating diff...");
+              console.log("📝 Generating diff (with noise filter)...");
               let diff = "";
               try {
-                const { stdout } = await exec.getExecOutput(`git diff origin/${pr.base.ref} HEAD`);
+                // 🛡️ NOISE FILTER: Exclude build artifacts, lockfiles, and images
+                const ignorePatterns = [
+                  ':(exclude)package-lock.json',
+                  ':(exclude)dist/*',
+                  ':(exclude)node_modules/*',
+                  ':(exclude)*.png',
+                  ':(exclude)*.jpg',
+                  ':(exclude)*.jpeg',
+                  ':(exclude)*.svg',
+                  ':(exclude)*.ico'
+                ];
+                const { stdout } = await exec.getExecOutput(`git diff origin/${pr.base.ref} HEAD -- . ${ignorePatterns.join(' ')}`);
                 diff = stdout;
               } catch (e) {
                 core.setFailed(`❌ Git diff failed: ${e.message}`);
@@ -96,7 +110,7 @@ jobs:
               }
 
               if (!diff || diff.trim().length === 0) {
-                console.log("✅ No changes detected in diff.");
+                console.log("✅ No changes detected in source files.");
                 return;
               }
 
