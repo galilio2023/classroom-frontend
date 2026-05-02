@@ -17,6 +17,7 @@ const LoginPage = React.lazy(() => import("@/features/auth/pages/login"));
 const ForgotPasswordPage = React.lazy(() => import("@/features/auth/pages/forgot-password"));
 const ResetPasswordPage = React.lazy(() => import("@/features/auth/pages/reset-password"));
 const RegisterPage = React.lazy(() => import("@/features/auth/pages/register"));
+const ApplyTeacherPage = React.lazy(() => import("@/features/auth/pages/apply-teacher"));
 const PendingVerification = React.lazy(() => import("@/features/auth/pages/pending-verification"));
 const UnauthorizedPage = React.lazy(() => import("@/pages/unauthorized"));
 const PrivacyPage = React.lazy(() => import("@/pages/privacy"));
@@ -257,6 +258,8 @@ export const AppRouter = () => {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register/teacher" element={<RegisterPage isTeacherFlow />} />
+          <Route path="/register/institution" element={<RegisterPage isInstitutionFlow />} />
         </Route>
 
         <Route path="/privacy" element={<PrivacyPage />} />
@@ -279,6 +282,7 @@ export const AppRouter = () => {
           }
         >
           <Route path="/onboarding/select-suite" element={<SelectSuitePage />} />
+          <Route path="/apply/teacher" element={<ApplyTeacherPage />} />
           <Route path="/pending-verification" element={<PendingVerification />} />
           <Route
             element={

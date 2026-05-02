@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import axios from "axios";
 import {
   useCustom,
   useNotification,
@@ -373,14 +374,33 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") return;
 
+      // 🛡️ SECURITY: Fail-Fast & Notify Admins (Strike 2)
       console.error("Tablawy AI Error:", err);
       const error = err as HttpError;
       const correlationId = getCorrelationId(err);
 
+      const isGovernanceError =
+        error?.statusCode === 503 ||
+        error?.message?.includes("security") ||
+        error?.message?.includes("governance");
+
+      if (isGovernanceError && identity?.id) {
+        // Asynchronously notify admins via the new alert endpoint
+        axios
+          .post(`${BACKEND_URL}/ai/alerts`, {
+            type: "sanitizer_failure",
+            message: error.message || "Unknown Governance Failure",
+            metadata: { userId: identity.id, classId: effectiveClassId, correlationId },
+          })
+          .catch(() => {}); // Suppress alert-of-alert failures
+      }
+
       open?.({
         type: "error",
         message: t("common.error"),
-        description: `${error.message || t("aiHub.errors.serviceUnavailable")} (Trace: ${correlationId})`,
+        description: isGovernanceError
+          ? "System governance active. AI Buddy is temporarily resting. Please try again in a few minutes."
+          : `${error.message || t("aiHub.errors.serviceUnavailable")} (Trace: ${correlationId})`,
       });
 
       setMessages((prev) => [

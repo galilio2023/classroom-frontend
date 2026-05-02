@@ -2,7 +2,17 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { useNavigation } from "@refinedev/core";
-import { Layout, FileText, Calendar, Users, Zap, Plus, Search, GraduationCap } from "lucide-react";
+import {
+  Layout,
+  FileText,
+  Calendar,
+  Users,
+  Zap,
+  Plus,
+  Search,
+  GraduationCap,
+  Briefcase,
+} from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,7 +47,7 @@ import { SuiteHomeShell } from "../components/SuiteHomeShell";
 const Dashboard = () => {
   const { t } = useTranslation();
   const { hash } = useLocation();
-  const { isSchoolSuite, isFacultySuite } = useCapabilities();
+  const { isSchoolSuite, isFacultySuite, isCandidate } = useCapabilities();
   const { push } = useNavigation() as any;
 
   const {
@@ -255,8 +265,38 @@ const Dashboard = () => {
               />
             )}
 
+            {/* 🛡️ CANDIDATE DASHBOARD: For educators awaiting verification */}
+            {isCandidate && (
+              <div className="flex flex-col items-center justify-center py-20 text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="p-10 rounded-[3rem] bg-primary/5 border-2 border-dashed border-primary/20 shadow-2xl shadow-primary/5 group">
+                  <Briefcase className="h-24 w-24 text-primary/20 group-hover:scale-110 group-hover:text-primary/30 transition-all duration-500" />
+                </div>
+                <div className="space-y-3">
+                  <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase">
+                    {t("dashboard.candidate.title", "Application Pending")}
+                  </h2>
+                  <p className="text-muted-foreground text-lg font-medium max-w-sm mx-auto leading-relaxed">
+                    {t(
+                      "dashboard.candidate.desc",
+                      "Your educator profile is being reviewed. Complete your profile to speed up verification."
+                    )}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-5">
+                  <Button
+                    size="lg"
+                    className="rounded-2xl h-16 px-10 font-black uppercase tracking-widest text-[10px] gap-3 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                    onClick={() => push("/settings")}
+                  >
+                    <Plus className="h-4 w-4" />
+                    {t("dashboard.candidate.completeProfile", "Complete Profile")}
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* 🛡️ STUDENT DASHBOARD LOGIC: Empty/Pending/Standard States */}
-            {roles.isStudent && showStandardDashboard && (
+            {roles.isStudent && !isCandidate && showStandardDashboard && (
               <StudentDashboard
                 identity={identity}
                 data={analyticsData}

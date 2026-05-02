@@ -6,24 +6,24 @@
       "pricing": "Pricing"
     },
     "hero": {
-      "badge": "2026 AI Registry Active",
-      "titlePart1": "Education",
-      "titlePart2": "Architected",
-      "titlePart3": "for Excellence",
-      "description": "The minimalist operating system for modern institutions. Advanced AI integrated with effortless management."
+      "badge": "Unlock Your Learning Potential 🚀",
+      "titlePart1": "Learning",
+      "titlePart2": "Made Magical",
+      "titlePart3": "for Everyone",
+      "description": "Welcome to the world's most joyful AI classroom. We combine advanced intelligence with a fun, cinematic experience to help you master anything, anywhere."
     },
     "pillars": {
       "ai": {
-        "title": "AI Assistant",
-        "desc": "Automate grading, generate lesson plans, and provide 24/7 tutoring for every student."
+        "title": "Magic AI Buddy",
+        "desc": "Meet your new 24/7 best friend who knows exactly how you learn and helps you master tough topics with a smile."
       },
       "manage": {
-        "title": "Easy Management",
-        "desc": "Track attendance, manage enrollments, and coordinate schedules with a single tap."
+        "title": "Happy Classrooms",
+        "desc": "Teachers get 'Magic' tools to create lessons instantly, giving them more time to focus on what matters most: You."
       },
       "growth": {
-        "title": "Student Growth",
-        "desc": "Gamified progress tracking and AI insights ensure no student is left behind."
+        "title": "Celebrate Success",
+        "desc": "Turn every lesson into a quest. Earn badges, level up, and watch your knowledge grow in a vibrant academic world."
       }
     },
     "bento": {

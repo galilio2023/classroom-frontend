@@ -52,7 +52,7 @@ export interface User {
   parentName: string | null;
   parentPhone: string | null;
   inviteCode: string | null;
-  planType: "basic" | "faculty" | "school";
+  planType: "basic" | "faculty" | "school" | "candidate";
   suiteType: "private" | "school" | "faculty" | "corporate";
   suiteOnboardingComplete: boolean;
   verificationStatus: VerificationStatus;

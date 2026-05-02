@@ -43,7 +43,12 @@ import { InviteBanner } from "../components/invite-banner";
 // Hook
 import { useRegisterForm, REGISTER_STEPS } from "@/features/auth/hooks/useRegisterForm";
 
-const RegisterPage = () => {
+interface RegisterPageProps {
+  isTeacherFlow?: boolean;
+  isInstitutionFlow?: boolean;
+}
+
+const RegisterPage = ({ isTeacherFlow, isInstitutionFlow }: RegisterPageProps) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
 
@@ -62,13 +67,17 @@ const RegisterPage = () => {
     verifyOtp,
     isVerifyingOtp,
     sendWhatsAppOtp,
-  } = useRegisterForm();
+  } = useRegisterForm({ isTeacherFlow, isInstitutionFlow });
 
   const handleGoogleSignIn = async () => {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/dashboard",
+        callbackURL: isInstitutionFlow
+          ? "/onboarding/select-suite"
+          : isTeacherFlow
+            ? "/apply/teacher"
+            : "/dashboard",
       });
     } catch (err: any) {
       toast.error(err instanceof Error ? err.message : "Google Sign-In failed");
@@ -78,7 +87,10 @@ const RegisterPage = () => {
   const renderStepLabel = () => {
     switch (step) {
       case 1:
-        return t("auth.register.accountSetup", "Account Setup");
+        if (isInstitutionFlow) return t("auth.register.institutionSetup", "Organization Setup");
+        return isTeacherFlow
+          ? t("auth.register.educatorCandidateSetup", "Educator Setup")
+          : t("auth.register.accountSetup", "Account Setup");
       case 2:
         return t("auth.register.profileDetails", "Profile Details");
       case 3:
@@ -95,7 +107,7 @@ const RegisterPage = () => {
       {inviteCode && <InviteBanner inviteCode={inviteCode} />}
       {/* Immersive Background - Mobile Optimized */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
-        <div className="absolute top-[-10%] start-[-10%] w-[60%] h-[40%] bg-primary/10 blur-[80px] md:blur-[120px] rounded-full opacity-50" />
+        <div className="absolute top-[-10%] start-[10%] w-[60%] h-[40%] bg-primary/10 blur-[80px] md:blur-[120px] rounded-full opacity-50" />
         <div className="absolute bottom-[-10%] end-[-10%] w-[60%] h-[40%] bg-purple-500/10 blur-[80px] md:blur-[120px] rounded-full opacity-50" />
       </div>
 
@@ -126,17 +138,29 @@ const RegisterPage = () => {
                 <div className="absolute inset-0 bg-primary/20 blur-[60px] animate-pulse rounded-full" />
               </div>
               <div className="space-y-3">
-                <h2 className="text-5xl font-black tracking-tighter uppercase leading-tight">
-                  Welcome Aboard!
+                <h2 className="text-4xl font-bold tracking-tighter uppercase leading-tight">
+                  {isInstitutionFlow
+                    ? "Deployment Ready!"
+                    : isTeacherFlow
+                      ? "Application Received!"
+                      : "Welcome Aboard!"}
                 </h2>
-                <p className="text-xl text-muted-foreground font-medium max-w-sm mx-auto">
-                  Your classroom is ready. Preparing your cinematic experience...
+                <p className="text-lg text-muted-foreground font-medium max-w-sm mx-auto">
+                  {isInstitutionFlow
+                    ? "Organization account created. Taking you to your OS Management Suite..."
+                    : isTeacherFlow
+                      ? "Your educator profile is created. Taking you to the application portal..."
+                      : "Your classroom is ready. Preparing your cinematic experience..."}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-                  Syncing Neural Engine
+                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
+                  {isInstitutionFlow
+                    ? "Provisioning Suite"
+                    : isTeacherFlow
+                      ? "Initializing Application"
+                      : "Syncing Neural Engine"}
                 </span>
               </div>
             </motion.div>
@@ -146,14 +170,14 @@ const RegisterPage = () => {
                 <div className="bg-primary p-2.5 rounded-2xl group-hover:rotate-6 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-primary/20">
                   <BookOpen className="h-7 w-7 text-primary-foreground" />
                 </div>
-                <span className="text-3xl font-black tracking-tighter uppercase leading-none">
+                <span className="text-3xl font-bold tracking-tighter uppercase leading-none">
                   Tablawy <span className="text-primary italic">OS</span>
                 </span>
               </Link>
 
               <Card className="border-border/40 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.4)] rounded-[2.5rem] md:rounded-[3rem] bg-card/50 backdrop-blur-3xl overflow-hidden">
                 <CardHeader className="text-center pt-10 md:pt-14 pb-6 md:pb-10 space-y-4 md:space-y-6">
-                  <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/5 text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 mx-auto border border-primary/10">
+                  <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/5 text-[10px] font-bold uppercase tracking-[0.2em] text-primary/60 mx-auto border border-primary/10">
                     <Sparkles className="h-3.5 w-3.5" />
                     {t("auth.register.stepOf", {
                       step,
@@ -161,15 +185,29 @@ const RegisterPage = () => {
                     })}
                   </div>
                   <div className="space-y-2">
-                    <CardTitle className="text-3xl md:text-4xl font-black tracking-tighter uppercase leading-tight">
+                    <CardTitle className="text-2xl md:text-3xl font-bold tracking-tighter uppercase leading-tight">
                       {step === REGISTER_STEPS.OTP_VERIFY
                         ? t("auth.register.verifyTitle", "Verify Identity")
-                        : t("auth.register.title")}
+                        : isInstitutionFlow
+                          ? t("auth.register.institutionTitle", "Deploy Your OS")
+                          : isTeacherFlow
+                            ? t("auth.register.educatorTitle", "Join as Educator")
+                            : t("auth.register.title")}
                     </CardTitle>
-                    <CardDescription className="font-medium text-base md:text-lg px-4 md:px-8">
+                    <CardDescription className="font-medium text-sm md:text-base px-4 md:px-8">
                       {step === REGISTER_STEPS.OTP_VERIFY
                         ? t("auth.register.verifyDesc", "One final step to secure your account.")
-                        : t("auth.register.description")}
+                        : isInstitutionFlow
+                          ? t(
+                              "auth.register.institutionDesc",
+                              "Start your digital transformation journey."
+                            )
+                          : isTeacherFlow
+                            ? t(
+                                "auth.register.educatorDesc",
+                                "Start your journey as an AI-powered tutor."
+                              )
+                            : t("auth.register.description")}
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -191,7 +229,7 @@ const RegisterPage = () => {
                                 type="button"
                                 variant="outline"
                                 onClick={handleGoogleSignIn}
-                                className="w-full h-14 md:h-16 rounded-2xl md:rounded-3xl border-border/60 bg-muted/20 hover:bg-muted/40 font-black uppercase tracking-widest text-[10px] md:text-xs flex items-center justify-center gap-3 transition-all duration-300"
+                                className="w-full h-14 md:h-16 rounded-2xl md:rounded-3xl border-border/60 bg-muted/20 hover:bg-muted/40 font-bold uppercase tracking-widest text-[10px] md:text-xs flex items-center justify-center gap-3 transition-all duration-300"
                               >
                                 <svg className="h-5 w-5" viewBox="0 0 24 24">
                                   <path
@@ -218,7 +256,7 @@ const RegisterPage = () => {
                                 <div className="absolute inset-0 flex items-center">
                                   <span className="w-full border-t border-border/40" />
                                 </div>
-                                <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest">
+                                <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
                                   <span className="bg-background px-4 text-muted-foreground/40">
                                     {t("auth.login.orDivider")}
                                   </span>
@@ -226,24 +264,26 @@ const RegisterPage = () => {
                               </div>
                             </div>
 
-                            <FormField
-                              control={form.control}
-                              name="role"
-                              render={({ field }) => (
-                                <FormItem className="space-y-3">
-                                  <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
-                                    {t("profile.labels.role")}
-                                  </FormLabel>
-                                  <FormControl>
-                                    <RoleSelector
-                                      value={field.value as "student" | "teacher" | "parent"}
-                                      onChange={(val) => field.onChange(val)}
-                                    />
-                                  </FormControl>
-                                  <FormMessage className="ms-2 font-bold" />
-                                </FormItem>
-                              )}
-                            />
+                            {!isTeacherFlow && !isInstitutionFlow && (
+                              <FormField
+                                control={form.control}
+                                name="role"
+                                render={({ field }) => (
+                                  <FormItem className="space-y-3">
+                                    <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                      {t("profile.labels.role")}
+                                    </FormLabel>
+                                    <FormControl>
+                                      <RoleSelector
+                                        value={field.value as "student" | "parent"}
+                                        onChange={(val) => field.onChange(val)}
+                                      />
+                                    </FormControl>
+                                    <FormMessage className="ms-2 font-bold" />
+                                  </FormItem>
+                                )}
+                              />
+                            )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                               <FormField
@@ -251,13 +291,13 @@ const RegisterPage = () => {
                                 name="name"
                                 render={({ field }) => (
                                   <FormItem className="space-y-3">
-                                    <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                    <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                       {t("auth.register.fullNameLabel")}
                                     </FormLabel>
                                     <FormControl>
                                       <Input
                                         placeholder={t("auth.register.fullNamePlaceholder")}
-                                        className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+                                        className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-bold placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                         {...field}
                                       />
                                     </FormControl>
@@ -270,14 +310,14 @@ const RegisterPage = () => {
                                 name="email"
                                 render={({ field }) => (
                                   <FormItem className="space-y-3">
-                                    <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                    <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                       {t("auth.register.emailLabel")}
                                     </FormLabel>
                                     <FormControl>
                                       <Input
                                         type="email"
                                         placeholder={t("auth.register.emailPlaceholder")}
-                                        className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+                                        className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-bold placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                         {...field}
                                       />
                                     </FormControl>
@@ -291,14 +331,14 @@ const RegisterPage = () => {
                               name="password"
                               render={({ field }) => (
                                 <FormItem className="space-y-3">
-                                  <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                  <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                     {t("auth.register.passwordLabel")}
                                   </FormLabel>
                                   <FormControl>
                                     <Input
                                       type="password"
                                       placeholder={t("auth.register.passwordPlaceholder")}
-                                      className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+                                      className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-bold placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                       {...field}
                                     />
                                   </FormControl>
@@ -317,7 +357,7 @@ const RegisterPage = () => {
                             className="space-y-6 md:space-y-8"
                           >
                             <div className="p-5 rounded-[1.5rem] bg-primary/5 border border-primary/10 shadow-sm text-start">
-                              <p className="text-xs md:text-sm text-muted-foreground font-black uppercase tracking-widest leading-relaxed flex items-center gap-2">
+                              <p className="text-xs md:text-sm text-muted-foreground font-bold uppercase tracking-widest leading-relaxed flex items-center gap-2">
                                 <Sparkles className="h-4 w-4 text-primary" />
                                 {t("auth.register.completeProfileTip")}
                               </p>
@@ -329,13 +369,13 @@ const RegisterPage = () => {
                                 name="phoneNumber"
                                 render={({ field }) => (
                                   <FormItem className="space-y-3 text-start">
-                                    <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                    <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                       {t("auth.register.phoneNumberLabel")}
                                     </FormLabel>
                                     <FormControl>
                                       <Input
                                         placeholder={t("auth.register.phoneNumberPlaceholder")}
-                                        className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+                                        className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-bold placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                         {...field}
                                       />
                                     </FormControl>
@@ -348,14 +388,14 @@ const RegisterPage = () => {
                                 name="nationalId"
                                 render={({ field }) => (
                                   <FormItem className="space-y-3 text-start">
-                                    <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                    <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                       {t("auth.register.nationalIdLabel", "National ID")}
                                     </FormLabel>
                                     <FormControl>
                                       <Input
                                         maxLength={14}
                                         placeholder="2900101XXXXXXXX"
-                                        className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+                                        className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-bold placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                         {...field}
                                       />
                                     </FormControl>
@@ -372,13 +412,13 @@ const RegisterPage = () => {
                                   name="dateOfBirth"
                                   render={({ field }) => (
                                     <FormItem className="space-y-3 text-start">
-                                      <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                      <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                         {t("auth.register.dobLabel")}
                                       </FormLabel>
                                       <FormControl>
                                         <Input
                                           type="date"
-                                          className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black focus-visible:ring-primary/20 appearance-none"
+                                          className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-bold focus-visible:ring-primary/20 appearance-none"
                                           {...field}
                                           value={field.value || ""}
                                         />
@@ -396,13 +436,13 @@ const RegisterPage = () => {
                                     name="parentName"
                                     render={({ field }) => (
                                       <FormItem className="space-y-3 text-start">
-                                        <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                        <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                           {t("auth.register.fullNameLabel")}
                                         </FormLabel>
                                         <FormControl>
                                           <Input
                                             placeholder={t("auth.register.fullNamePlaceholder")}
-                                            className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+                                            className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-bold placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                             {...field}
                                             value={field.value || ""}
                                           />
@@ -416,13 +456,13 @@ const RegisterPage = () => {
                                     name="parentPhone"
                                     render={({ field }) => (
                                       <FormItem className="space-y-3 text-start">
-                                        <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                        <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                           {t("auth.register.phoneNumberLabel")}
                                         </FormLabel>
                                         <FormControl>
                                           <Input
                                             placeholder={t("auth.register.phoneNumberPlaceholder")}
-                                            className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+                                            className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-bold placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                             {...field}
                                             value={field.value || ""}
                                           />
@@ -437,7 +477,7 @@ const RegisterPage = () => {
                                     render={({ field }) => (
                                       <FormItem className="space-y-3 col-span-1 md:col-span-2 text-start">
                                         <div className="flex items-center gap-2 ms-2">
-                                          <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-primary">
+                                          <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-primary">
                                             Child's Invite Code
                                           </FormLabel>
                                           <Badge
@@ -450,7 +490,7 @@ const RegisterPage = () => {
                                         <FormControl>
                                           <Input
                                             placeholder="e.g. STU-XXXX-XXXX"
-                                            className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-primary/5 border-2 border-primary/10 px-6 md:px-8 text-base md:text-lg font-mono font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+                                            className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-primary/5 border-2 border-primary/10 px-6 md:px-8 text-base md:text-lg font-mono font-bold placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                             {...field}
                                             value={field.value || ""}
                                             onChange={(e) =>
@@ -478,14 +518,14 @@ const RegisterPage = () => {
                                   render={({ field }) => (
                                     <FormItem className="space-y-3 text-start">
                                       <div className="flex justify-between items-center">
-                                        <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                        <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                           {t("auth.register.bioLabel")}
                                         </FormLabel>
                                         <Button
                                           type="button"
                                           variant="ghost"
                                           size="sm"
-                                          className="h-9 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/10 rounded-xl gap-2"
+                                          className="h-9 text-[10px] font-bold uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/10 rounded-xl gap-2"
                                           onClick={generateAIBio}
                                           disabled={isGeneratingBio}
                                         >
@@ -515,7 +555,7 @@ const RegisterPage = () => {
                                   name="verificationDocumentUrl"
                                   render={({ field }) => (
                                     <FormItem className="space-y-3 text-start">
-                                      <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
+                                      <FormLabel className="font-bold uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                         {t("auth.register.verification.uploadLabel")}
                                       </FormLabel>
                                       <FormControl>
@@ -589,7 +629,7 @@ const RegisterPage = () => {
                             type="button"
                             variant="outline"
                             size="lg"
-                            className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm border-2 border-border/40 bg-background/50 shadow-sm"
+                            className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-bold uppercase tracking-widest text-xs md:text-sm border-2 border-border/40 bg-background/50 shadow-sm"
                             onClick={prevStep}
                           >
                             <ArrowLeft
@@ -605,7 +645,7 @@ const RegisterPage = () => {
                             <Button
                               variant="outline"
                               size="lg"
-                              className="w-full h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm border-2 border-border/40 bg-background/50 shadow-sm"
+                              className="w-full h-14 md:h-16 rounded-2xl md:rounded-3xl font-bold uppercase tracking-widest text-xs md:text-sm border-2 border-border/40 bg-background/50 shadow-sm"
                             >
                               <ArrowLeft
                                 className={cn("h-4 w-4 me-2", isAr && "ms-2 me-0 rotate-180")}
@@ -619,7 +659,7 @@ const RegisterPage = () => {
                           <Button
                             type="button"
                             size="lg"
-                            className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm shadow-2xl shadow-primary/30 group"
+                            className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-bold uppercase tracking-widest text-xs md:text-sm shadow-2xl shadow-primary/30 group"
                             onClick={nextStep}
                           >
                             {step === REGISTER_STEPS.CONSENT
@@ -642,7 +682,7 @@ const RegisterPage = () => {
                     {t("auth.register.alreadyHaveAccount")}&nbsp;
                     <Link
                       to={`/login${inviteCode ? `?inviteCode=${inviteCode}` : ""}`}
-                      className="font-black text-primary hover:underline uppercase tracking-[0.1em] text-xs md:text-sm"
+                      className="font-bold text-primary hover:underline uppercase tracking-[0.1em] text-xs md:text-sm"
                     >
                       {t("buttons.signIn")}
                     </Link>

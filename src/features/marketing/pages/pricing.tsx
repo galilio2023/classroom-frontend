@@ -95,51 +95,79 @@ const Pricing = () => {
         <title>Pricing | Tablawy OS - Flexible Plans for Every Learner</title>
         <meta
           name="description"
-          content="Choose the perfect plan to accelerate your learning journey with AI features and high-definition teacher channels."
+          content="Choose the perfect plan to accelerate your learning journey with AI features and joyful learning tools."
         />
       </Helmet>
 
-      <div className="noise-overlay" />
+      <div className="noise-overlay opacity-30" />
 
-      {/* Cinematic Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-0 start-0 w-full h-full bg-primary/1 blur-[140px]" />
-        <div className="absolute top-[20%] end-[-10%] w-150 h-150 bg-primary/5 rounded-full blur-[120px] opacity-50" />
-        <div className="absolute bottom-[10%] start-[-10%] w-150 h-150 bg-ai-primary/5 rounded-full blur-[120px] opacity-50" />
+      {/* 🌈 VIBRANT DESIGNER BACKGROUND: Multicolored Aurora + Magic Particles */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-0 start-0 w-full h-full bg-primary/2 blur-[140px]" />
+        <div className="absolute top-[-10%] start-[10%] w-[70%] h-[60%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] end-[10%] w-[60%] h-[50%] bg-purple-500/10 rounded-full blur-[120px] [animation-delay:1s] animate-pulse" />
+
+        {/* ✨ MAGIC PARTICLES */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{
+              opacity: [0, 0.4, 0],
+              scale: [0, 1, 0.5],
+              y: [0, -150 - Math.random() * 300],
+              x: [0, (Math.random() - 0.5) * 200],
+            }}
+            transition={{
+              duration: 12 + Math.random() * 12,
+              repeat: Infinity,
+              delay: Math.random() * 10,
+              ease: "easeInOut",
+            }}
+            className="absolute top-1/2 left-1/2 h-2.5 w-2.5 bg-primary/20 rounded-full blur-[1px]"
+            style={{
+              marginLeft: `${(Math.random() - 0.5) * 100}%`,
+              marginTop: `${(Math.random() - 0.5) * 50}%`,
+            }}
+          />
+        ))}
       </div>
 
       <div className="relative z-10">
         {/* Hero Section */}
-        <section className="section-wrapper pt-32 md:pt-48">
+        <section className="section-wrapper pt-24 md:pt-32 pb-16 md:pb-24">
           <div className="container-center text-center space-y-10">
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="inline-flex items-center gap-3 px-6 py-2 rounded-full border border-primary/20 bg-white/10 backdrop-blur-xl shadow-xl shadow-primary/5 mx-auto group hover:scale-105 transition-transform"
             >
-              <Crown className="h-3.5 w-3.5 text-primary animate-pulse" />
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-foreground/70">
+              <Crown className="h-4 w-4 text-amber-400 animate-spin-slow" />
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-primary/80">
                 {t("pricing.badge")}
               </span>
             </motion.div>
 
-            <div className="max-w-250 mx-auto space-y-8">
+            <div className="max-w-3xl mx-auto space-y-10">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.8 }}
-                className="text-4xl sm:text-6xl md:text-7xl lg:text-[8rem] font-black leading-[0.9] tracking-tighter uppercase text-gradient"
+                className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight leading-[0.9] uppercase"
               >
-                {t("pricing.titlePart1")}
-                <br />
-                <span className="text-primary">{t("pricing.titlePart2")}</span>
+                <span className="bg-clip-text text-transparent bg-linear-to-r from-primary via-purple-500 to-primary bg-[length:200%_auto] animate-gradient block">
+                  {t("pricing.titlePart1")}
+                </span>
+                <span className="italic font-serif normal-case text-foreground/90 tracking-normal block mt-2">
+                  {t("pricing.titlePart2")}
+                </span>
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
-                className="text-lg md:text-xl lg:text-2xl text-muted-foreground/80 font-medium max-w-2xl mx-auto leading-relaxed"
+                className="text-lg md:text-2xl text-muted-foreground/70 font-medium max-w-2xl mx-auto leading-relaxed"
               >
                 {t("pricing.description")}
               </motion.p>
@@ -147,7 +175,7 @@ const Pricing = () => {
           </div>
         </section>
 
-        {/* Pricing Cards */}
+        {/* Pricing Cards - VIBRANT & JOYFUL */}
         <section className="section-wrapper py-0!">
           <div className="container-center">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-6xl mx-auto items-stretch">
@@ -166,52 +194,70 @@ const Pricing = () => {
                 >
                   <div
                     className={cn(
-                      "relative h-full flex flex-col glass-card p-6 sm:p-8 md:p-12 rounded-4xl sm:rounded-[3.5rem] transition-all duration-500 group hover:-translate-y-2 hover:shadow-3xl",
-                      plan.featured &&
-                        "border-primary/30 ring-1 ring-primary/10 shadow-primary/5 shadow-2xl bg-white/80 dark:bg-muted/10"
+                      "relative h-full flex flex-col p-8 sm:p-10 md:p-14 rounded-[3.5rem] transition-all duration-700 group hover:-translate-y-2 border-2",
+                      plan.featured
+                        ? "bg-linear-to-br from-card to-purple-500/[0.03] border-primary/30 shadow-[0_40px_100px_-20px_rgba(var(--primary-rgb),0.15)] hover:shadow-[0_40px_120px_-20px_rgba(var(--primary-rgb),0.25)]"
+                        : "bg-linear-to-br from-card to-primary/[0.03] border-border/40 hover:border-primary/20 shadow-3xl shadow-black/5"
                     )}
                   >
                     {plan.featured && (
-                      <div className="absolute top-6 end-6 sm:top-8 sm:end-8 md:top-12 md:end-12">
-                        <div className="bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg animate-bounce">
+                      <div className="absolute top-10 end-10">
+                        <div className="bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-[0.3em] px-6 py-2 rounded-full shadow-2xl animate-pulse">
                           {t("pricing.recommended")}
                         </div>
                       </div>
                     )}
 
-                    <div className="space-y-2">
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-widest flex items-center gap-3">
+                    <div className="space-y-4">
+                      <h3
+                        className={cn(
+                          "text-3xl font-black uppercase tracking-tight",
+                          plan.featured ? "text-primary" : "text-foreground/80"
+                        )}
+                      >
                         {plan.name}
                       </h3>
                       <div className="flex items-baseline gap-2 pt-6">
-                        <span className="text-xl sm:text-2xl font-bold text-muted-foreground/40">
+                        <span className="text-2xl font-bold text-muted-foreground/30">
                           {plan.symbol}
                         </span>
-                        <span className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter">
+                        <span className="text-6xl md:text-8xl font-black tracking-tighter">
                           {plan.price}
                         </span>
                         {plan.period && (
-                          <span className="text-muted-foreground font-black uppercase text-[10px] tracking-[0.3em] opacity-60">
+                          <span className="text-muted-foreground font-black uppercase text-xs tracking-[0.3em] opacity-40">
                             {plan.period}
                           </span>
                         )}
                       </div>
-                      <p className="text-muted-foreground font-medium text-base sm:text-lg leading-relaxed pt-6 text-start">
+                      <p className="text-muted-foreground font-medium text-lg leading-relaxed pt-6 text-start max-w-sm">
                         {plan.description}
                       </p>
                     </div>
 
-                    <div className="mt-12 space-y-6 flex-1">
-                      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">
-                        {t("pricing.whatsIncluded")}
-                      </p>
-                      <div className="space-y-4">
+                    <div className="mt-14 space-y-8 flex-1">
+                      <div className="flex items-center gap-4">
+                        <div className="h-px flex-1 bg-border/40" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-primary/40">
+                          {t("pricing.whatsIncluded")}
+                        </p>
+                        <div className="h-px flex-1 bg-border/40" />
+                      </div>
+
+                      <div className="space-y-5">
                         {plan.features.map((feature) => (
-                          <div key={feature} className="flex items-start gap-4 group/item">
-                            <div className="mt-1 p-1 rounded-full bg-primary/10 text-primary shrink-0 transition-colors group-hover/item:bg-primary group-hover/item:text-white">
-                              <Check className="h-3 w-3" strokeWidth={4} />
+                          <div key={feature} className="flex items-start gap-5 group/item">
+                            <div
+                              className={cn(
+                                "mt-1 p-1.5 rounded-full shrink-0 transition-all group-hover/item:scale-110 shadow-lg",
+                                plan.featured
+                                  ? "bg-primary text-white"
+                                  : "bg-primary/10 text-primary"
+                              )}
+                            >
+                              <Check className="h-3.5 w-3.5" strokeWidth={4} />
                             </div>
-                            <span className="text-base font-bold tracking-tight text-foreground/70 text-start group-hover/item:text-foreground transition-colors leading-tight">
+                            <span className="text-lg font-bold tracking-tight text-foreground/70 text-start group-hover/item:text-foreground transition-colors leading-tight">
                               {feature}
                             </span>
                           </div>
@@ -219,20 +265,23 @@ const Pricing = () => {
                       </div>
                     </div>
 
-                    <div className="mt-12 pt-8 border-t border-border/40 space-y-4">
+                    <div className="mt-14 pt-10 border-t border-border/40 space-y-5">
                       <Button
                         onClick={() => handleUpgrade(plan.priceId, plan.amount || 0, "paymob")}
                         disabled={(identity && plan.priceId === "free") || isPending}
                         size="lg"
                         className={cn(
-                          "w-full h-20 rounded-full font-black uppercase tracking-widest text-xs transition-all duration-500",
+                          "w-full h-18 md:h-22 rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm md:text-base transition-all duration-700 shadow-2xl relative overflow-hidden group/btn",
                           plan.featured
-                            ? "bg-primary text-primary-foreground shadow-2xl shadow-primary/20 hover:scale-105"
-                            : "bg-muted text-muted-foreground hover:bg-foreground hover:text-background"
+                            ? "bg-linear-to-r from-primary via-purple-600 to-primary bg-[length:200%_auto] animate-gradient text-white shadow-primary/30"
+                            : "bg-foreground text-background hover:bg-primary hover:text-white"
                         )}
                       >
-                        {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : plan.cta}
-                        <ArrowRight className="ms-3 h-5 w-5 rtl:rotate-180" />
+                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
+                        <span className="relative z-10 flex items-center justify-center gap-3">
+                          {isPending ? <Loader2 className="h-6 w-6 animate-spin" /> : plan.cta}
+                          <ArrowRight className="h-5 w-5 rtl:rotate-180 group-hover/btn:translate-x-2 transition-transform" />
+                        </span>
                       </Button>
 
                       {plan.priceId !== "free" && (
@@ -240,9 +289,9 @@ const Pricing = () => {
                           onClick={() => handleUpgrade(plan.priceId, plan.amount || 0, "fawry")}
                           variant="outline"
                           disabled={isPending}
-                          className="w-full h-16 rounded-full font-black uppercase tracking-widest text-[10px] border-primary/20 hover:bg-primary/5 transition-all"
+                          className="w-full h-16 rounded-2xl font-bold uppercase tracking-widest text-[10px] border-primary/20 bg-white/5 backdrop-blur-md hover:bg-primary/5 transition-all group/fawry"
                         >
-                          <Store className="me-2 h-4 w-4 text-primary" />
+                          <Store className="me-3 h-5 w-5 text-primary group-hover/fawry:scale-110 transition-transform" />
                           {t("payments.kiosk.title")}
                         </Button>
                       )}
@@ -315,7 +364,7 @@ const Pricing = () => {
                     <feature.icon className="h-8 w-8" />
                   </div>
                   <div className="space-y-4">
-                    <h3 className="text-2xl font-black uppercase tracking-tight">
+                    <h3 className="text-2xl font-extrabold uppercase tracking-tight">
                       {feature.title}
                     </h3>
                     <p className="text-muted-foreground leading-relaxed font-medium">
@@ -337,12 +386,12 @@ const Pricing = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-muted/50 text-muted-foreground/60 text-[10px] font-black uppercase tracking-widest border border-border/40"
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-muted/50 text-muted-foreground/60 text-[10px] font-extrabold uppercase tracking-widest border border-border/40"
                 >
                   <HelpCircle className="h-4 w-4" />
                   {t("pricing.faq.badge")}
                 </motion.div>
-                <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-[0.9]">
+                <h2 className="text-5xl md:text-7xl font-extrabold tracking-tighter uppercase leading-[0.9]">
                   {t("pricing.faq.title1")} <br />
                   <span className="text-primary">{t("pricing.faq.title2")}</span>
                 </h2>
@@ -367,7 +416,7 @@ const Pricing = () => {
             >
               <div className="absolute inset-0 bg-linear-to-br from-white/10 to-transparent pointer-events-none" />
               <div className="relative space-y-8">
-                <h2 className="text-5xl md:text-9xl font-black tracking-tighter leading-[0.85] uppercase">
+                <h2 className="text-5xl md:text-9xl font-extrabold tracking-tighter leading-[0.85] uppercase">
                   {t("pricing.cta.title1")}
                   <br /> {t("pricing.cta.title2")}
                 </h2>
@@ -378,7 +427,7 @@ const Pricing = () => {
                   <Link to="/register" className="inline-block w-full sm:w-auto">
                     <Button
                       size="lg"
-                      className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 h-20 px-16 rounded-full text-xl font-black uppercase tracking-widest shadow-2xl hover:scale-110 active:scale-95 transition-all group"
+                      className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 h-20 px-16 rounded-full text-xl font-extrabold uppercase tracking-widest shadow-2xl hover:scale-110 active:scale-95 transition-all group"
                     >
                       {t("pricing.cta.start")}
                       <Zap className="ms-4 h-6 w-6 fill-current animate-pulse" />

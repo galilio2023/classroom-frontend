@@ -27,6 +27,7 @@ export const useCapabilities = () => {
   const isTeacher = role === "teacher";
   const isStudent = role === "student";
   const isParent = role === "parent";
+  const isCandidate = isStudent && plan === "candidate"; // 🚀 Vetted Onboarding Marker
   const isPrincipal = role === "principal" || isAdmin;
   const isDeptHead = role === "deptHead" || isAdmin;
   const isStaff =
@@ -44,6 +45,7 @@ export const useCapabilities = () => {
     isTeacher,
     isStudent,
     isParent,
+    isCandidate,
     isPrincipal,
     isDeptHead,
     isOwner,
