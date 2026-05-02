@@ -98,7 +98,7 @@ const LoginPage = () => {
             <BookOpen className="h-7 w-7 text-primary-foreground" />
           </div>
           <span className="text-3xl font-black tracking-tighter uppercase leading-none">
-            Class<span className="text-primary italic">Room</span>
+            Tablawy <span className="text-primary italic">OS</span>
           </span>
         </Link>
 

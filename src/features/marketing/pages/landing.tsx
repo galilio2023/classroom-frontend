@@ -181,41 +181,102 @@ const LandingPage = () => {
         {/* Role Selection - CONSTRAINED */}
         <section className="section-wrapper">
           <div className="container-center">
-            <div className="flex flex-col md:flex-row gap-8 items-stretch max-w-6xl mx-auto">
-              <Link to="/register" className="flex-1 group">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch max-w-7xl mx-auto">
+              <Link to="/register" className="group">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="h-full p-6 sm:p-12 md:p-20 rounded-[2.5rem] sm:rounded-[4rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
+                  className="h-full p-6 sm:p-10 rounded-[2.5rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
                 >
                   <div className="absolute top-[-10%] end-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
-                    <Users className="h-96 w-96 text-primary" />
+                    <Users className="h-64 w-64 text-primary" />
                   </div>
-                  <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">
+                  <h2 className="text-3xl sm:text-4xl font-black tracking-tighter mb-4 leading-none">
                     {t("landing.roles.student.title")}
                     <br />
                     <span className="text-primary/40">{t("landing.roles.student.portal")}</span>
                   </h2>
-                  <div className="flex items-center gap-3 font-black uppercase tracking-widest text-xs mt-12 bg-primary/10 text-primary w-fit px-6 py-3 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
-                    {t("buttons.joinNow")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+                  <ul className="space-y-2 mb-8 relative z-10">
+                    <li className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-1 w-1 rounded-full bg-primary" />{" "}
+                      {t("landing.roles.student.f1")}
+                    </li>
+                    <li className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-1 w-1 rounded-full bg-primary" />{" "}
+                      {t("landing.roles.student.f2")}
+                    </li>
+                    <li className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-1 w-1 rounded-full bg-primary" />{" "}
+                      {t("landing.roles.student.f3")}
+                    </li>
+                  </ul>
+                  <div className="flex items-center gap-3 font-black uppercase tracking-widest text-[10px] bg-primary/10 text-primary w-fit px-5 py-2.5 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
+                    {t("buttons.joinNow")} <ChevronRight className="h-3 w-3 rtl:rotate-180" />
                   </div>
                 </motion.div>
               </Link>
 
-              <Link to="/register" className="flex-1 group">
+              <Link to="/register" className="group">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="h-full p-6 sm:p-12 md:p-20 rounded-[2.5rem] sm:rounded-[4rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
+                  className="h-full p-6 sm:p-10 rounded-[2.5rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
                 >
                   <div className="absolute top-[-10%] end-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
-                    <GraduationCap className="h-96 w-96 text-primary" />
+                    <GraduationCap className="h-64 w-64 text-primary" />
                   </div>
-                  <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">
+                  <h2 className="text-3xl sm:text-4xl font-black tracking-tighter mb-4 leading-none">
                     {t("landing.roles.teacher.title")}
                     <br />
                     <span className="text-primary/40">{t("landing.roles.teacher.portal")}</span>
                   </h2>
-                  <div className="flex items-center gap-3 font-black uppercase tracking-widest text-xs mt-12 bg-foreground text-background w-fit px-6 py-3 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
-                    {t("buttons.applyToTeach")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+                  <ul className="space-y-2 mb-8 relative z-10">
+                    <li className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-1 w-1 rounded-full bg-primary" />{" "}
+                      {t("landing.roles.teacher.f1")}
+                    </li>
+                    <li className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-1 w-1 rounded-full bg-primary" />{" "}
+                      {t("landing.roles.teacher.f2")}
+                    </li>
+                    <li className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-1 w-1 rounded-full bg-primary" />{" "}
+                      {t("landing.roles.teacher.f3")}
+                    </li>
+                  </ul>
+                  <div className="flex items-center gap-3 font-black uppercase tracking-widest text-[10px] bg-foreground text-background w-fit px-5 py-2.5 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
+                    {t("buttons.applyToTeach")} <ChevronRight className="h-3 w-3 rtl:rotate-180" />
+                  </div>
+                </motion.div>
+              </Link>
+
+              <Link to="/register" className="group">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  className="h-full p-6 sm:p-10 rounded-[2.5rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
+                >
+                  <div className="absolute top-[-10%] end-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                    <Zap className="h-64 w-64 text-primary" />
+                  </div>
+                  <h2 className="text-3xl sm:text-4xl font-black tracking-tighter mb-4 leading-none">
+                    {t("landing.roles.institution.title")}
+                    <br />
+                    <span className="text-primary/40">{t("landing.roles.institution.portal")}</span>
+                  </h2>
+                  <ul className="space-y-2 mb-8 relative z-10">
+                    <li className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-1 w-1 rounded-full bg-primary" />{" "}
+                      {t("landing.roles.institution.f1")}
+                    </li>
+                    <li className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-1 w-1 rounded-full bg-primary" />{" "}
+                      {t("landing.roles.institution.f2")}
+                    </li>
+                    <li className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-1 w-1 rounded-full bg-primary" />{" "}
+                      {t("landing.roles.institution.f3")}
+                    </li>
+                  </ul>
+                  <div className="flex items-center gap-3 font-black uppercase tracking-widest text-[10px] bg-primary text-white w-fit px-5 py-2.5 rounded-full hover:bg-primary/90 transition-all">
+                    {t("landing.cta.launch")} <ChevronRight className="h-3 w-3 rtl:rotate-180" />
                   </div>
                 </motion.div>
               </Link>

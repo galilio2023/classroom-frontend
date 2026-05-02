@@ -6,7 +6,7 @@ export const resourceToPath: Record<string, string> = {
   "teacher-channels": "channels",
   "teacher-subscriptions": "enrollments",
   "student-subscriptions": "enrollments",
-  "my-classes": "enrollments",
+  enrollments: "enrollments",
   portfolio: "users",
   "ai-activity-logs": "ai/logs",
   "ai-health-reports": "ai/health-reports",

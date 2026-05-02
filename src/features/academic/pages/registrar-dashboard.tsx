@@ -140,7 +140,19 @@ export default function RegistrarDashboardPage() {
   const hasDeptData = data?.departments && data.departments.length > 0;
 
   return (
-    <div className="p-8 space-y-10 max-w-7xl mx-auto">
+    <div className="p-8 space-y-10 max-w-7xl mx-auto relative">
+      {/* 🚀 Background Fetching Indicator */}
+      {isFetching && !isLoading && (
+        <div className="absolute top-0 left-0 w-full h-1 z-50 overflow-hidden rounded-full bg-ai-primary/5">
+          <motion.div
+            className="h-full bg-ai-primary"
+            initial={{ width: "0%", x: "-100%" }}
+            animate={{ width: "30%", x: "400%" }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+          />
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-4xl font-black tracking-tighter uppercase flex items-center gap-3">

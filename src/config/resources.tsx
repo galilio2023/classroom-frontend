@@ -310,11 +310,11 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "my-classes",
+    name: "enrollments",
     list: "/enrollments",
     meta: {
       group: "groups.academic",
-      label: "resources.my-classes.label",
+      label: "resources.enrollments.label",
       icon: <Bookmark />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
@@ -503,7 +503,7 @@ export const resources: ResourceProps[] = [
     list: "/followed-teachers",
     meta: {
       group: "groups.student-hub",
-      label: "resources.followed-teachers.label",
+      label: "resources.student-subscriptions.label",
       icon: <Bookmark />,
       roles: [UserRole.STUDENT],
     },

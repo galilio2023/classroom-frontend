@@ -6,11 +6,11 @@
       "pricing": "Pricing"
     },
     "hero": {
-      "badge": "Modern Education",
-      "titlePart1": "Teach",
-      "titlePart2": "Smarter",
-      "titlePart3": "Grow Faster",
-      "description": "The minimalist operating system for Egyptian schools. Advanced AI met with effortless management."
+      "badge": "2026 AI Registry Active",
+      "titlePart1": "Education",
+      "titlePart2": "Architected",
+      "titlePart3": "for Excellence",
+      "description": "The minimalist operating system for modern institutions. Advanced AI integrated with effortless management."
     },
     "pillars": {
       "ai": {
@@ -76,27 +76,33 @@
         "desc": "Engage with peers and mentors in a safe, moderated environment."
       },
       "smartClassroom": {
-        "title": "Smart Classroom",
-        "desc": "Integrated management for classes, assignments, and quizzes in one place."
-      }
-    },
+        "title": "Intelligent Hub",
+        "desc": "Integrated management for classes, assignments, and quizzes across your entire OS."
+      }    },
     "roles": {
-      "sectionTitle": "Tailored for",
-      "sectionTitleItalic": "Everyone",
-      "sectionDesc": "Platform providing tools for both lead global classes and individual mastery.",
+      "sectionTitle": "Architected for",
+      "sectionTitleItalic": "Every Scale",
+      "sectionDesc": "One codebase, three operating modes. Tailored for individual mastery and institutional governance.",
       "student": {
         "title": "Student",
-        "portal": "Portal",
-        "f1": "Access all your classes in one hub",
-        "f2": "Master topics with AI Study Lab",
-        "f3": "Track your academic journey & XP"
+        "portal": "Hub",
+        "f1": "Access all your classes in one dashboard",
+        "f2": "Master topics with AI Study Lab 2.0",
+        "f3": "Track your learning DNA & achievements"
       },
       "teacher": {
         "title": "Teacher",
-        "portal": "Portal",
+        "portal": "Studio",
         "f1": "Manage multiple classrooms with ease",
         "f2": "Automate grading with AI Assistant",
         "f3": "Go live with collaborative tools"
+      },
+      "institution": {
+        "title": "Institution",
+        "portal": "Console",
+        "f1": "Multi-tenant boundary management",
+        "f2": "AI governance & Law 151 compliance",
+        "f3": "Custom white-label branding"
       }
     },
     "showcase": {
@@ -109,9 +115,10 @@
       "draft": "Draft Ready"
     },
     "landing_ai_hub": {
-      "title1": "AI-Powered",      "title2": "Study Hub",
-      "desc": "A cutting-edge learning companion that understands your curriculum. Generate quizzes, summarize notes, and create flashcards instantly with Gemini 3 Flash Preview.",
-      "poweredBy": "Gemini 3 FLASH PREVIEW Powered",
+      "title1": "AI-Native",
+      "title2": "Learning Hub",
+      "desc": "A cutting-edge learning companion that understands your curriculum. Generate quizzes, summarize notes, and create flashcards instantly with Gemini 3.1 Flash.",
+      "poweredBy": "Gemini 3.1 FLASH Powered",
       "activeNow": "Active Now",
       "analysisProcessing": "Analysis Processing",
       "list": {
@@ -132,12 +139,12 @@
       "title": "Empowering Modern Classrooms"
     },
     "cta": {
-      "title": "Ready to Transform Your Classroom?",
-      "desc": "Join thousands of educators and students using Classroom CMS to shape the future of education.",
-      "launch": "Launch Your Classroom",
+      "title": "Ready to Architect Your Institution?",
+      "desc": "Join thousands of schools and educators using Tablawy OS to shape the future of learning.",
+      "launch": "Deploy Your OS",
       "watchDemo": "Watch Demo",
       "evolved1": "Education",
-      "evolved2": "Evolved."
+      "evolved2": "Architected."
     }
   },
   "pricing": {

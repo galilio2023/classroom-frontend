@@ -79,8 +79,7 @@
     "label": "AI Observability"
   },
   "app": {
-    "title": "Classroom AI",
-    "ai": "AI",
+  "title": "Tablawy OS",    "ai": "AI",
     "studyBuddy": "Study Buddy",
     "generating": "Generating..."
   },
@@ -104,8 +103,8 @@
     "teacher-channels": {
       "list": "Teacher TV"
     },
-    "default": "Classroom AI",
-    "suffix": " | Classroom AI",
+    "default": "Tablawy OS",
+    "suffix": " | Tablawy OS",
     "dashboard": {
       "list": "Dashboard",
       "dashboard": "Dashboard"

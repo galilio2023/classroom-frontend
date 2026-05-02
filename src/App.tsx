@@ -143,7 +143,7 @@ function App() {
                 projectId: "classroom-refine",
                 title: {
                   icon: <GraduationCap className="w-8 h-8 text-primary" />,
-                  text: t("app.title", { defaultValue: "Classroom AI" }),
+                  text: t("app.title", { defaultValue: "Tablawy OS" }),
                 },
               }}
             >
