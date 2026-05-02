@@ -52,7 +52,7 @@ export interface User {
   parentName: string | null;
   parentPhone: string | null;
   inviteCode: string | null;
-  planType: "basic" | "faculty" | "school";
+  planType: "basic" | "faculty" | "school" | "candidate";
   suiteType: "private" | "school" | "faculty" | "corporate";
   suiteOnboardingComplete: boolean;
   verificationStatus: VerificationStatus;
@@ -66,6 +66,7 @@ export interface User {
   currentStreak: number;
   longestStreak: number;
   lastActiveAt: string | null;
+  brandingConfig?: BrandingConfig;
   aiTokensUsed?: number;
   aiMonthlyLimit?: number;
   aiConsentVersion?: string;
@@ -102,6 +103,7 @@ export enum UserRole {
 
 export interface BrandingConfig {
   primaryColor?: string;
+  secondaryColor?: string;
   logoUrl?: string;
   theme?: "light" | "dark" | "system";
   accentColor?: string;

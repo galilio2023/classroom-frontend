@@ -27,7 +27,11 @@ export const useCapabilities = () => {
   const isTeacher = role === "teacher";
   const isStudent = role === "student";
   const isParent = role === "parent";
-  const isStaff = isAdmin || isTeacher || role === "ta";
+  const isCandidate = isStudent && plan === "candidate"; // 🚀 Vetted Onboarding Marker
+  const isPrincipal = role === "principal" || isAdmin;
+  const isDeptHead = role === "deptHead" || isAdmin;
+  const isStaff =
+    isAdmin || isTeacher || role === "ta" || role === "principal" || role === "deptHead";
 
   // 🛡️ SCHOOL OWNERSHIP (Admin role in their own school)
   const isOwner = isAdmin;
@@ -41,6 +45,9 @@ export const useCapabilities = () => {
     isTeacher,
     isStudent,
     isParent,
+    isCandidate,
+    isPrincipal,
+    isDeptHead,
     isOwner,
     suiteOnboardingComplete,
     isPrivate: isPrivateSuite,

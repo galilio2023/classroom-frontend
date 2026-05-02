@@ -14,9 +14,14 @@ import { Loader2 } from "lucide-react";
 // Lazy Load Pages
 const Dashboard = React.lazy(() => import("@/features/dashboard/pages/index"));
 const LoginPage = React.lazy(() => import("@/features/auth/pages/login"));
+const ForgotPasswordPage = React.lazy(() => import("@/features/auth/pages/forgot-password"));
+const ResetPasswordPage = React.lazy(() => import("@/features/auth/pages/reset-password"));
 const RegisterPage = React.lazy(() => import("@/features/auth/pages/register"));
+const ApplyTeacherPage = React.lazy(() => import("@/features/auth/pages/apply-teacher"));
 const PendingVerification = React.lazy(() => import("@/features/auth/pages/pending-verification"));
 const UnauthorizedPage = React.lazy(() => import("@/pages/unauthorized"));
+const PrivacyPage = React.lazy(() => import("@/pages/privacy"));
+const TermsPage = React.lazy(() => import("@/pages/terms"));
 
 const ClassesList = React.lazy(() => import("@/features/classes/pages/list"));
 const ClassShow = React.lazy(() => import("@/features/classes/pages/show"));
@@ -102,10 +107,31 @@ const CreateBadge = React.lazy(() => import("@/features/users/pages/badges/creat
 const ActivityLogPage = React.lazy(() => import("@/features/dashboard/pages/activity-log"));
 const SchoolAdminDashboard = React.lazy(() => import("@/features/schools/pages/dashboard"));
 const AIGovernanceList = React.lazy(() => import("@/features/ai/pages/ai-governance-list"));
+const AiAuditBoard = React.lazy(() => import("@/features/ai/pages/ai-audit-board"));
 const PendingApprovals = React.lazy(() => import("@/features/ai/pages/pending-approvals"));
 const AIMetrics = React.lazy(() => import("@/features/ai/pages/ai-metrics"));
 const AdminImportPage = React.lazy(() => import("@/features/schools/pages/import"));
 const ApprovalsPage = React.lazy(() => import("@/features/schools/pages/approvals"));
+const PlatformSettingsPage = React.lazy(() => import("@/features/schools/pages/platform-settings"));
+const BrandingSettingsPage = React.lazy(() => import("@/features/schools/pages/branding-settings"));
+const FeatureFlagsListPage = React.lazy(() => import("@/features/admin/pages/feature-flags-list"));
+
+// FEATURE: CORPORATE
+const CorporateDashboard = React.lazy(() => import("@/features/corporate/pages/dashboard"));
+const CorporateSetupWizard = React.lazy(() => import("@/features/corporate/pages/setup-wizard"));
+const CorporateProgramsList = React.lazy(() => import("@/features/corporate/pages/programs-list"));
+const CorporateProgramShow = React.lazy(() => import("@/features/corporate/pages/program-show"));
+const CorporateCertificatesList = React.lazy(
+  () => import("@/features/corporate/pages/certificates-list")
+);
+const CorporateEmployeesList = React.lazy(
+  () => import("@/features/corporate/pages/employees-list")
+);
+const CorporateEmployeeShow = React.lazy(() => import("@/features/corporate/pages/employee-show"));
+const DueReviewsPage = React.lazy(() => import("@/features/quizzes/pages/due-reviews"));
+
+// FEATURE: REPORTS
+const AtRiskPage = React.lazy(() => import("@/features/reports/pages/at-risk"));
 
 // FEATURE: ACADEMIC
 const AcademicYearsList = React.lazy(() => import("@/features/academic/pages/years/list"));
@@ -148,6 +174,9 @@ const TeacherSubscriptionsList = React.lazy(
 );
 const MyTeachersList = React.lazy(() => import("@/features/users/pages/my-teachers/list"));
 const DiscoveryPage = React.lazy(() => import("@/features/academic/pages/discovery/index"));
+const RegistrarDashboard = React.lazy(
+  () => import("@/features/academic/pages/registrar-dashboard")
+);
 const PublicClassesPage = React.lazy(
   () => import("@/features/academic/pages/discovery/classes-list")
 );
@@ -164,8 +193,9 @@ const ChildRiskReport = React.lazy(() =>
   import("@/features/parents/pages/child-risk-report").then((m) => ({ default: m.ChildRiskReport }))
 );
 
-const LandingPage = React.lazy(() => import("@/pages/landing"));
-const PricingPage = React.lazy(() => import("@/pages/pricing"));
+const LandingPage = React.lazy(() => import("@/features/marketing/pages/landing"));
+const PublicChannelPage = React.lazy(() => import("@/features/marketplace/pages/public-channel"));
+const PricingPage = React.lazy(() => import("@/features/marketing/pages/pricing"));
 const PublicLayout = React.lazy(() =>
   import("@/features/engagement/components/layout").then((m) => ({
     default: m.PublicLayout,
@@ -195,8 +225,8 @@ import { useCapabilities } from "@/hooks/use-capabilities";
 import { OnboardingGuard } from "@/features/onboarding/components/onboarding-guard";
 
 export const AppRouter = () => {
-  const { isSchoolMode, isFacultyMode, isStaff, isAdmin } = useCapabilities();
-  const isInstitutional = isSchoolMode || isFacultyMode;
+  const { isSchoolMode, isFacultyMode, isCorporateSuite, isStaff, isAdmin } = useCapabilities();
+  const isInstitutional = isSchoolMode || isFacultyMode || isCorporateSuite;
 
   return (
     <Suspense fallback={<Loading />}>
@@ -206,6 +236,7 @@ export const AppRouter = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/channels/:slug" element={<PublicChannelPage />} />
           <Route path="/discovery">
             <Route index element={<DiscoveryPage />} />
             <Route path="classes">
@@ -224,8 +255,15 @@ export const AppRouter = () => {
           }
         >
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register/teacher" element={<RegisterPage isTeacherFlow />} />
+          <Route path="/register/institution" element={<RegisterPage isInstitutionFlow />} />
         </Route>
+
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
 
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
@@ -244,6 +282,7 @@ export const AppRouter = () => {
           }
         >
           <Route path="/onboarding/select-suite" element={<SelectSuitePage />} />
+          <Route path="/apply/teacher" element={<ApplyTeacherPage />} />
           <Route path="/pending-verification" element={<PendingVerification />} />
           <Route
             element={
@@ -511,8 +550,15 @@ export const AppRouter = () => {
                   </AuthorizedRoute>
                 }
               />
+              <Route
+                path="due-reviews"
+                element={
+                  <AuthorizedRoute resource="quizzes" action="list">
+                    <DueReviewsPage />
+                  </AuthorizedRoute>
+                }
+              />
             </Route>
-
             {/* OTHERS */}
             <Route
               path="/attendance"
@@ -709,6 +755,14 @@ export const AppRouter = () => {
                   />
                 </Route>
                 <Route
+                  path="/academic/registrar"
+                  element={
+                    <AuthorizedRoute resource="registrar-dashboard" action="list">
+                      <RegistrarDashboard />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
                   path="/academic-years"
                   element={
                     <AuthorizedRoute resource="academic-years" action="list">
@@ -789,6 +843,22 @@ export const AppRouter = () => {
                   }
                 />
                 <Route
+                  path="/admin/settings"
+                  element={
+                    <AuthorizedRoute resource="settings" action="edit">
+                      <PlatformSettingsPage />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/school/branding"
+                  element={
+                    <AuthorizedRoute resource="schools" action="edit">
+                      <BrandingSettingsPage />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
                   path="/ai-governance"
                   element={
                     <AuthorizedRoute resource="ai-health-reports" action="list">
@@ -804,10 +874,95 @@ export const AppRouter = () => {
                     </AuthorizedRoute>
                   }
                 />
+                <Route
+                  path="/ai-audit"
+                  element={
+                    <AuthorizedRoute resource="ai-audits" action="list">
+                      <AiAuditBoard />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/reports/at-risk"
+                  element={
+                    <AuthorizedRoute resource="at-risk-report" action="list">
+                      <AtRiskPage />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/corporate/setup"
+                  element={
+                    <AuthorizedRoute resource="corporate-dashboard" action="list">
+                      <CorporateSetupWizard />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="/corporate/dashboard"
+                  element={
+                    <AuthorizedRoute resource="corporate-dashboard" action="list">
+                      <CorporateDashboard />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route path="/corporate/programs">
+                  <Route
+                    index
+                    element={
+                      <AuthorizedRoute resource="corporate-programs" action="list">
+                        <CorporateProgramsList />
+                      </AuthorizedRoute>
+                    }
+                  />
+                  <Route
+                    path=":id"
+                    element={
+                      <AuthorizedRoute resource="corporate-programs" action="show">
+                        <CorporateProgramShow />
+                      </AuthorizedRoute>
+                    }
+                  />
+                </Route>
+                <Route
+                  path="/corporate/certificates"
+                  element={
+                    <AuthorizedRoute resource="corporate-certificates" action="list">
+                      <CorporateCertificatesList />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route path="/corporate/employees">
+                  <Route
+                    index
+                    element={
+                      <AuthorizedRoute resource="corporate-employees" action="list">
+                        <CorporateEmployeesList />
+                      </AuthorizedRoute>
+                    }
+                  />
+                  <Route
+                    path="/corporate/employees/:id"
+                    element={
+                      <AuthorizedRoute resource="corporate-employees" action="show">
+                        <CorporateEmployeeShow />
+                      </AuthorizedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/feature-flags"
+                    element={
+                      <AuthorizedRoute resource="feature-flags" action="list">
+                        <FeatureFlagsListPage />
+                      </AuthorizedRoute>
+                    }
+                  />
+                </Route>
               </>
             ) : (
               <>
                 <Route path="/departments" element={<CatchAllNavigate to="/dashboard" />} />
+
                 <Route path="/subjects" element={<CatchAllNavigate to="/dashboard" />} />
                 <Route path="/terms" element={<CatchAllNavigate to="/dashboard" />} />
                 <Route path="/admin/import" element={<CatchAllNavigate to="/dashboard" />} />

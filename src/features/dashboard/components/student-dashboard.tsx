@@ -6,10 +6,10 @@ import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { User, DashboardData } from "@/types";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { useTranslation } from "react-i18next";
-import { useOne } from "@refinedev/core";
+import { useOne, useCustom, useNavigation } from "@refinedev/core";
 import { MissionControlHero } from "./mission-control-hero";
 import { QuickActions } from "./quick-actions";
-import { Calendar, Rocket, Sparkles, Trophy, Tv } from "lucide-react";
+import { Calendar, Rocket, Sparkles, Trophy, Tv, Brain } from "lucide-react";
 import { useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 import React, { useState, useEffect } from "react";
 import { useCapabilities } from "@/hooks/use-capabilities";
@@ -36,10 +36,22 @@ interface ActionItem {
 
 export const StudentDashboard = ({ identity, data, isLoading, list, show }: Props) => {
   const { t } = useTranslation();
+  const { push } = useNavigation() as any;
   const { isSchoolSuite, isFacultySuite } = useCapabilities();
   const { isInstallable, isStandalone, handleInstallClick } = usePWAInstall();
   const { isOnline, getNextOfflineMission } = useOfflineSync();
   const [offlineMission, setOfflineMission] = useState<any>(null);
+
+  // 🚀 SRS: Fetch due reviews for nudge
+  const { query: dueReviewsQuery } = useCustom<any[]>({
+    url: `${import.meta.env.VITE_API_URL}/quizzes/due-reviews`,
+    method: "get",
+    queryOptions: {
+      enabled: !!identity?.id && isOnline,
+    },
+  });
+
+  const dueReviewsCount = (dueReviewsQuery.data?.data as any[])?.length || 0;
 
   // 🚀 MISSION CONTROL: Fetch personalized next action and readiness score
   const { query: missionQuery } = useOne({
@@ -81,6 +93,21 @@ export const StudentDashboard = ({ identity, data, isLoading, list, show }: Prop
       ),
       icon: Rocket,
       action: handleInstallClick,
+      variant: "ai",
+    });
+  }
+
+  // 🧠 SRS Nudge
+  if (dueReviewsCount > 0) {
+    actions.push({
+      id: "due-reviews",
+      title: t("dashboard.student.actions.srs.title", "Memory Review"),
+      description: t("dashboard.student.actions.srs.description", {
+        count: dueReviewsCount,
+        defaultValue: `You have ${dueReviewsCount} cognitive retention tasks due today.`,
+      }),
+      icon: Brain,
+      action: () => push("/quizzes/due-reviews"),
       variant: "ai",
     });
   }

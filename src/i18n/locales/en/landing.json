@@ -6,24 +6,24 @@
       "pricing": "Pricing"
     },
     "hero": {
-      "badge": "Modern Education",
-      "titlePart1": "Teach",
-      "titlePart2": "Smarter",
-      "titlePart3": "Grow Faster",
-      "description": "The minimalist operating system for Egyptian schools. Advanced AI met with effortless management."
+      "badge": "Unlock Your Learning Potential 🚀",
+      "titlePart1": "Learning",
+      "titlePart2": "Made Magical",
+      "titlePart3": "for Everyone",
+      "description": "Welcome to the world's most joyful AI classroom. We combine advanced intelligence with a fun, cinematic experience to help you master anything, anywhere."
     },
     "pillars": {
       "ai": {
-        "title": "AI Assistant",
-        "desc": "Automate grading, generate lesson plans, and provide 24/7 tutoring for every student."
+        "title": "Magic AI Buddy",
+        "desc": "Meet your new 24/7 best friend who knows exactly how you learn and helps you master tough topics with a smile."
       },
       "manage": {
-        "title": "Easy Management",
-        "desc": "Track attendance, manage enrollments, and coordinate schedules with a single tap."
+        "title": "Happy Classrooms",
+        "desc": "Teachers get 'Magic' tools to create lessons instantly, giving them more time to focus on what matters most: You."
       },
       "growth": {
-        "title": "Student Growth",
-        "desc": "Gamified progress tracking and AI insights ensure no student is left behind."
+        "title": "Celebrate Success",
+        "desc": "Turn every lesson into a quest. Earn badges, level up, and watch your knowledge grow in a vibrant academic world."
       }
     },
     "bento": {
@@ -76,27 +76,33 @@
         "desc": "Engage with peers and mentors in a safe, moderated environment."
       },
       "smartClassroom": {
-        "title": "Smart Classroom",
-        "desc": "Integrated management for classes, assignments, and quizzes in one place."
-      }
-    },
+        "title": "Intelligent Hub",
+        "desc": "Integrated management for classes, assignments, and quizzes across your entire OS."
+      }    },
     "roles": {
-      "sectionTitle": "Tailored for",
-      "sectionTitleItalic": "Everyone",
-      "sectionDesc": "Platform providing tools for both lead global classes and individual mastery.",
+      "sectionTitle": "Architected for",
+      "sectionTitleItalic": "Every Scale",
+      "sectionDesc": "One codebase, three operating modes. Tailored for individual mastery and institutional governance.",
       "student": {
         "title": "Student",
-        "portal": "Portal",
-        "f1": "Access all your classes in one hub",
-        "f2": "Master topics with AI Study Lab",
-        "f3": "Track your academic journey & XP"
+        "portal": "Hub",
+        "f1": "Access all your classes in one dashboard",
+        "f2": "Master topics with AI Study Lab 2.0",
+        "f3": "Track your learning DNA & achievements"
       },
       "teacher": {
         "title": "Teacher",
-        "portal": "Portal",
+        "portal": "Studio",
         "f1": "Manage multiple classrooms with ease",
         "f2": "Automate grading with AI Assistant",
         "f3": "Go live with collaborative tools"
+      },
+      "institution": {
+        "title": "Institution",
+        "portal": "Console",
+        "f1": "Multi-tenant boundary management",
+        "f2": "AI governance & Law 151 compliance",
+        "f3": "Custom white-label branding"
       }
     },
     "showcase": {
@@ -109,9 +115,10 @@
       "draft": "Draft Ready"
     },
     "landing_ai_hub": {
-      "title1": "AI-Powered",      "title2": "Study Hub",
-      "desc": "A cutting-edge learning companion that understands your curriculum. Generate quizzes, summarize notes, and create flashcards instantly with Gemini 3 Flash Preview.",
-      "poweredBy": "Gemini 3 FLASH PREVIEW Powered",
+      "title1": "AI-Native",
+      "title2": "Learning Hub",
+      "desc": "A cutting-edge learning companion that understands your curriculum. Generate quizzes, summarize notes, and create flashcards instantly with Gemini 3.1 Flash.",
+      "poweredBy": "Gemini 3.1 FLASH Powered",
       "activeNow": "Active Now",
       "analysisProcessing": "Analysis Processing",
       "list": {
@@ -132,12 +139,12 @@
       "title": "Empowering Modern Classrooms"
     },
     "cta": {
-      "title": "Ready to Transform Your Classroom?",
-      "desc": "Join thousands of educators and students using Classroom CMS to shape the future of education.",
-      "launch": "Launch Your Classroom",
+      "title": "Ready to Architect Your Institution?",
+      "desc": "Join thousands of schools and educators using Tablawy OS to shape the future of learning.",
+      "launch": "Deploy Your OS",
       "watchDemo": "Watch Demo",
       "evolved1": "Education",
-      "evolved2": "Evolved."
+      "evolved2": "Architected."
     }
   },
   "pricing": {

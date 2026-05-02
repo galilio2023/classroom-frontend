@@ -53,12 +53,15 @@ import { ListView } from "@/components/refine/views/list-view";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
+import { useTerm } from "@/contexts/term-context";
 import { CollisionModal } from "../../components/CollisionModal";
-import { DAYS } from "@/constants/calendar";
+import { TimetableGrid } from "@/features/timetable/components/TimetableGrid";
 
 export default function BellSchedulePage() {
   const { t } = useTranslation();
-  const { isSchoolSuite, isAdmin } = useCapabilities();
+  const { isSchoolSuite, isFacultySuite, isAdmin, lectureSchedule, bellTimetable } =
+    useCapabilities();
+  const { currentTerm } = useTerm();
 
   const slotSchema = useMemo(
     () =>
@@ -70,9 +73,12 @@ export default function BellSchedulePage() {
         teacherId: z.string().min(1, "Teacher is required"),
         roomId: z.string().optional(),
         classId: z.string().optional(),
+        sectionId: lectureSchedule
+          ? z.string().min(1, "Section is required")
+          : z.string().optional(),
         subjectId: z.string().optional(),
       }),
-    []
+    [lectureSchedule]
   );
 
   type SlotFormValues = z.infer<typeof slotSchema>;
@@ -91,12 +97,18 @@ export default function BellSchedulePage() {
   });
   const { query: classesQuery } = useList<Class>({ resource: "classes" });
   const { query: subjectsQuery } = useList<Subject>({ resource: "subjects" });
+  const { query: sectionsQuery } = useList<any>({
+    resource: "academic/sections",
+    filters: currentTerm ? [{ field: "termId", operator: "eq", value: currentTerm.id }] : [],
+    queryOptions: { enabled: lectureSchedule && !!currentTerm },
+  });
 
-  const slots = slotsQuery.data?.data || [];
+  const slots = (slotsQuery.data?.data || []) as any[];
   const years = yearsQuery.data?.data || [];
   const teachers = teachersQuery.data?.data || [];
   const classesData = classesQuery.data?.data || [];
   const subjectsData = subjectsQuery.data?.data || [];
+  const sectionsData = sectionsQuery.data?.data || [];
   const isLoading =
     slotsQuery.isLoading ||
     yearsQuery.isLoading ||
@@ -115,12 +127,18 @@ export default function BellSchedulePage() {
   });
 
   const onSubmit = (values: SlotFormValues) => {
+    // 🛡️ HUB PHASE 6.2: Wrap single slot in an array for batch backend compatibility
     create(
       {
         resource: "timetable/bell-schedule",
         values: {
-          ...values,
-          dayOfWeek: parseInt(values.dayOfWeek),
+          academicYearId: values.academicYearId,
+          slots: [
+            {
+              ...values,
+              dayOfWeek: parseInt(values.dayOfWeek),
+            },
+          ],
         },
       },
       {
@@ -141,7 +159,7 @@ export default function BellSchedulePage() {
     );
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this period?")) {
       deleteMutation(
         { resource: "timetable", id },
@@ -153,14 +171,14 @@ export default function BellSchedulePage() {
     }
   };
 
-  if (!isSchoolSuite) {
+  if (!isSchoolSuite && !isFacultySuite) {
     return (
       <div className="flex items-center justify-center p-20">
-        <Card className="max-w-md p-8 text-center space-y-4">
+        <Card className="max-w-md p-8 text-center space-y-4 rounded-4xl border-border/40">
           <TrendingUp className="w-12 h-12 text-muted-foreground/20 mx-auto" />
-          <h2 className="text-xl font-black">Not Available</h2>
+          <h2 className="text-xl font-black">Feature Restricted</h2>
           <p className="text-muted-foreground">
-            The Bell Schedule is only available in the Tablawy School suite.
+            The Bell Schedule is currently optimized for the Tablawy School suite.
           </p>
         </Card>
       </div>
@@ -198,26 +216,30 @@ export default function BellSchedulePage() {
                   {t("timetable.bell.create", "Add Period")}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="rounded-[2.5rem] max-w-lg p-0 overflow-hidden text-start">
+              <DialogContent className="rounded-[2.5rem] max-w-lg p-0 overflow-hidden text-start border-none shadow-2xl">
                 <div className="p-8 md:p-12 space-y-8">
                   <DialogHeader>
-                    <DialogTitle className="text-3xl font-black">New Period</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="text-3xl font-black uppercase tracking-tighter">
+                      New Period
+                    </DialogTitle>
+                    <DialogDescription className="font-medium text-muted-foreground/60">
                       Define a recurring time slot for the school.
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Academic Year</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
+                          Academic Year
+                        </Label>
                         <Select
                           value={form.watch("academicYearId")}
                           onValueChange={(v) => form.setValue("academicYearId", v)}
                         >
-                          <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4">
+                          <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 shadow-inner">
                             <SelectValue placeholder="Select Year" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="rounded-2xl border-none shadow-2xl">
                             {years.map((y) => (
                               <SelectItem key={y.id} value={y.id.toString()}>
                                 {y.name}
@@ -227,20 +249,24 @@ export default function BellSchedulePage() {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Day of Week</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
+                          Day of Week
+                        </Label>
                         <Select
                           value={form.watch("dayOfWeek")}
                           onValueChange={(v) => form.setValue("dayOfWeek", v)}
                         >
-                          <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4">
+                          <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 shadow-inner">
                             <SelectValue placeholder="Select Day" />
                           </SelectTrigger>
-                          <SelectContent>
-                            {DAYS.map((label, idx) => (
-                              <SelectItem key={idx} value={idx.toString()}>
-                                {label}
-                              </SelectItem>
-                            ))}
+                          <SelectContent className="rounded-2xl border-none shadow-2xl">
+                            <SelectItem value="0">Sunday</SelectItem>
+                            <SelectItem value="1">Monday</SelectItem>
+                            <SelectItem value="2">Tuesday</SelectItem>
+                            <SelectItem value="3">Wednesday</SelectItem>
+                            <SelectItem value="4">Thursday</SelectItem>
+                            <SelectItem value="5">Friday</SelectItem>
+                            <SelectItem value="6">Saturday</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -248,30 +274,36 @@ export default function BellSchedulePage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Start Time</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
+                          Start Time
+                        </Label>
                         <Input
                           type="time"
                           {...form.register("startTime")}
-                          className="rounded-2xl bg-muted/30 border-none h-12 px-4"
+                          className="rounded-2xl bg-muted/30 border-none h-12 px-4 shadow-inner"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>End Time</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
+                          End Time
+                        </Label>
                         <Input
                           type="time"
                           {...form.register("endTime")}
-                          className="rounded-2xl bg-muted/30 border-none h-12 px-4"
+                          className="rounded-2xl bg-muted/30 border-none h-12 px-4 shadow-inner"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Assigned Teacher</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
+                        Assigned Teacher
+                      </Label>
                       <Select onValueChange={(v) => form.setValue("teacherId", v)}>
-                        <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 text-start">
+                        <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 text-start shadow-inner">
                           <SelectValue placeholder="Select Teacher" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="rounded-2xl border-none shadow-2xl">
                           {teachers.map((t) => (
                             <SelectItem key={t.id} value={t.id}>
                               {t.name}
@@ -282,28 +314,61 @@ export default function BellSchedulePage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
+                      {bellTimetable && (
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
+                            Class (Grade)
+                          </Label>
+                          <Select
+                            value={form.watch("classId")}
+                            onValueChange={(v) => form.setValue("classId", v)}
+                          >
+                            <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 text-start shadow-inner">
+                              <SelectValue placeholder="Select Class" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-none shadow-2xl">
+                              {classesData.map((c) => (
+                                <SelectItem key={c.id} value={c.id.toString()}>
+                                  {c.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
+                      {lectureSchedule && (
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
+                            Academic Section
+                          </Label>
+                          <Select
+                            value={form.watch("sectionId")}
+                            onValueChange={(v) => form.setValue("sectionId", v)}
+                          >
+                            <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 text-start shadow-inner">
+                              <SelectValue placeholder="Select Section" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-none shadow-2xl">
+                              {sectionsData.map((s) => (
+                                <SelectItem key={s.id} value={s.id.toString()}>
+                                  {s.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
                       <div className="space-y-2">
-                        <Label>Class (Grade)</Label>
-                        <Select onValueChange={(v) => form.setValue("classId", v)}>
-                          <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 text-start">
-                            <SelectValue placeholder="Select Class" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {classesData.map((c) => (
-                              <SelectItem key={c.id} value={c.id.toString()}>
-                                {c.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Subject</Label>
+                        <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
+                          Subject
+                        </Label>
                         <Select onValueChange={(v) => form.setValue("subjectId", v)}>
-                          <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 text-start">
+                          <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 text-start shadow-inner">
                             <SelectValue placeholder="Select Subject" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="rounded-2xl border-none shadow-2xl">
                             {subjectsData.map((s) => (
                               <SelectItem key={s.id} value={s.id.toString()}>
                                 {s.name}
@@ -315,20 +380,27 @@ export default function BellSchedulePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Room (Optional)</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest ml-1">
+                        Room (Optional)
+                      </Label>
                       <Input
                         placeholder="e.g. Lab 3"
                         {...form.register("roomId")}
-                        className="rounded-2xl bg-muted/30 border-none h-12 px-4"
+                        className="rounded-2xl bg-muted/30 border-none h-12 px-4 shadow-inner"
                       />
                     </div>
 
                     <DialogFooter className="pt-4">
                       <Button
                         type="submit"
-                        className="w-full h-14 rounded-2xl font-black shadow-xl shadow-primary/20"
+                        className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform"
+                        disabled={createMutation.isPending}
                       >
-                        Save Period
+                        {createMutation.isPending ? (
+                          <Loader2 className="animate-spin" />
+                        ) : (
+                          "Save Period"
+                        )}
                       </Button>
                     </DialogFooter>
                   </form>
@@ -338,79 +410,17 @@ export default function BellSchedulePage() {
           )}
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
-          {DAYS.map((label, idx) => {
-            const daySlots = slots.filter((s) => s.dayOfWeek === idx);
-            return (
-              <div key={idx} className="space-y-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-center text-muted-foreground/60 py-2 border-b border-border/40 mb-4">
-                  {label}
-                </div>
-                <div className="space-y-3">
-                  {daySlots.length === 0 ? (
-                    <div className="h-20 rounded-3xl border border-dashed border-border/40 flex items-center justify-center opacity-40">
-                      <span className="text-[8px] font-bold uppercase tracking-widest">Free</span>
-                    </div>
-                  ) : (
-                    daySlots.map((slot) => (
-                      <Card
-                        key={slot.id}
-                        className="p-4 rounded-3xl border-border/40 shadow-sm hover:shadow-md transition-all group relative overflow-hidden bg-card/40 backdrop-blur-sm text-start"
-                      >
-                        <div className="flex flex-col items-start gap-1">
-                          <span className="text-[10px] font-black tracking-tight text-primary">
-                            {slot.startTime.slice(0, 5)} - {slot.endTime.slice(0, 5)}
-                          </span>
-                          <div className="flex flex-col gap-0.5 mt-1 text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <BookOpen className="w-2.5 h-2.5 text-blue-500" />
-                              <span className="text-[10px] font-black text-foreground">
-                                {subjectsData.find(
-                                  (s) => s.id.toString() === slot.subjectId?.toString()
-                                )?.name || "Subject"}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Layers className="w-2.5 h-2.5 text-amber-500" />
-                              <span className="text-[8px] font-bold">
-                                {classesData.find(
-                                  (c) => c.id.toString() === slot.classId?.toString()
-                                )?.name || "Class"}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1 opacity-70">
-                              <UserIcon className="w-2.5 h-2.5" />
-                              <span className="text-[8px] font-bold truncate">
-                                T.{" "}
-                                {teachers.find((t) => t.id === slot.teacherId)?.name || "Unknown"}
-                              </span>
-                            </div>
-                          </div>
-                          {slot.roomId && (
-                            <div className="flex items-center gap-1 text-muted-foreground/60 mt-1">
-                              <MapPin className="w-2.5 h-2.5" />
-                              <span className="text-[8px] font-bold">{slot.roomId}</span>
-                            </div>
-                          )}
-                        </div>
-                        {isAdmin && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => handleDelete(slot.id as number)}
-                          >
-                            <Trash2 className="h-3 w-3 text-destructive" />
-                          </Button>
-                        )}
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <TimetableGrid
+          slots={slots.map((s) => ({
+            ...s,
+            subject: subjectsData.find((sub) => sub.id.toString() === s.subjectId?.toString()),
+            teacher: teachers.find((t) => t.id === s.teacherId),
+            section: classesData.find((c) => c.id.toString() === s.classId?.toString()),
+          }))}
+          isLoading={isLoading}
+          isAdmin={isAdmin}
+          onDelete={(id) => handleDelete(id as string)}
+        />
 
         <CollisionModal
           open={isCollisionOpen}

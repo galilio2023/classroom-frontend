@@ -32,14 +32,13 @@ export const GlobalLiveOverlay = () => {
   const liveClasses = data?.data || [];
 
   useEffect(() => {
-    // Re-reconcile on socket events (e.g., if we were offline and just came back)
-    socket.on("class:live:started", () => void refetch());
-    socket.on("class:live:stopped", () => void refetch());
+    socket.on("live_session_started", () => void refetch());
+    socket.on("live_session_ended", () => void refetch());
     socket.on("connect", () => void refetch());
 
     return () => {
-      socket.off("class:live:started");
-      socket.off("class:live:stopped");
+      socket.off("live_session_started");
+      socket.off("live_session_ended");
       socket.off("connect");
     };
   }, [refetch]);

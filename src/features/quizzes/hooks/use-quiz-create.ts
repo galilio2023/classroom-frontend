@@ -15,6 +15,7 @@ const quizSchema = (t: any) =>
     dueDate: z.string().optional(),
     timeLimit: z.coerce.number().min(1).optional(),
     moduleId: z.coerce.number().optional().nullable(),
+    examMode: z.boolean().default(false),
     questions: z
       .array(
         z.object({
@@ -51,6 +52,7 @@ export const useQuizCreate = () => {
       dueDate: "",
       timeLimit: 15,
       moduleId: null,
+      examMode: false,
       questions: [
         {
           question: "",

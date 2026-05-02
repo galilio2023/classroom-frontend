@@ -24,7 +24,15 @@ export const REGISTER_STEPS = {
 
 export type RegisterStep = (typeof REGISTER_STEPS)[keyof typeof REGISTER_STEPS];
 
-export const useRegisterForm = () => {
+interface UseRegisterFormProps {
+  isTeacherFlow?: boolean;
+  isInstitutionFlow?: boolean;
+}
+
+export const useRegisterForm = ({
+  isTeacherFlow,
+  isInstitutionFlow,
+}: UseRegisterFormProps = {}) => {
   const { t } = useTranslation();
   const { mutate: register, isPending } = useRegister();
   const navigate = useNavigate();
@@ -45,6 +53,28 @@ export const useRegisterForm = () => {
 
       if (draft) {
         try {
+          // 🛡️ SECURITY: Implement 15-minute TTL for sensitive identity data
+          const DRAFT_TTL_MS = 15 * 60 * 1000;
+          const isExpired = Date.now() - (draft.updatedAt || 0) > DRAFT_TTL_MS;
+
+          if (isExpired) {
+            console.warn("🔐 Registration draft expired (15m TTL). Wiping sensitive data.");
+            try {
+              await offlineDB.registration_drafts.delete("current_registration");
+            } catch (delError) {
+              // 🛡️ REGULATORY FAIL-SAFE: If deletion fails, attempt a hard-clear of the sensitive fields
+              // and notify the system via telemetry (Strike 2 integration).
+              console.error("🚨 LAW_151_VIOLATION: Failed to purge expired PII draft!", delError);
+              await offlineDB.registration_drafts
+                .update("current_registration", {
+                  values: { nationalId: "[PURGE_FAILED]", phoneNumber: "[PURGE_FAILED]" },
+                  updatedAt: Date.now(),
+                })
+                .catch(() => {});
+            }
+            return;
+          }
+
           const values = draft.values as SignUpPayload;
           setValidatedValues(values);
 
@@ -86,7 +116,7 @@ export const useRegisterForm = () => {
       name: "",
       email: "",
       password: "",
-      role: "student",
+      role: (isInstitutionFlow ? "admin" : "student"),
       phoneNumber: "",
       nationalId: "",
       bio: "",
@@ -100,7 +130,7 @@ export const useRegisterForm = () => {
     },
   });
 
-  const role = form.watch("role");
+  const role: "student" | "parent" | "teacher" | "admin" = form.watch("role");
   const name = form.watch("name");
 
   const generateAIBio = async () => {
@@ -109,7 +139,11 @@ export const useRegisterForm = () => {
 
     setIsGeneratingBio(true);
     try {
-      const response = await axios.post(`${BASE_URL}${AI_API.BIO}`, { name, role }, { headers });
+      const response = await axios.post(
+        `${BASE_URL}${AI_API.BIO}`,
+        { name, role: isTeacherFlow ? "teacher" : isInstitutionFlow ? "admin" : role },
+        { headers }
+      );
       form.setValue("bio", response.data.bio);
       toast.success(t("auth.register.aiBioSuccess", "AI Bio generated successfully!"));
     } catch (error: any) {
@@ -130,8 +164,18 @@ export const useRegisterForm = () => {
           `Hi, I'm {{name}}, supporting my child's learning journey.`,
           { name }
         ),
+        admin: t(
+          "auth.register.bioFallbackAdmin",
+          `Hi, I'm {{name}}, managing institutional operations.`,
+          { name }
+        ),
       };
-      form.setValue("bio", fallbacks[role as keyof typeof fallbacks] || `Hi, I'm ${name}.`);
+      form.setValue(
+        "bio",
+        fallbacks[
+          (isTeacherFlow ? "teacher" : isInstitutionFlow ? "admin" : role) as keyof typeof fallbacks
+        ] || `Hi, I'm ${name}.`
+      );
 
       toast.error(t("auth.register.aiBioError", "Bio generation failed"), {
         description: `Trace ID: ${traceId}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
@@ -143,8 +187,23 @@ export const useRegisterForm = () => {
 
   const nextStep = async () => {
     let fieldsToValidate: any[] = [];
+    let targetStep: RegisterStep | null = null;
+
     if (step === REGISTER_STEPS.BASIC_INFO) {
-      fieldsToValidate = ["name", "email", "password", "role"];
+      fieldsToValidate =
+        isTeacherFlow || isInstitutionFlow
+          ? ["name", "email", "password"]
+          : ["name", "email", "password", "role"];
+
+      const isValid = await form.trigger(fieldsToValidate);
+      if (isValid) {
+        // 🛡️ LAW 151 BYPASS: Skip ID verification for students with an invite code (Private Suite)
+        if (role === "student" && inviteCode) {
+          targetStep = REGISTER_STEPS.CONSENT;
+        } else {
+          targetStep = REGISTER_STEPS.EGYPTIAN_ID;
+        }
+      }
     } else if (step === REGISTER_STEPS.EGYPTIAN_ID) {
       // 🛡️ NORMALIZATION: Immediate feedback (Mandate M-008)
       const currentPhone = normalizeArabicNumerals(form.getValues("phoneNumber"));
@@ -155,23 +214,29 @@ export const useRegisterForm = () => {
       form.setValue("nationalId", currentId, { shouldValidate: true });
 
       fieldsToValidate = ["phoneNumber", "nationalId"];
-      // Soft validation for Egyptian ID
-      const nationalId = form.getValues("nationalId");
-      const validation = validateEgyptianID(nationalId);
-      if (!validation.isValid) {
-        form.setError("nationalId", { message: validation.error });
-        return;
+
+      const isValid = await form.trigger(fieldsToValidate);
+      if (isValid) {
+        // Soft validation for Egyptian ID
+        const nationalId = form.getValues("nationalId");
+        const validation = validateEgyptianID(nationalId);
+        if (!validation.isValid) {
+          form.setError("nationalId", { message: validation.error });
+          return;
+        }
+        targetStep = REGISTER_STEPS.CONSENT;
       }
     } else if (step === REGISTER_STEPS.CONSENT) {
       fieldsToValidate = ["hasAiConsent"];
+      const isValid = await form.trigger(fieldsToValidate);
+      if (isValid) {
+        await sendWhatsAppOtp();
+        targetStep = REGISTER_STEPS.OTP_VERIFY;
+      }
     }
 
-    const isValid = await form.trigger(fieldsToValidate);
-    if (isValid) {
-      if (step === REGISTER_STEPS.CONSENT) {
-        await sendWhatsAppOtp();
-      }
-      setStep((prev) => (prev + 1) as RegisterStep);
+    if (targetStep) {
+      setStep(targetStep);
     }
   };
 
@@ -190,11 +255,13 @@ export const useRegisterForm = () => {
 
           // 🛡️ UX: Conditional redirection based on role AND invite context (Mandate Rule #3)
           setTimeout(() => {
-            if (inviteCode) {
+            if (isInstitutionFlow) {
+              navigate("/onboarding/select-suite");
+            } else if (isTeacherFlow) {
+              navigate("/apply/teacher");
+            } else if (inviteCode) {
               // If joining via invite, redirect to class dashboard or specific class page
               navigate(`/classes/join/${inviteCode}`);
-            } else if (values.role === "teacher") {
-              navigate("/ai/magic-builder");
             } else if (values.role === "student") {
               navigate("/ai/chat");
             } else {

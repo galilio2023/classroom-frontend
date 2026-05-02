@@ -38,6 +38,7 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
   const [formData, setData] = useState({
     name: school?.name || "",
     slug: school?.slug || "",
+    suiteType: school?.suiteType || "school",
     primaryColor: school?.brandingConfig?.primaryColor || "#4f46e5",
     secondaryColor: school?.brandingConfig?.secondaryColor || "#10b981",
     logoUrl: school?.brandingConfig?.logoUrl || "",
@@ -62,6 +63,7 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
         values: {
           name: formData.name,
           slug: formData.slug,
+          suiteType: formData.suiteType,
         },
       },
       {

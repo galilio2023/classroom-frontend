@@ -35,6 +35,15 @@ export const useTusUpload = () => {
     (file: File, token: string | null, metadata: Record<string, string> = {}) => {
       const uploadId = crypto.randomUUID();
 
+      // 🛡️ SECURITY: Production Protocol Guard (Mandate Review #12)
+      // Prevents MITM attacks on resumable uploads in production.
+      if (import.meta.env.PROD && TUS_ENDPOINT.startsWith("http://")) {
+        const error = new Error("❌ SECURITY: TUS_ENDPOINT must use HTTPS in production.");
+        setError(error);
+        setStatus("error");
+        return null;
+      }
+
       setCurrentUploadId(uploadId);
       setStatus("uploading");
       setError(null);

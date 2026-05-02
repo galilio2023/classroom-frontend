@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 const usePageTitle = (title: string) => {
   useEffect(() => {
-    document.title = `${title} | Classroom AI`;
+    document.title = `${title} | Tablawy OS`;
   }, [title]);
 };
 

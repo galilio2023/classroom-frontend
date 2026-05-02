@@ -19,6 +19,19 @@ export const accessControlProvider: AccessControlProvider = {
     // 1. Find the resource definition from the master config
     const resourceDef = resources.find((r) => r.name === resourceName);
 
+    // 🛡️ CANDIDATE ISOLATION: Restricted access until vetted (Audit #3)
+    const isCandidate = role === UserRole.STUDENT && user.planType === "candidate";
+    if (isCandidate) {
+      const allowedCandidateResources = ["dashboard", "settings", "teacher-applications"];
+      if (!allowedCandidateResources.includes(resourceName)) {
+        return {
+          can: false,
+          reason:
+            "Your educator application is pending. Access to student resources is restricted.",
+        };
+      }
+    }
+
     // 2. Check Role-based access (Dynamic)
     // If resource is defined, check if user role is in its allowed roles array.
     const allowedRoles = resourceDef?.meta?.roles as UserRole[] | undefined;

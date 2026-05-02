@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useList, useNavigation, useCustom } from "@refinedev/core";
-import { User, Class } from "@/types";
+import { User, Class, Enrollment } from "@/types";
 import { DashboardData } from "@/types/dashboard";
 import { useTerm } from "@/contexts/term-context";
 import { socket, connectSocket } from "@/lib/socket";
@@ -66,6 +66,16 @@ export const useDashboard = () => {
     ],
     queryOptions: { enabled: isAdmin, staleTime: 60000 },
   });
+
+  // Fetch enrollments for students to handle empty/pending states
+  const { query: enrollmentsQuery } = useList<Enrollment>({
+    resource: "enrollments",
+    queryOptions: { enabled: isStudent, staleTime: 60000 },
+    meta: { populate: ["class.teachers.teacher"] },
+  });
+
+  const enrollmentsData = enrollmentsQuery.data;
+  const isEnrollmentsLoading = enrollmentsQuery.isLoading;
 
   const { refetch: refetchDashboard } = dashboardQuery;
 
@@ -137,9 +147,11 @@ export const useDashboard = () => {
   }, [identity?.id, refetchDashboard, refetchIdentity]);
 
   return {
-    identity,
+    identity: identity
+      ? { ...identity, enrollments: enrollmentsData?.data || identity.enrollments }
+      : identity,
     isIdentityLoading,
-    isCoreLoading: dashboardQuery.isLoading,
+    isCoreLoading: dashboardQuery.isLoading || (isStudent && isEnrollmentsLoading),
     isAnalyticsLoading: dashboardQuery.isLoading,
     isError: dashboardQuery.isError,
     coreData: dashboardData,

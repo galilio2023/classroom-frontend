@@ -16,13 +16,21 @@ const SocketContext = createContext<SocketContextType>({
 export const useSocket = () => useContext(SocketContext);
 
 import { useJobs } from "./job-context";
+import { useStudyPlanToast } from "@/hooks/use-study-plan-toast";
+import { handleError } from "@/providers/utils/api-errors";
+import { Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
   const { data: user, isLoading } = useGetIdentity<User>();
   const [isConnected, setIsConnected] = useState(socket.connected);
   const invalidate = useInvalidate();
   const { open } = useNotification();
   const { updateJob, removeJob, syncJobs } = useJobs();
+
+  // 🚀 RULE 5: Standardized Notifications with Action Buttons
+  useStudyPlanToast();
 
   useEffect(() => {
     if (isLoading) return;
@@ -46,8 +54,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("bulk-enroll:completed", ({ results }) => {
         open?.({
           type: "success",
-          message: "Bulk Enrollment Complete",
-          description: `Created ${results.created} users and enrolled ${results.enrolled} students.`,
+          message: t("notifications.socket.bulkEnroll.title"),
+          description: t("notifications.socket.bulkEnroll.desc", {
+            created: results.created,
+            enrolled: results.enrolled,
+          }),
         });
         updateJob("bulk-enroll", { status: "completed" });
         // Seamlessly refresh the students/enrollments list
@@ -60,8 +71,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("AI_SUMMARY_COMPLETED", ({ classId }) => {
         open?.({
           type: "success",
-          message: "AI Summary Ready",
-          description: "The class summary has been generated and is now available.",
+          message: t("notifications.socket.aiSummary.title"),
+          description: t("notifications.socket.aiSummary.desc"),
         });
         updateJob(`summary-${classId}`, { status: "completed" });
         void invalidate({
@@ -69,6 +80,26 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           id: classId,
           invalidates: ["detail"],
         });
+      });
+
+      socket.on("AI_STUDY_PLAN_COMPLETED", ({ jobId }) => {
+        open?.({
+          type: "success",
+          message: t("notifications.socket.aiStudyPlan.title"),
+          description: t("notifications.socket.aiStudyPlan.desc"),
+        });
+
+        updateJob(jobId || "study-plan-gen", { status: "completed" });
+
+        // 🔄 REFRESH: Invalidate study plan query
+        void invalidate({
+          resource: "study-planner",
+          invalidates: ["list", "detail", "many"],
+        });
+
+        // 🚀 NAVIGATION: Custom toast via window.dispatchEvent or direct toast if sonner is available
+        // Since we are in a context, we can use window.dispatchEvent to let components handle specific actions
+        window.dispatchEvent(new CustomEvent("AI_STUDY_PLAN_READY"));
       });
 
       socket.on(
@@ -91,22 +122,22 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       );
 
-      socket.on("AI_ASSIGNMENT_COMPLETED", ({ content }) => {
+      socket.on("AI_ASSIGNMENT_GENERATED", ({ content }) => {
         open?.({
           type: "success",
-          message: "Assignment Generated",
-          description: "Your AI assignment draft is ready!",
+          message: t("notifications.socket.aiAssignment.title"),
+          description: t("notifications.socket.aiAssignment.desc"),
         });
         updateJob("assignment-gen", { status: "completed" });
         // We can use a custom event or Zustand to pass this to the component
         window.dispatchEvent(new CustomEvent("AI_ASSIGNMENT_READY", { detail: { content } }));
       });
 
-      socket.on("AI_QUIZ_COMPLETED", ({ quiz }) => {
+      socket.on("AI_QUIZ_GENERATED", ({ quiz }) => {
         open?.({
           type: "success",
-          message: "Quiz Generated",
-          description: "Your AI quiz draft is ready!",
+          message: t("notifications.socket.aiQuiz.title"),
+          description: t("notifications.socket.aiQuiz.desc"),
         });
         updateJob("quiz-gen", { status: "completed" });
         window.dispatchEvent(new CustomEvent("AI_QUIZ_READY", { detail: { quiz } }));
@@ -115,8 +146,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("AI_MAGIC_BUILDER_COMPLETED", ({ lessonData, classId }) => {
         open?.({
           type: "success",
-          message: "Curriculum Built",
-          description: "Magic Builder has finished creating your modules and lessons.",
+          message: t("notifications.socket.magicBuilder.title"),
+          description: t("notifications.socket.magicBuilder.desc"),
         });
         updateJob(`magic-builder-${classId}`, { status: "completed" });
         window.dispatchEvent(
@@ -125,24 +156,44 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         void invalidate({ resource: "classes", id: classId, invalidates: ["detail"] });
       });
 
-      socket.on("AI_ASSIGNMENT_FAILED", ({ error }) => {
-        open?.({ type: "error", message: "Generation Failed", description: error });
+      socket.on("AI_ASSIGNMENT_FAILED", async ({ error }) => {
         updateJob("assignment-gen", { status: "failed" });
+        const handled = await handleError(error);
+        open?.({
+          type: "error",
+          message: t("notifications.socket.errors.assignmentGen"),
+          description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
+        });
       });
 
-      socket.on("AI_QUIZ_FAILED", ({ error }) => {
-        open?.({ type: "error", message: "Generation Failed", description: error });
+      socket.on("AI_QUIZ_FAILED", async ({ error }) => {
         updateJob("quiz-gen", { status: "failed" });
+        const handled = await handleError(error);
+        open?.({
+          type: "error",
+          message: t("notifications.socket.errors.quizGen"),
+          description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
+        });
       });
 
-      socket.on("AI_MAGIC_BUILDER_FAILED", ({ error, classId }) => {
-        open?.({ type: "error", message: "Generation Failed", description: error });
+      socket.on("AI_MAGIC_BUILDER_FAILED", async ({ error, classId }) => {
         updateJob(`magic-builder-${classId}`, { status: "failed" });
+        const handled = await handleError(error);
+        open?.({
+          type: "error",
+          message: t("notifications.socket.errors.magicBuilder"),
+          description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
+        });
       });
 
-      socket.on("AI_SUMMARY_FAILED", ({ error, classId }) => {
-        open?.({ type: "error", message: "Generation Failed", description: error });
+      socket.on("AI_SUMMARY_FAILED", async ({ error, classId }) => {
         updateJob(`summary-${classId}`, { status: "failed" });
+        const handled = await handleError(error);
+        open?.({
+          type: "error",
+          message: t("notifications.socket.errors.aiSummary"),
+          description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
+        });
       });
 
       socket.on("submission:ai-grade:completed", ({ submissionId }) => {
@@ -160,16 +211,20 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socket.off("disconnect", onDisconnect);
         socket.off("bulk-enroll:completed");
         socket.off("AI_SUMMARY_COMPLETED");
+        socket.off("AI_STUDY_PLAN_COMPLETED");
         socket.off("magic_builder_progress");
-        socket.off("AI_ASSIGNMENT_COMPLETED");
-        socket.off("AI_QUIZ_COMPLETED");
+        socket.off("AI_ASSIGNMENT_GENERATED");
+        socket.off("AI_QUIZ_GENERATED");
         socket.off("AI_MAGIC_BUILDER_COMPLETED");
         socket.off("AI_ASSIGNMENT_FAILED");
         socket.off("AI_QUIZ_FAILED");
         socket.off("AI_MAGIC_BUILDER_FAILED");
         socket.off("AI_SUMMARY_FAILED");
         socket.off("submission:ai-grade:completed");
+
+        // 🛡️ SRE: Properly disconnect on unmount to prevent dangling connections (Review #21)
         socket.disconnect();
+        setIsConnected(false);
       };
     } else {
       if (socket.connected) {

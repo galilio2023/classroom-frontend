@@ -29,7 +29,8 @@ export const HubSuiteSettings: React.FC = () => {
     method: "get",
   }) as any;
 
-  const { mutate: upgradeSuite, isLoading: isUpgrading } = useCustomMutation() as any;
+  const { mutate: upgradeSuite, mutation: upgradeMutation } = useCustomMutation() as any;
+  const isUpgrading = upgradeMutation.isPending;
 
   const handleUpgrade = () => {
     upgradeSuite({

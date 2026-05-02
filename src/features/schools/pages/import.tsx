@@ -117,7 +117,15 @@ const AdminImportPage = () => {
       });
 
       setResult(responseData);
-      toast.success(t("resources.admin-import.success", { defaultValue: "Onboarding complete!" }));
+      if (responseData.failed === 0) {
+        toast.success(
+          t("resources.admin-import.success", { defaultValue: "Onboarding complete!" })
+        );
+      } else {
+        toast.warning(
+          t("resources.admin-import.partial", { defaultValue: "Import completed with errors." })
+        );
+      }
     } catch (error: any) {
       const apiError = await handleError(error);
       toast.error(
@@ -130,6 +138,26 @@ const AdminImportPage = () => {
     } finally {
       setIsImporting(false);
     }
+  };
+
+  const downloadFailedRows = () => {
+    if (!result?.errors || result.errors.length === 0) return;
+
+    const csvData = result.errors.map((e: any) => ({
+      ...e.data,
+      import_error_reason: e.reason,
+    }));
+
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `failed_rows_${new Date().getTime()}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const reset = () => {
@@ -279,40 +307,64 @@ const AdminImportPage = () => {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 space-y-6">
             {result.errors.length > 0 && (
-              <div className="mt-4">
-                <h3 className="font-bold text-red-600 flex items-center gap-2 mb-4">
-                  <AlertCircle className="h-5 w-5" />
-                  {t("resources.admin-import.errors", { defaultValue: "Import Errors" })}
-                </h3>
-                <div className="rounded-md border border-red-100 bg-red-50/30 overflow-hidden">
+              <div className="mt-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-black uppercase tracking-widest text-[10px] text-destructive flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {t("resources.admin-import.errors", {
+                      defaultValue: "Import Remediation Required",
+                    })}
+                  </h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadFailedRows}
+                    className="rounded-xl border-destructive/20 text-destructive hover:bg-destructive/5 font-black uppercase tracking-widest text-[9px] h-9 gap-2"
+                  >
+                    <Upload className="h-3 w-3 rotate-180" />
+                    {t("resources.admin-import.downloadFailed", {
+                      defaultValue: "Download Failed Rows as CSV",
+                    })}
+                  </Button>
+                </div>
+                <div className="rounded-[1.5rem] border border-destructive/10 bg-destructive/5 overflow-hidden">
                   <Table>
-                    <TableHeader className="bg-red-50">
-                      <TableRow>
-                        <TableHead className="w-[80px]">Row</TableHead>
-                        <TableHead className="w-[200px]">Email</TableHead>
-                        <TableHead>Error</TableHead>
+                    <TableHeader className="bg-destructive/10 border-none">
+                      <TableRow className="hover:bg-transparent border-none">
+                        <TableHead className="w-[80px] font-black uppercase text-[9px] tracking-widest">
+                          Row
+                        </TableHead>
+                        <TableHead className="font-black uppercase text-[9px] tracking-widest">
+                          Reason
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {result.errors.map((err: any, i: number) => (
-                        <TableRow key={i}>
-                          <TableCell className="font-medium">{err.row}</TableCell>
-                          <TableCell>{err.email}</TableCell>
-                          <TableCell className="text-red-600 text-sm font-medium">
-                            {err.error}
+                        <TableRow key={i} className="hover:bg-destructive/5 border-destructive/5">
+                          <TableCell className="font-bold text-xs">#{err.row}</TableCell>
+                          <TableCell className="text-destructive font-bold text-xs">
+                            {err.reason}
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 </div>
+                <p className="text-[10px] font-medium text-muted-foreground italic text-center">
+                  Fix the errors in the downloaded file and re-upload only the failed rows.
+                </p>
               </div>
             )}
 
             <div className="mt-8 flex justify-center">
-              <Button onClick={reset} variant="outline" className="px-8 font-bold">
+              <Button
+                onClick={reset}
+                variant="outline"
+                className="px-8 font-bold rounded-xl h-11 uppercase tracking-widest text-[10px]"
+              >
                 {t("buttons.back")}
               </Button>
             </div>

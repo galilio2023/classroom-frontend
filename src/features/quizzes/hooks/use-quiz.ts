@@ -48,7 +48,7 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
   const { mutate: sendHeartbeat } = useCustomMutation();
   const heartbeatTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // --- RECOVERY LOGIC ---
+  // --- RECOVERY LOGIC & METADATA ---
   const { query: recoveryQuery } = useCustom({
     url: `/quizzes/${assignmentId}/results`,
     method: "get",
@@ -56,6 +56,10 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
       enabled: !!assignmentId && isResuming,
     },
   });
+
+  // 🛡️ OPTIMIZATION: Derive examMode from metadata already present in results or previous state
+  // (In Tablawy, the results endpoint returns the quiz definition to reduce roundtrips)
+  const examMode = (recoveryQuery.data as any)?.data?.quiz?.examMode ?? false;
 
   useEffect(() => {
     if (recoveryQuery.data) {
@@ -203,6 +207,7 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
     isAnswered,
     score,
     isFinished,
+    examMode,
     progress,
     activeStudents,
     isResuming,

@@ -27,7 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Loader2, LayoutGrid, Info } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Sparkles, Loader2, LayoutGrid, Info, ShieldAlert } from "lucide-react";
 import { Module } from "@/types";
 import { useTranslation } from "react-i18next";
 import { useQuizCreate } from "../hooks/use-quiz-create";
@@ -191,6 +192,35 @@ const QuizCreate = () => {
                         )}
                       />
                     </div>
+
+                    <FormField
+                      control={form.control}
+                      name="examMode"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-primary/10 bg-primary/5 p-4 space-y-0 transition-all hover:bg-primary/10">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                              <ShieldAlert className="h-3.5 w-3.5 text-primary" />
+                              <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+                              {t("classes.quiz.examMode", { defaultValue: "Exam Mode" })}
+                            </FormLabel>
+                            <p className="text-[10px] font-medium text-muted-foreground">
+                              {t("classes.quiz.examModeDesc", {
+                                defaultValue:
+                                  "Hardened integrity: AI-proctoring, tab-switch detection & no AI assistance.",
+                              })}
+                            </p>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              className="data-[state=checked]:bg-primary"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <QuizQuestionsForm form={form} questions={questions} />
@@ -242,6 +272,18 @@ const QuizCreate = () => {
                 </p>
                 <p className="text-xs font-medium leading-relaxed">
                   {t("aiHub.assistant.draftsDesc")}
+                </p>
+              </div>
+              <div className="pt-4 border-t border-primary/10 space-y-2">
+                <p className="font-black text-[10px] uppercase tracking-widest text-primary flex items-center gap-2">
+                  <ShieldAlert className="h-3.5 w-3.5" />
+                  {t("classes.quiz.examMode", "Exam Mode")}
+                </p>
+                <p className="text-[10px] font-medium leading-relaxed text-muted-foreground italic">
+                  {t(
+                    "classes.quiz.examModeExcellence",
+                    "Exam Mode ensures high-integrity assessments by tracking active focus and preventing unauthorized assistance."
+                  )}
                 </p>
               </div>
             </CardContent>

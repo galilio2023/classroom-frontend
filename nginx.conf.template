@@ -20,7 +20,14 @@ http {
     # 🛡️ SECURITY: Remove version header
     server_tokens off;
 
+    # 🚀 UPLOADS: Support 5MB+ uploads for Rural Hardening (Mandate Review #12)
+    client_max_body_size 10M;
+
     include /etc/nginx/conf.d/security-headers.conf;
+
+    # 🛡️ RESILIENCE: Use Docker's internal DNS resolver
+    # This allows Nginx to start even if the backend is temporarily down.
+    resolver 127.0.0.11 valid=30s;
 
     server {
         listen 8080;
@@ -37,7 +44,8 @@ http {
 
         # 🚀 REVERSE PROXY: API
         location /api/ {
-            proxy_pass ${BACKEND_URL};
+            set $backend "${BACKEND_URL}";
+            proxy_pass $backend;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection 'upgrade';
@@ -49,7 +57,8 @@ http {
 
         # 🚀 REVERSE PROXY: Sockets
         location /socket.io/ {
-            proxy_pass ${SOCKET_URL}/socket.io/;
+            set $socket_backend "${SOCKET_URL}";
+            proxy_pass $socket_backend/socket.io/;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";

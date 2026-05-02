@@ -1,5 +1,5 @@
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
-import { Settings as SettingsIcon, Loader2, History, Layout } from "lucide-react";
+import { Settings as SettingsIcon, Loader2, History, Layout, Paintbrush } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import usePageTitle from "@/hooks/use-page-title";
 import { motion } from "framer-motion";
@@ -34,6 +34,7 @@ import { UserRole } from "@/types";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { SettingsAuditLog } from "./components/audit-log";
 import { HubSuiteSettings } from "@/features/onboarding/components/HubSuiteSettings";
+import { BrandingSection } from "./components/BrandingSection";
 
 // Define the schema for global settings
 const settingsSchema = z.object({
@@ -53,7 +54,7 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 const SettingsEditPage = () => {
   const { t } = useTranslation();
-  const { isOwner } = useCapabilities();
+  const { isOwner, canCustomBrand } = useCapabilities();
   usePageTitle(t("settings.title"));
 
   const SETTINGS_ID = "global-settings";
@@ -143,6 +144,15 @@ const SettingsEditPage = () => {
                 <SettingsIcon className="h-3.5 w-3.5" />
                 General
               </TabsTrigger>
+              {canCustomBrand && (
+                <TabsTrigger
+                  value="branding"
+                  className="px-6 py-2.5 rounded-full font-black uppercase tracking-widest text-[10px] transition-all duration-300 gap-2 h-10 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
+                >
+                  <Paintbrush className="h-3.5 w-3.5" />
+                  Branding
+                </TabsTrigger>
+              )}
               {isOwner && (
                 <TabsTrigger
                   value="hub"
@@ -347,6 +357,12 @@ const SettingsEditPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {canCustomBrand && (
+            <TabsContent value="branding" className="mt-0 focus-visible:outline-none">
+              <BrandingSection />
+            </TabsContent>
+          )}
 
           {isOwner && (
             <TabsContent value="hub" className="mt-0 focus-visible:outline-none">

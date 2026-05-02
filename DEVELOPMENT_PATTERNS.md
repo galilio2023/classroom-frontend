@@ -76,7 +76,7 @@ To maintain 99.9% availability during deployments:
 
 ---
 
-## 9. Feature-Based Migration & Backward Compatibility
+## 10. Feature-Based Migration & Backward Compatibility
 The project is transitioning to a strictly feature-scoped directory structure (`src/features/`).
 - **Legacy Shims**: To prevent breaking existing imports, "shim" files are maintained in `src/hooks/` and `src/components/`. These files simply re-export the logic from its new feature-based home.
 - **Mandate**: All shim files MUST include a `@deprecated` JSDoc tag referencing the new feature path.

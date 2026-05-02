@@ -196,7 +196,7 @@ export const useClassDetails = (classId: string) => {
     }
   };
 
-  const { mutate: checkoutMutation, isLoading: isCheckingOut } = useCustomMutation() as any;
+  const { mutate: checkoutMutation, isPending: isCheckingOut } = useCustomMutation() as any;
 
   const handleCheckout = () => {
     checkoutMutation(

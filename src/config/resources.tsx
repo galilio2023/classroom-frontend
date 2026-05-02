@@ -39,6 +39,8 @@ import {
   Megaphone,
   ScrollText,
   UserCheck,
+  ShieldAlert,
+  ToggleRight,
 } from "lucide-react";
 import { ResourceProps } from "@refinedev/core";
 import { UserRole } from "@/types";
@@ -52,6 +54,68 @@ export const resources: ResourceProps[] = [
       label: "resources.dashboard.label",
       icon: <Home />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
+    },
+  },
+  {
+    name: "feature-flags",
+    list: "/admin/feature-flags",
+    meta: {
+      label: "resources.feature-flags.label",
+      icon: <ToggleRight />,
+      roles: [UserRole.ADMIN],
+      hide: true,
+    },
+  },
+  {
+    name: "at-risk-report",
+    list: "/reports/at-risk",
+    meta: {
+      label: "resources.at-risk-report.label",
+      icon: <ShieldAlert />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
+      hide: true,
+    },
+  },
+  {
+    name: "corporate-dashboard",
+    list: "/corporate/dashboard",
+    meta: {
+      label: "resources.corporate-dashboard.label",
+      icon: <LayoutGrid />,
+      roles: [UserRole.ADMIN],
+      hide: true,
+    },
+  },
+  {
+    name: "corporate-programs",
+    list: "/corporate/programs",
+    show: "/corporate/programs/:id",
+    meta: {
+      label: "resources.corporate-programs.label",
+      icon: <Briefcase />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
+      hide: true,
+    },
+  },
+  {
+    name: "corporate-certificates",
+    list: "/corporate/certificates",
+    meta: {
+      label: "resources.corporate-certificates.label",
+      icon: <Award />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
+      hide: true,
+    },
+  },
+  {
+    name: "corporate-employees",
+    list: "/corporate/employees",
+    show: "/corporate/employees/:id",
+    meta: {
+      label: "resources.corporate-employees.label",
+      icon: <Users />,
+      roles: [UserRole.ADMIN],
+      hide: true,
     },
   },
   {
@@ -246,11 +310,11 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "my-classes",
+    name: "enrollments",
     list: "/enrollments",
     meta: {
       group: "groups.academic",
-      label: "resources.my-classes.label",
+      label: "resources.enrollments.label",
       icon: <Bookmark />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
@@ -439,7 +503,7 @@ export const resources: ResourceProps[] = [
     list: "/followed-teachers",
     meta: {
       group: "groups.student-hub",
-      label: "resources.followed-teachers.label",
+      label: "resources.student-subscriptions.label",
       icon: <Bookmark />,
       roles: [UserRole.STUDENT],
     },

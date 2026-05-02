@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Users } from "lucide-react";
-import { useGo } from "@refinedev/core";
+import { useGo, useCustomMutation } from "@refinedev/core";
 import { QuizResult } from "@/features/ai/components/quiz-result";
 import { useQuiz } from "@/features/quizzes/hooks/use-quiz";
 import { QuizProgress } from "@/features/ai/components/quiz-progress";
@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
+import { toast } from "sonner";
+import { offlineDB } from "@/lib/offline-db";
 
 interface InteractiveQuizProps {
   assignmentId: number;
@@ -30,6 +32,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   const { t } = useTranslation();
   const { width, height } = useWindowSize();
   const go = useGo();
+  const { mutate: logTelemetry } = useCustomMutation();
   const {
     questions,
     currentStep,
@@ -38,12 +41,67 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
     isAnswered,
     score,
     isFinished,
+    examMode,
     progress,
     activeStudents,
     handleOptionSelect,
     handleCheckAnswer,
     handleNext,
   } = useQuiz({ assignmentId, classId, description, onComplete });
+
+  // 🛡️ RULE 6: Hardware Privacy & Safety (Tab Visibility)
+  // Mandate: Detect and report focus loss during high-stakes exams.
+  React.useEffect(() => {
+    if (!examMode || isFinished) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        toast.error(
+          t("classes.quiz.examModeWarning", {
+            defaultValue: "Tab-switch detected! This action has been logged for review.",
+          }),
+          {
+            duration: 10000,
+            icon: "🛡️",
+          }
+        );
+
+        // 🚀 TELEMETRY: Reliability + Rural Hardening (Rule 4)
+        const telemetryData = {
+          event: "focus_loss",
+          timestamp: new Date().toISOString(),
+          assignmentId,
+        };
+
+        if (navigator.onLine) {
+          navigator.sendBeacon(
+            `${import.meta.env.VITE_API_URL}/quizzes/${assignmentId}/telemetry`,
+            JSON.stringify(telemetryData)
+          );
+        } else {
+          // 📶 OFFLINE: Queue for later sync via useOfflineSync logic
+          void offlineDB.queue({
+            resource: "quizzes",
+            action: "custom",
+            variables: { ...telemetryData, path: "telemetry" },
+          });
+        }
+
+        // 🛡️ RULE 6: Stop active speech synthesis (Mandate)
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+        // 🚀 AUDIT: Telemetry sent via beacon to ensure persistence
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      // 🛡️ CLEANUP: Ensure no audio leaks if component unmounts while speaking
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+    };
+  }, [examMode, isFinished, t, assignmentId]); // logTelemetry removed (redundant)
 
   if (questions.length === 0) return null;
 

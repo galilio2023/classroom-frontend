@@ -14,7 +14,7 @@ export const getRegisterSchema = (t: TFunction) =>
     password: z
       .string()
       .min(8, t("auth.register.passwordMin", "Password must be at least 8 characters")),
-    role: z.enum(["student", "teacher", "parent"]),
+    role: z.enum(["student", "parent", "teacher", "admin"]),
     phoneNumber: z
       .string()
       .min(1, t("auth.register.phoneRequired", "Phone number is required"))

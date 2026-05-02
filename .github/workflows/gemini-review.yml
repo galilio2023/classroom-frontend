@@ -11,6 +11,7 @@ permissions:
 jobs:
   review:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -23,67 +24,99 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: npm install --no-save @google/generative-ai
+        run: npm ci
 
       - name: Run Gemini Review
         uses: actions/github-script@v7
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: "gemini-3.1-flash-lite-preview"
         with:
           script: |
             const fs = require('fs');
             const { GoogleGenerativeAI } = require("@google/generative-ai");
 
             async function run({ github, context, core, exec }) {
+              console.log("🚀 Starting Gemini Review Script (Frontend)...");
+              
               const geminiApiKey = process.env.GEMINI_API_KEY;
+              const geminiModel = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite-preview";
+
               if (!geminiApiKey) {
-                core.warning("No GEMINI_API_KEY found. Skipping review.");
+                core.warning("⚠️ No GEMINI_API_KEY found. Skipping review.");
                 return;
               }
 
               const genAI = new GoogleGenerativeAI(geminiApiKey);
-              const GEMINI_MODEL = "gemini-3-flash-preview";
-            
-              const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+              const model = genAI.getGenerativeModel({ model: geminiModel });
 
-              let rules = "";
+              console.log(`🤖 Using model: ${geminiModel}`);
+              console.log("📋 Loading rules and patterns...");
+              let rules = `
+                You are an expert code reviewer for Tablawy OS frontend.
+                Prioritize:
+                - Component deconstruction (no God files).
+                - Capability-based UI gating.
+                - Rural resilience (offline-first, IndexedDB).
+                - Accessible, high-fidelity Arabic typography.
+              `;
               try {
                 if (fs.existsSync("GEMINI.md")) {
-                  rules += fs.readFileSync("GEMINI.md", "utf8") + "\n\n";
+                  rules = fs.readFileSync("GEMINI.md", "utf8") + "\n\n";
+                  console.log("✅ Loaded GEMINI.md");
                 }
-                if (fs.existsSync("CODE_PATTERNS.md")) {
-                  rules += "--- FRONTEND SPECIFIC RULES ---\n" + fs.readFileSync("CODE_PATTERNS.md", "utf8");
+                if (fs.existsSync("DEVELOPMENT_PATTERNS.md")) {
+                  rules += "--- FRONTEND SPECIFIC RULES ---\n" + fs.readFileSync("DEVELOPMENT_PATTERNS.md", "utf8");
+                  console.log("✅ Loaded DEVELOPMENT_PATTERNS.md");
                 }
               } catch (e) {
-                core.error("Could not read rule files");
+                console.warn("⚠️ Could not read rule files, using default rules.");
               }
 
-              const pr = context.payload.pull_request;
-              if (!pr) return;
 
-              try {
-                await exec.exec(`git fetch origin ${pr.base.ref}`);
-              } catch (e) {
-                core.setFailed(`Fetch failed: ${e.message}`);
+              const pr = context.payload.pull_request;
+              if (!pr) {
+                console.log("ℹ️ No pull_request context. Skipping.");
                 return;
               }
 
+              console.log(`🔍 Fetching base branch: ${pr.base.ref}...`);
+              try {
+                await exec.exec(`git fetch origin ${pr.base.ref}`);
+              } catch (e) {
+                core.setFailed(`❌ Git fetch failed: ${e.message}`);
+                return;
+              }
+
+              console.log("📝 Generating diff (with noise filter)...");
               let diff = "";
               try {
-                const { stdout } = await exec.getExecOutput(`git diff origin/${pr.base.ref} HEAD`);
+                // 🛡️ NOISE FILTER: Exclude build artifacts, lockfiles, and images
+                const ignorePatterns = [
+                  ':(exclude)package-lock.json',
+                  ':(exclude)dist/*',
+                  ':(exclude)node_modules/*',
+                  ':(exclude)*.png',
+                  ':(exclude)*.jpg',
+                  ':(exclude)*.jpeg',
+                  ':(exclude)*.svg',
+                  ':(exclude)*.ico'
+                ];
+                const { stdout } = await exec.getExecOutput(`git diff origin/${pr.base.ref} HEAD -- . ${ignorePatterns.join(' ')}`);
                 diff = stdout;
               } catch (e) {
-                core.setFailed(`Diff failed: ${e.message}`);
+                core.setFailed(`❌ Git diff failed: ${e.message}`);
                 return;
               }
 
               if (!diff || diff.trim().length === 0) {
-                core.info("No changes detected.");
+                console.log("✅ No changes detected in source files.");
                 return;
               }
 
               const MAX_DIFF_LENGTH = 30000;
               if (diff.length > MAX_DIFF_LENGTH) {
+                console.log(`⚠️ Diff truncated from ${diff.length} to ${MAX_DIFF_LENGTH} characters.`);
                 diff = diff.substring(0, MAX_DIFF_LENGTH) + "\n... (Diff truncated)";
               }
 
@@ -97,7 +130,7 @@ jobs:
                 - Identify potential bugs or logical errors.
                 - Suggest improvements for readability and maintainability.
                 - Point out any security vulnerabilities.
-                - STRICTLY check for adherence to the "CODE_PATTERNS.md" rules (especially Refine v5 hooks and Table patterns).
+                - STRICTLY check for adherence to the "DEVELOPMENT_PATTERNS.md" rules (especially Refine v5 hooks and Table patterns).
                 - Keep feedback concise and use markdown bullet points.
 
                 ### Code Changes (diff):
@@ -106,20 +139,27 @@ jobs:
                 \`\`\`
               `;
 
+              console.log("🤖 Sending prompt to Gemini...");
               try {
                 const result = await model.generateContent(prompt);
                 const response = await result.response;
                 const review = response.text();
 
+                console.log("💬 Posting review comment...");
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
                   body: review,
                 });
+                console.log("✅ Review posted successfully!");
               } catch (error) {
-                core.setFailed(`AI Generation failed: ${error.message}`);
+                core.setFailed(`❌ AI Generation or Posting failed: ${error.message}`);
               }
             }
 
-            return await run({ github, context, core, exec });
+            try {
+              await run({ github, context, core, exec });
+            } catch (fatalError) {
+              core.setFailed(`🚨 Fatal script error: ${fatalError.message}`);
+            }

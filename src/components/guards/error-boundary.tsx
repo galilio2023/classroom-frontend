@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { withTranslation, WithTranslation } from "react-i18next";
+import { redactSensitiveData } from "@/lib/security";
 
 interface Props extends WithTranslation {
   children?: ReactNode;
@@ -24,6 +25,20 @@ class ErrorBoundaryInner extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
+
+    // 🛡️ PRODUCTION LOGGING: Send to an external service if needed
+    if (import.meta.env.PROD) {
+      // 🛡️ SECURITY: Aggressively redact PII from error metadata before transmission
+      const sanitizedLog = redactSensitiveData({
+        event: "uncaught_react_error",
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+        timestamp: new Date().toISOString(),
+      });
+
+      console.error(JSON.stringify(sanitizedLog));
+    }
 
     // Specifically handle dynamic import (chunk) failures
     if (

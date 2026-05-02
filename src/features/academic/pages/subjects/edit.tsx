@@ -44,7 +44,7 @@ const formSchema = z.object({
     .max(255, "Description must be less than 255 characters")
     .optional()
     .nullable(),
-  credits: z.coerce.number().min(0, "Credits cannot be negative").default(0),
+  credits: z.coerce.number().min(0, "Credits cannot be negative").step(0.1).default(0),
   departmentId: z.coerce.number().positive("Department is required"),
 });
 
@@ -171,7 +171,7 @@ const SubjectsEdit = () => {
                             Credits
                           </FormLabel>
                           <FormControl>
-                            <Input type="number" placeholder="e.g. 3" {...field} />
+                            <Input type="number" step="0.1" placeholder="e.g. 3.0" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

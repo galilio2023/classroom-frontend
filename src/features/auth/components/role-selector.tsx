@@ -2,91 +2,87 @@ import { GraduationCap, User, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
+type RoleType = "student" | "teacher" | "parent";
+
 interface RoleSelectorProps {
-  value: "student" | "teacher" | "parent";
-  onChange: (role: "student" | "teacher" | "parent") => void;
+  value: RoleType;
+  onChange: (role: RoleType) => void;
+  allowedRoles?: RoleType[];
 }
 
-export const RoleSelector = ({ value, onChange }: RoleSelectorProps) => {
+export const RoleSelector = ({
+  value,
+  onChange,
+  allowedRoles = ["student", "parent"],
+}: RoleSelectorProps) => {
   const { t } = useTranslation();
 
+  const roleConfigs = [
+    {
+      id: "student" as const,
+      label: t("roles.student"),
+      icon: GraduationCap,
+      activeColor: "text-primary",
+      activeBg: "bg-primary/5",
+    },
+    {
+      id: "teacher" as const,
+      label: t("roles.teacher"),
+      icon: User,
+      activeColor: "text-purple-500",
+      activeBg: "bg-purple-500/5",
+    },
+    {
+      id: "parent" as const,
+      label: t("roles.parent"),
+      icon: Heart,
+      activeColor: "text-primary",
+      activeBg: "bg-primary/5",
+    },
+  ];
+
+  const filteredRoles = roleConfigs.filter((role) => allowedRoles.includes(role.id));
+
   return (
-    <div className="grid grid-cols-3 gap-4">
-      <div
-        className={cn(
-          "relative flex flex-col items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all hover:border-primary/50",
-          value === "student" ? "border-primary bg-primary/5" : "border-muted bg-background"
-        )}
-        onClick={() => onChange("student")}
-      >
-        <GraduationCap
-          className={cn(
-            "h-8 w-8 mb-2",
-            value === "student" ? "text-primary" : "text-muted-foreground"
-          )}
-        />
-        <span
-          className={cn(
-            "font-medium text-xs text-center",
-            value === "student" ? "text-primary" : "text-muted-foreground"
-          )}
-        >
-          {t("roles.student")}
-        </span>
-        {value === "student" && (
-          <div className={cn("absolute top-2 h-2 w-2 bg-primary rounded-full", "end-2")} />
-        )}
-      </div>
-      <div
-        className={cn(
-          "relative flex flex-col items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all hover:border-primary/50",
-          value === "teacher" ? "border-primary bg-primary/5" : "border-muted bg-background"
-        )}
-        onClick={() => onChange("teacher")}
-      >
-        <User
-          className={cn(
-            "h-8 w-8 mb-2",
-            value === "teacher" ? "text-primary" : "text-muted-foreground"
-          )}
-        />
-        <span
-          className={cn(
-            "font-medium text-xs text-center",
-            value === "teacher" ? "text-primary" : "text-muted-foreground"
-          )}
-        >
-          {t("roles.teacher")}
-        </span>
-        {value === "teacher" && (
-          <div className={cn("absolute top-2 h-2 w-2 bg-primary rounded-full", "end-2")} />
-        )}
-      </div>
-      <div
-        className={cn(
-          "relative flex flex-col items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all hover:border-primary/50",
-          value === "parent" ? "border-primary bg-primary/5" : "border-muted bg-background"
-        )}
-        onClick={() => onChange("parent")}
-      >
-        <Heart
-          className={cn(
-            "h-8 w-8 mb-2",
-            value === "parent" ? "text-primary" : "text-muted-foreground"
-          )}
-        />
-        <span
-          className={cn(
-            "font-medium text-xs text-center",
-            value === "parent" ? "text-primary" : "text-muted-foreground"
-          )}
-        >
-          {t("roles.parent")}
-        </span>
-        {value === "parent" && (
-          <div className={cn("absolute top-2 h-2 w-2 bg-primary rounded-full", "end-2")} />
-        )}
-      </div>
+    <div className={cn("grid gap-4", filteredRoles.length === 3 ? "grid-cols-3" : "grid-cols-2")}>
+      {filteredRoles.map((role) => {
+        const isActive = value === role.id;
+        const Icon = role.icon;
+
+        return (
+          <div
+            key={role.id}
+            className={cn(
+              "relative flex flex-col items-center justify-center p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:border-primary/30",
+              isActive ? cn("border-primary", role.activeBg) : "border-border/40 bg-muted/10"
+            )}
+            onClick={() => onChange(role.id)}
+          >
+            <Icon
+              className={cn(
+                "h-10 w-10 mb-3",
+                isActive ? role.activeColor : "text-muted-foreground/40"
+              )}
+            />
+            <span
+              className={cn(
+                "font-bold text-xs uppercase tracking-widest text-center",
+                isActive ? "text-foreground" : "text-muted-foreground"
+              )}
+            >
+              {role.label}
+            </span>
+            {isActive && (
+              <div
+                className={cn(
+                  "absolute top-3 h-2 w-2 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]",
+                  "end-3"
+                )}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

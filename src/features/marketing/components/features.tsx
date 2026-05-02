@@ -79,7 +79,7 @@ export const LandingFeatures = ({ isAr }: Props) => {
         <div className="space-y-4 md:space-y-6 max-w-3xl">
           <h2
             className={cn(
-              "text-4xl md:text-7xl lg:text-8xl font-black uppercase leading-[0.95] md:leading-[0.9]",
+              "text-4xl md:text-7xl lg:text-8xl font-extrabold uppercase leading-[0.95] md:leading-[0.9]",
               !isAr && "tracking-tighter"
             )}
           >
@@ -92,7 +92,7 @@ export const LandingFeatures = ({ isAr }: Props) => {
         </div>
         <Button
           variant="ghost"
-          className="font-black uppercase tracking-widest text-[10px] md:text-xs gap-3 h-14 md:h-16 px-8 md:px-10 rounded-2xl hover:bg-primary/5 group border border-primary/10 transition-all w-fit"
+          className="font-extrabold uppercase tracking-widest text-[10px] md:text-xs gap-3 h-14 md:h-16 px-8 md:px-10 rounded-2xl hover:bg-primary/5 group border border-primary/10 transition-all w-fit"
         >
           {t("landing.features.exploreAll")}
           <ChevronRight className="h-4 w-4 md:h-5 md:w-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
@@ -122,7 +122,7 @@ export const LandingFeatures = ({ isAr }: Props) => {
             >
               {feature.icon}
             </div>
-            <h3 className="text-xl md:text-2xl font-black mb-3 md:mb-4 uppercase tracking-tight">
+            <h3 className="text-xl md:text-2xl font-extrabold mb-3 md:mb-4 uppercase tracking-tight">
               {feature.title}
             </h3>
             <p className="text-sm md:text-lg text-muted-foreground/80 font-medium leading-relaxed">

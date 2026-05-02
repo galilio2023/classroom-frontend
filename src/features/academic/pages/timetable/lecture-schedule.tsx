@@ -58,13 +58,15 @@ import { ListView } from "@/components/refine/views/list-view";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
+import { useTerm } from "@/contexts/term-context";
 import { CollisionModal } from "../../components/CollisionModal";
 import { DAYS } from "@/constants/calendar";
 
 export default function LectureSchedulePage() {
   const { t } = useTranslation();
-  const { isFacultySuite, isTeacher, isAdmin } = useCapabilities();
+  const { isFacultySuite, isTeacher, isAdmin, lectureSchedule } = useCapabilities();
   const { push } = useNavigation() as any;
+  const { currentTerm } = useTerm();
 
   const slotSchema = useMemo(
     () =>
@@ -73,7 +75,8 @@ export default function LectureSchedulePage() {
         dayOfWeek: z.string().min(1, "Day is required"),
         startTime: z.string().min(1, "Start time is required"),
         endTime: z.string().min(1, "End time is required"),
-        classId: z.string().min(1, "Section is required"), // Faculty: Class = Section
+        classId: z.string().optional(),
+        sectionId: z.string().min(1, "Section is required"),
         roomId: z.string().optional(),
       }),
     []
@@ -90,14 +93,15 @@ export default function LectureSchedulePage() {
 
   const { query: yearsQuery } = useList<AcademicYear>({ resource: "academic-years" });
 
-  const { query: sectionsQuery } = useList<Class>({
-    resource: "timetable/lecturer-sections",
-    queryOptions: { enabled: isTeacher || isAdmin },
+  const { query: sectionsQuery } = useList<any>({
+    resource: "academic/sections",
+    filters: currentTerm ? [{ field: "termId", operator: "eq", value: currentTerm.id }] : [],
+    queryOptions: { enabled: isTeacher || isAdmin || !!currentTerm },
   });
 
   const slots = slotsQuery.data?.data || [];
   const years = yearsQuery.data?.data || [];
-  const sections = sectionsQuery.data?.data || [];
+  const sections = (sectionsQuery.data?.data || []) as any[];
   const isLoading = slotsQuery.isLoading || yearsQuery.isLoading || sectionsQuery.isLoading;
 
   const { mutate: create, mutation: createMutation } = useCreate();
@@ -111,7 +115,7 @@ export default function LectureSchedulePage() {
   });
 
   const onSubmit = (values: SlotFormValues) => {
-    const selectedSection = sections.find((s) => s.id.toString() === values.classId);
+    const selectedSection = sections.find((s) => s.id.toString() === values.sectionId);
 
     create(
       {
@@ -209,8 +213,8 @@ export default function LectureSchedulePage() {
                     <div className="space-y-2">
                       <Label>Course Section</Label>
                       <Select
-                        value={form.watch("classId")}
-                        onValueChange={(v) => form.setValue("classId", v)}
+                        value={form.watch("sectionId")}
+                        onValueChange={(v) => form.setValue("sectionId", v)}
                       >
                         <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 text-start">
                           <SelectValue placeholder="Select Section" />
@@ -218,7 +222,7 @@ export default function LectureSchedulePage() {
                         <SelectContent>
                           {sections.map((s) => (
                             <SelectItem key={s.id} value={s.id.toString()}>
-                              {(s as any).subject?.name} — Sec {s.name}
+                              {s.subject?.name} — {s.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -254,7 +258,7 @@ export default function LectureSchedulePage() {
                             <SelectValue placeholder="Day" />
                           </SelectTrigger>
                           <SelectContent>
-                            {DAYS.map((label, idx) => (
+                            {DAYS.map((label: string, idx: number) => (
                               <SelectItem key={idx} value={idx.toString()}>
                                 {label}
                               </SelectItem>
@@ -308,7 +312,7 @@ export default function LectureSchedulePage() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
-          {DAYS.map((label, idx) => {
+          {DAYS.map((label: string, idx: number) => {
             const daySlots = slots.filter((s) => s.dayOfWeek === idx);
             const isToday = dayjs().get("day") === idx;
 
@@ -351,6 +355,11 @@ export default function LectureSchedulePage() {
                               <Layers className="w-3 h-3 text-purple-500 shrink-0" />
                               <h4 className="text-[10px] font-black truncate">
                                 {(slot as any).section?.name || "Section"}
+                                {slot.sectionId && (
+                                  <span className="ml-1 text-[8px] opacity-40">
+                                    #{slot.sectionId.toString()}
+                                  </span>
+                                )}
                               </h4>
                             </div>
                             <div className="flex items-center gap-1.5 opacity-60">
