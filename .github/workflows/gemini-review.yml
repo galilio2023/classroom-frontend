@@ -45,7 +45,7 @@ jobs:
               }
 
               const genAI = new GoogleGenerativeAI(geminiApiKey);
-              const GEMINI_MODEL = "gemini-1.5-flash";
+              const GEMINI_MODEL = "gemini-3.1-flash-lite-preview";
               const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
               console.log("📋 Loading rules and patterns...");
