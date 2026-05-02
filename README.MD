@@ -30,9 +30,12 @@ We strictly adhere to industrial architectural standards to ensure AI security a
 
 **[Read the Full Code Patterns Guide here](./DEVELOPMENT_PATTERNS.md)**
 
-1.  **Zero-Direct-Call Policy**: The frontend never calls AI SDKs directly.
-2.  **Visual Identity (Rule 4)**: Consistent `ai-primary` branding.
-3.  **Compound Component Architecture**: Large features are broken into reusable atoms.
+1.  **Component Deconstruction (Section 3)**: Monolithic components are forbidden; large features are broken into atomic widgets.
+2.  **Zero-Direct-Call Policy (Section 4)**: The frontend never calls AI SDKs directly; all interactions go through the backend proxy.
+3.  **Visual Identity (Section 5)**: Consistent `ai-primary` branding and `Sparkles` iconography.
+4.  **Rural Hardening (Section 7)**: Offline-first strategy using Dexie (IndexedDB) and Service Workers.
+5.  **Operational Resilience (Section 9)**: Non-root Docker containers and zero-downtime migrations.
+6.  **Feature-Based Migration (Section 10)**: Strict adherence to feature-scoped directory structures.
 
 ---
 

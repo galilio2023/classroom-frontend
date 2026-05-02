@@ -10,13 +10,13 @@ export SOCKET_URL=$(echo ${VITE_SOCKET_URL:-"http://localhost:8000"} | sed 's:/*
 # Permissive regex allows internal Docker service names (e.g., http://backend_svc:8000)
 # This prevents configuration injection into nginx.conf
 if ! echo "$BACKEND_URL" | grep -qE '^https?://[a-zA-Z0-9._-]+(:[0-9]+)?$'; then
-  echo "⚠️ WARNING: BACKEND_URL ($BACKEND_URL) does not appear to be a valid URL. Sanitizing..."
-  BACKEND_URL=$(echo "$BACKEND_URL" | tr -cd 'a-zA-Z0-9._\-:/?')
+  echo "❌ ERROR: BACKEND_URL ($BACKEND_URL) is invalid. Must be a valid http/https URL."
+  exit 1
 fi
 
 if ! echo "$SOCKET_URL" | grep -qE '^https?://[a-zA-Z0-9._-]+(:[0-9]+)?$'; then
-  echo "⚠️ WARNING: SOCKET_URL ($SOCKET_URL) does not appear to be a valid URL. Sanitizing..."
-  SOCKET_URL=$(echo "$SOCKET_URL" | tr -cd 'a-zA-Z0-9._\-:/?')
+  echo "❌ ERROR: SOCKET_URL ($SOCKET_URL) is invalid. Must be a valid http/https URL."
+  exit 1
 fi
 
 echo "🔧 Injecting BACKEND_URL=$BACKEND_URL and SOCKET_URL=$SOCKET_URL into Configs..."
