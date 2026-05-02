@@ -355,6 +355,38 @@
     },
     "deleteDialog": {
       "description": "This will permanently remove this notification from your history. This action cannot be undone."
+    },
+    "socket": {
+      "bulkEnroll": {
+        "title": "Bulk Enrollment Complete",
+        "desc": "Created {{created}} users and enrolled {{enrolled}} students."
+      },
+      "aiSummary": {
+        "title": "AI Summary Ready",
+        "desc": "The class summary has been generated and is now available."
+      },
+      "aiStudyPlan": {
+        "title": "✨ Your study plan is ready",
+        "desc": "Your personalized AI study journey has been generated."
+      },
+      "aiAssignment": {
+        "title": "✨ Assignment Generated",
+        "desc": "Your AI assignment draft is ready!"
+      },
+      "aiQuiz": {
+        "title": "✨ Quiz Generated",
+        "desc": "Your AI quiz draft is ready!"
+      },
+      "magicBuilder": {
+        "title": "Curriculum Built",
+        "desc": "Magic Builder has finished creating your modules and lessons."
+      },
+      "errors": {
+        "assignmentGen": "Assignment Generation Failed",
+        "quizGen": "Quiz Generation Failed",
+        "magicBuilder": "Curriculum Construction Failed",
+        "aiSummary": "Class Summary Failed"
+      }
     }
   },
   "settings": {

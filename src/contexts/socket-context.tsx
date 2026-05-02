@@ -19,8 +19,10 @@ import { useJobs } from "./job-context";
 import { useStudyPlanToast } from "@/hooks/use-study-plan-toast";
 import { handleError } from "@/providers/utils/api-errors";
 import { Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
   const { data: user, isLoading } = useGetIdentity<User>();
   const [isConnected, setIsConnected] = useState(socket.connected);
   const invalidate = useInvalidate();
@@ -52,8 +54,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("bulk-enroll:completed", ({ results }) => {
         open?.({
           type: "success",
-          message: "Bulk Enrollment Complete",
-          description: `Created ${results.created} users and enrolled ${results.enrolled} students.`,
+          message: t("notifications.socket.bulkEnroll.title"),
+          description: t("notifications.socket.bulkEnroll.desc", {
+            created: results.created,
+            enrolled: results.enrolled,
+          }),
         });
         updateJob("bulk-enroll", { status: "completed" });
         // Seamlessly refresh the students/enrollments list
@@ -66,8 +71,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("AI_SUMMARY_COMPLETED", ({ classId }) => {
         open?.({
           type: "success",
-          message: "AI Summary Ready",
-          description: "The class summary has been generated and is now available.",
+          message: t("notifications.socket.aiSummary.title"),
+          description: t("notifications.socket.aiSummary.desc"),
         });
         updateJob(`summary-${classId}`, { status: "completed" });
         void invalidate({
@@ -80,13 +85,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("AI_STUDY_PLAN_COMPLETED", ({ jobId }) => {
         open?.({
           type: "success",
-          message: "✨ Your study plan is ready",
-          description: "Your personalized AI study journey has been generated.",
-          // 🚀 RULE 5: Standardized Error Handling/Notifications
-          // We use the notification's ability to show an action button if supported,
-          // or we rely on the user clicking the toast.
-          // Note: Refine's default notification provider might not support custom buttons in the 'open' call directly
-          // depending on the UI kit used. We'll use the description or a custom toast if needed.
+          message: t("notifications.socket.aiStudyPlan.title"),
+          description: t("notifications.socket.aiStudyPlan.desc"),
         });
 
         updateJob(jobId || "study-plan-gen", { status: "completed" });
@@ -125,8 +125,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("AI_ASSIGNMENT_GENERATED", ({ content }) => {
         open?.({
           type: "success",
-          message: "✨ Assignment Generated",
-          description: "Your AI assignment draft is ready!",
+          message: t("notifications.socket.aiAssignment.title"),
+          description: t("notifications.socket.aiAssignment.desc"),
         });
         updateJob("assignment-gen", { status: "completed" });
         // We can use a custom event or Zustand to pass this to the component
@@ -136,8 +136,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("AI_QUIZ_GENERATED", ({ quiz }) => {
         open?.({
           type: "success",
-          message: "✨ Quiz Generated",
-          description: "Your AI quiz draft is ready!",
+          message: t("notifications.socket.aiQuiz.title"),
+          description: t("notifications.socket.aiQuiz.desc"),
         });
         updateJob("quiz-gen", { status: "completed" });
         window.dispatchEvent(new CustomEvent("AI_QUIZ_READY", { detail: { quiz } }));
@@ -146,8 +146,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       socket.on("AI_MAGIC_BUILDER_COMPLETED", ({ lessonData, classId }) => {
         open?.({
           type: "success",
-          message: "Curriculum Built",
-          description: "Magic Builder has finished creating your modules and lessons.",
+          message: t("notifications.socket.magicBuilder.title"),
+          description: t("notifications.socket.magicBuilder.desc"),
         });
         updateJob(`magic-builder-${classId}`, { status: "completed" });
         window.dispatchEvent(
@@ -161,7 +161,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         const handled = await handleError(error);
         open?.({
           type: "error",
-          message: "Assignment Generation Failed",
+          message: t("notifications.socket.errors.assignmentGen"),
           description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
         });
       });
@@ -171,7 +171,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         const handled = await handleError(error);
         open?.({
           type: "error",
-          message: "Quiz Generation Failed",
+          message: t("notifications.socket.errors.quizGen"),
           description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
         });
       });
@@ -181,7 +181,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         const handled = await handleError(error);
         open?.({
           type: "error",
-          message: "Curriculum Construction Failed",
+          message: t("notifications.socket.errors.magicBuilder"),
           description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
         });
       });
@@ -191,7 +191,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         const handled = await handleError(error);
         open?.({
           type: "error",
-          message: "Class Summary Failed",
+          message: t("notifications.socket.errors.aiSummary"),
           description: `${handled.message} (Support ID: ${handled.meta?.correlationId})`,
         });
       });

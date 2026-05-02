@@ -1,39 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useApiUrl, useCustom } from "@refinedev/core";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BrainCircuit,
   Users,
-  TrendingUp,
   AlertCircle,
-  BarChart3,
   ShieldAlert,
   ChevronRight,
-  Search,
   BookOpen,
   Loader2,
   WifiOff,
 } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Cell,
-  Pie,
-  PieChart,
-  CartesianGrid,
-} from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 import { handleError } from "@/providers/utils/api-errors";
+import { RegistrarGPAChart } from "../components/RegistrarGPAChart";
+import { RegistrarStandingMix } from "../components/RegistrarStandingMix";
 
 interface RegistrarSummary {
   standings: Array<{ standing: string; count: number }>;
@@ -41,8 +24,16 @@ interface RegistrarSummary {
   departments: Array<{ id: string; name: string; studentCount: number }>;
 }
 
+// 🎨 HUB RULE 7: Analysis features use ai-primary colors and institutional themes.
+const COLORS = [
+  "hsl(var(--ai-primary))",
+  "hsl(var(--ai-primary) / 0.7)",
+  "hsl(var(--ai-primary) / 0.5)",
+  "hsl(var(--ai-primary) / 0.3)",
+  "hsl(var(--ai-primary) / 0.1)",
+];
+
 export default function RegistrarDashboardPage() {
-  const { t } = useTranslation();
   const apiUrl = useApiUrl();
 
   const { query } = useCustom<RegistrarSummary>({
@@ -78,16 +69,6 @@ export default function RegistrarDashboardPage() {
       isMounted = false;
     };
   }, [isError, error]);
-
-  // 🎨 HUB RULE 7: Analysis features use ai-primary colors and institutional themes.
-  const COLORS = ["#7c3aed", "#a78bfa", "#c4b5fd", "#ddd6fe", "#ede9fe"];
-
-  const chartConfig = {
-    count: {
-      label: "Students",
-      color: "hsl(var(--primary))",
-    },
-  };
 
   if (isLoading) {
     return (
@@ -135,8 +116,6 @@ export default function RegistrarDashboardPage() {
     );
   }
 
-  const hasStandings = data?.standings && data.standings.length > 0;
-  const hasGpaData = data?.gpaDistribution && data.gpaDistribution.length > 0;
   const hasDeptData = data?.departments && data.departments.length > 0;
 
   return (
@@ -183,7 +162,7 @@ export default function RegistrarDashboardPage() {
 
       {/* KPI Cards */}
       <div className="grid gap-6 md:grid-cols-4">
-        {hasStandings ? (
+        {data?.standings && data.standings.length > 0 ? (
           data?.standings.map((s, i) => (
             <Card
               key={s.standing}
@@ -215,124 +194,8 @@ export default function RegistrarDashboardPage() {
       </div>
 
       <div className="grid gap-8 md:grid-cols-3">
-        {/* GPA Bell Curve */}
-        <Card className="md:col-span-2 rounded-[2.5rem] border-border/40 shadow-2xl p-8">
-          <CardHeader className="px-0 pt-0 pb-8">
-            <CardTitle className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
-              <BarChart3 className="h-5 w-5 text-primary" />
-              GPA Distribution (Bell Curve)
-            </CardTitle>
-            <CardDescription className="font-medium italic">
-              Student density across 4.0 academic scale.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="px-0">
-            {hasGpaData ? (
-              <div className="h-[350px] w-full">
-                <ChartContainer config={chartConfig}>
-                  <BarChart data={data?.gpaDistribution || []}>
-                    <CartesianGrid
-                      vertical={false}
-                      strokeDasharray="3 3"
-                      stroke="rgba(0,0,0,0.05)"
-                    />
-                    <XAxis
-                      dataKey="range"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 900, fill: "rgba(0,0,0,0.4)" }}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 900, fill: "rgba(0,0,0,0.4)" }}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="count" radius={[10, 10, 0, 0]} fill="var(--color-count)">
-                      {(data?.gpaDistribution || []).map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.count > 10 ? "hsl(var(--primary))" : "rgba(0,0,0,0.1)"}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ChartContainer>
-              </div>
-            ) : (
-              <div className="h-[350px] w-full flex flex-col items-center justify-center text-muted-foreground/20">
-                <BarChart3 className="h-16 w-16 mb-4" />
-                <p className="font-black uppercase tracking-[0.2em] text-[10px]">
-                  Waiting for GPA Data
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Standing Split */}
-        <Card className="rounded-[2.5rem] border-border/40 shadow-2xl p-8">
-          <CardHeader className="px-0 pt-0 pb-8">
-            <CardTitle className="text-xl font-black uppercase tracking-tight">
-              Standing Mix
-            </CardTitle>
-            <CardDescription className="font-medium italic">
-              Relative split of institutional standings.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="px-0 flex flex-col items-center">
-            {hasStandings ? (
-              <>
-                <div className="h-[250px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={data?.standings || []}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={70}
-                        outerRadius={90}
-                        paddingAngle={8}
-                        dataKey="count"
-                        nameKey="standing"
-                      >
-                        {(data?.standings || []).map((_, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                            stroke="none"
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="w-full space-y-3 mt-8">
-                  {data?.standings.map((s, i) => (
-                    <div key={s.standing} className="flex items-center justify-between group">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: COLORS[i % COLORS.length] }}
-                        />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
-                          {s.standing}
-                        </span>
-                      </div>
-                      <span className="text-xs font-black">{s.count}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="h-[350px] flex flex-col items-center justify-center text-muted-foreground/20">
-                <BarChart3 className="h-16 w-16 mb-4 rotate-90" />
-                <p className="font-black uppercase tracking-[0.2em] text-[10px]">Mix Empty</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <RegistrarGPAChart data={data?.gpaDistribution || []} />
+        <RegistrarStandingMix data={data?.standings || []} />
       </div>
 
       {/* Department Breakdown */}
