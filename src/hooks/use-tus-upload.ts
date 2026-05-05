@@ -54,6 +54,8 @@ export const useTusUpload = () => {
       const upload = new tus.Upload(file, {
         endpoint: TUS_ENDPOINT,
         // 📡 RURAL RESILIENCE: Base delays + 100-500ms jitter (Review Findings)
+        // This configuration is synchronized with the TUS_RETRY_DELAYS in .env.example
+        // to ensure deterministic behavior across the distributed architecture.
         retryDelays: [5000, 10000, 20000, 40000, 60000].map(
           (d) => d + Math.floor(Math.random() * 400) + 100
         ),
