@@ -15,6 +15,7 @@ import {
   Pin,
   PinOff,
   Download,
+  BrainCircuit,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -28,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import { usePersistentLive } from "@/features/classes/hooks/use-persistent-live";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { offlineDB as db } from "@/lib/offline-db";
+import { CinematicArchitectModal } from "@/features/ai/components/cinematic-architect-modal";
 
 interface ResourceItemProps {
   res: Resource;
@@ -50,6 +52,7 @@ export const ResourceItem = ({
   const { setActiveVideo } = usePersistentLive();
   const { downloadLesson } = useOfflineSync();
   const isAr = i18n.language === "ar";
+  const [isArchitectOpen, setIsArchitectOpen] = useState(false);
 
   const handleOpenResource = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -74,6 +77,11 @@ export const ResourceItem = ({
 
   return (
     <div className="flex items-center justify-between p-4 rounded-2xl border border-black/3 dark:border-white/3 bg-muted/20 hover:bg-primary/5 transition-all cursor-pointer group/item">
+      <CinematicArchitectModal
+        isOpen={isArchitectOpen}
+        onClose={() => setIsArchitectOpen(false)}
+        resourceId={String(res.id)}
+      />
       <div className="flex items-center gap-4 overflow-hidden">
         <div
           className={cn(
@@ -152,6 +160,15 @@ export const ResourceItem = ({
                   </>
                 )}
               </DropdownMenuItem>
+              {isTeacher && (
+                <DropdownMenuItem
+                  className="rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer text-purple-600 hover:bg-purple-50 transition-all"
+                  onClick={() => setIsArchitectOpen(true)}
+                >
+                  <BrainCircuit className="h-3.5 w-3.5" />
+                  Draft Course with AI
+                </DropdownMenuItem>
+              )}
               {res.type === "video" && (
                 <DropdownMenuItem
                   className="rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer text-ai-primary hover:bg-ai-primary/10 transition-all"

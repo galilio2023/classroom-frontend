@@ -1,5 +1,8 @@
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 import "highlight.js/styles/github-dark.css";
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
@@ -47,7 +50,8 @@ export const MarkdownRenderer = ({ content, className }: MarkdownRendererProps) 
   return (
     <div className={cn("prose prose-sm dark:prose-invert max-w-none", className)}>
       <ReactMarkdown
-        rehypePlugins={[rehypeHighlight]}
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeHighlight, rehypeKatex]}
         components={{
           pre: ({ node, ...props }) => <div {...(props as any)} />,
           code: ({ node, inline, className, children, ...props }: any) => {

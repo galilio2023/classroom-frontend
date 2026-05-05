@@ -51,7 +51,30 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
       // Fallback: Use the original color without alpha to avoid invalid CSS
       document.documentElement.style.setProperty("--primary-muted", normalizedColor);
     }
-  }, [theme.primaryColor, suiteFallback]);
+
+    // ♿ ACCESSIBILITY: Apply High Contrast Mode
+    if (identity?.accessibilityPreferences?.highContrast) {
+      document.documentElement.classList.add("high-contrast");
+    } else {
+      document.documentElement.classList.remove("high-contrast");
+    }
+
+    // ♿ ACCESSIBILITY: Apply Font Scaling
+    const scale = identity?.accessibilityPreferences?.fontSize || 100;
+    document.documentElement.style.fontSize = `${(scale / 100) * 16}px`;
+
+    // 📡 REACH: Low Bandwidth Mode Signal (for components to query)
+    if (identity?.lowBandwidthMode) {
+      document.documentElement.setAttribute("data-low-bandwidth", "true");
+    } else {
+      document.documentElement.removeAttribute("data-low-bandwidth");
+    }
+  }, [
+    theme.primaryColor,
+    suiteFallback,
+    identity?.accessibilityPreferences,
+    identity?.lowBandwidthMode,
+  ]);
 
   return <SchoolThemeContext.Provider value={theme}>{children}</SchoolThemeContext.Provider>;
 };

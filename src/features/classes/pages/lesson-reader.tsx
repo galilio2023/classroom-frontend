@@ -207,6 +207,9 @@ export const LessonReader = () => {
             variant="outline"
             size="sm"
             onClick={() => setIsAddChatOpen(!isChatOpen)}
+            aria-expanded={isChatOpen}
+            aria-controls="ai-tutor-sidebar"
+            aria-label={isChatOpen ? t("classes.reader.hideAiTutor") : t("classes.reader.aiTutor")}
             className={cn(
               "rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] h-9 md:h-11 px-3 md:px-5 gap-2 transition-all shadow-sm",
               isChatOpen
@@ -222,7 +225,11 @@ export const LessonReader = () => {
         </header>
 
         {/* Lesson Content */}
-        <main className="flex-1 overflow-y-auto px-4 md:px-12 lg:px-20 py-10 md:py-20 max-w-5xl mx-auto w-full text-start scroll-smooth">
+        <main
+          role="main"
+          aria-label={t("classes.reader.lessonContent", { defaultValue: "Lesson Content" })}
+          className="flex-1 overflow-y-auto px-4 md:px-12 lg:px-20 py-10 md:py-20 max-w-5xl mx-auto w-full text-start scroll-smooth"
+        >
           <article className="prose prose-sm md:prose-base lg:prose-lg dark:prose-invert max-w-none">
             <header className="mb-10 md:mb-16">
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -267,6 +274,9 @@ export const LessonReader = () => {
       <AnimatePresence>
         {isChatOpen && (
           <motion.aside
+            id="ai-tutor-sidebar"
+            role="complementary"
+            aria-label={t("classes.reader.tutorTitle")}
             initial={isAr ? { x: -400 } : { x: 400 }}
             animate={{ x: 0 }}
             exit={isAr ? { x: -400 } : { x: 400 }}
@@ -280,7 +290,7 @@ export const LessonReader = () => {
             <div className="h-16 md:h-20 px-6 border-b flex items-center justify-between bg-primary/5">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-xl shadow-inner">
-                  <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                  <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-primary" aria-hidden="true" />
                 </div>
                 <div className="text-start">
                   <h2 className="font-black text-sm md:text-base tracking-tight">
@@ -294,6 +304,7 @@ export const LessonReader = () => {
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label={t("buttons.close")}
                 onClick={() => setIsAddChatOpen(false)}
                 className="rounded-full h-8 w-8 md:h-10 md:w-10"
               >
@@ -301,7 +312,13 @@ export const LessonReader = () => {
               </Button>
             </div>
 
-            <ScrollArea className="flex-1 p-4 md:p-6" ref={scrollRef}>
+            <ScrollArea
+              className="flex-1 p-4 md:p-6"
+              ref={scrollRef}
+              role="log"
+              aria-label={t("classes.reader.chatHistory", { defaultValue: "Chat History" })}
+              aria-live="polite"
+            >
               <div className="space-y-6">
                 <div className="bg-muted/50 p-4 rounded-2xl text-[11px] md:text-xs leading-relaxed text-start font-medium border border-black/3 dark:border-white/3">
                   {t("classes.reader.welcome", {
@@ -343,8 +360,12 @@ export const LessonReader = () => {
                 ))}
 
                 {isTyping && (
-                  <div className="flex gap-2 items-center text-muted-foreground animate-pulse px-2">
-                    <div className="flex gap-1">
+                  <div
+                    className="flex gap-2 items-center text-muted-foreground animate-pulse px-2"
+                    aria-live="assertive"
+                    role="status"
+                  >
+                    <div className="flex gap-1" aria-hidden="true">
                       <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-bounce" />
                       <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-bounce delay-100" />
                       <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-bounce delay-200" />

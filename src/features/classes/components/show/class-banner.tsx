@@ -18,6 +18,7 @@ import { useMemo } from "react";
 import { getSubjectIcon } from "@/lib/subject-icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useLowBandwidth } from "@/hooks/use-low-bandwidth";
 
 interface ClassBannerProps {
   aClass: Class;
@@ -43,6 +44,7 @@ export const ClassBanner = ({
   isCheckingOut,
 }: ClassBannerProps) => {
   const { t, i18n } = useTranslation();
+  const isLowBandwidth = useLowBandwidth();
   const classColor = aClass.color || "#3b82f6";
   const isFull = aClass.capacity && approvedCount >= aClass.capacity;
 
@@ -64,7 +66,9 @@ export const ClassBanner = ({
       {/* Background Patterns */}
       <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-white via-transparent to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
+      {!isLowBandwidth && (
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
+      )}
 
       <div className="relative z-10 p-6 md:p-10 lg:p-12 flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 w-full">
         <div className="space-y-4 md:space-y-6 max-w-4xl flex-1">

@@ -16,6 +16,9 @@ import { AILiveCompanion } from "@/features/ai/components/AiLiveCompanion";
 import { useQueryClient } from "@tanstack/react-query";
 import { handleError } from "@/providers/utils/api-errors";
 import { useHardwareSafety } from "@/hooks/use-hardware-safety";
+import { useLowBandwidth } from "@/hooks/use-low-bandwidth";
+import { WifiOff, ClosedCaption } from "lucide-react";
+import { useLiveCaptions } from "../hooks/use-live-captions";
 
 // Hooks
 import { useLiveSession } from "@/features/classes/hooks/useLiveSession";
@@ -399,6 +402,13 @@ export const LiveClassroom = ({
     };
   }, [isMiniMode]);
 
+  const isLowBandwidth = useLowBandwidth();
+  const [showCaptions, setShowCaptions] = useState(true);
+  const { caption, isStreaming: isCaptioning } = useLiveCaptions(
+    classId,
+    classData?.isLive && showCaptions
+  );
+
   if (isMiniMode && !isJoined) return null;
 
   const inlineStyle: React.CSSProperties = containerRect
@@ -520,6 +530,15 @@ export const LiveClassroom = ({
             </div>
 
             <div className="flex flex-col gap-4 w-full max-w-sm mx-auto">
+              {isLowBandwidth && (
+                <div className="flex items-center gap-3 p-3 bg-amber-500/10 text-amber-600 rounded-xl border border-amber-500/20 text-xs font-bold animate-in fade-in slide-in-from-top-2">
+                  <WifiOff className="h-4 w-4 shrink-0" />
+                  {t(
+                    "classes.live.lowBandwidthNotice",
+                    "Notice: Low-bandwidth mode is active. Live video may be unstable."
+                  )}
+                </div>
+              )}
               {isTeacher && !classData?.isLive ? (
                 <div className="space-y-6">
                   <div className="flex items-center space-x-3 bg-ai-primary/5 p-4 rounded-2xl border border-ai-primary/10">
@@ -631,6 +650,36 @@ export const LiveClassroom = ({
                 </div>
               )}
               <div ref={jitsiContainerRef} className="w-full h-full" />
+
+              <div className="absolute top-4 start-4 flex flex-col gap-2 z-[100]">
+                <Badge className="bg-destructive text-white border-none px-3 py-1 font-black animate-pulse uppercase tracking-widest text-[9px] shadow-lg">
+                  {t("classes.live.liveLabel", "LIVE")}
+                </Badge>
+                {isCaptioning && (
+                  <Badge className="bg-blue-600 text-white border-none px-3 py-1 font-black uppercase tracking-widest text-[9px] shadow-lg flex gap-1.5 items-center">
+                    <ClosedCaption className="h-3 w-3" />
+                    CC: AR
+                  </Badge>
+                )}
+              </div>
+
+              {/* 🎙️ LIVE CAPTION OVERLAY (Phase 4.1) */}
+              <AnimatePresence>
+                {caption && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute bottom-24 inset-x-0 flex justify-center px-6 z-[110] pointer-events-none"
+                  >
+                    <div className="bg-black/80 backdrop-blur-xl border border-white/20 px-8 py-4 rounded-2xl md:rounded-3xl shadow-2xl max-w-2xl text-center">
+                      <p className="text-white text-lg md:text-2xl font-bold tracking-tight leading-relaxed italic">
+                        {caption}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {!isMiniMode && activeTab === "whiteboard" && (

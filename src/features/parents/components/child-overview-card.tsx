@@ -14,13 +14,15 @@ import {
   Sparkles,
   BrainCircuit,
   Loader2,
+  Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useCustom } from "@refinedev/core";
+import { useCustom, useCustomMutation } from "@refinedev/core";
 import { ChildCardSkeleton } from "./parent-skeletons";
 import { formatGrade } from "@/lib/numeric";
+import { toast } from "sonner";
 
 interface Props {
   child: {
@@ -51,6 +53,28 @@ export const ChildOverviewCard = ({ child }: Props) => {
 
   const isNarrativeLoading = narrativeQuery.isLoading;
   const narrativeData = narrativeQuery.data;
+
+  // 🎙️ VOICE RECAP: Trigger on-demand synthesis
+  const { mutate: triggerVoiceRecap, mutation: voiceMutation } = useCustomMutation();
+  const isRecapping = voiceMutation.isPending;
+
+  const handleVoiceRecap = () => {
+    triggerVoiceRecap(
+      {
+        url: `${import.meta.env.VITE_API_URL}/ai/parent-recap/${child.id}/voice`,
+        method: "post",
+        values: {},
+      },
+      {
+        onSuccess: () => {
+          toast.success("Voice recap is being synthesized and will be sent to your WhatsApp.");
+        },
+        onError: () => {
+          toast.error("Failed to generate voice recap. Please try again later.");
+        },
+      }
+    );
+  };
 
   const riskColors = {
     low: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
@@ -165,15 +189,30 @@ export const ChildOverviewCard = ({ child }: Props) => {
             </div>
           )}
 
-          <Button
-            asChild
-            className="w-full h-12 rounded-xl font-black uppercase tracking-widest gap-2 shadow-lg shadow-primary/20"
-          >
-            <Link to={`/parent/child/${child.id}`}>
-              View Full Report
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              asChild
+              className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest gap-2 shadow-lg shadow-primary/20"
+            >
+              <Link to={`/parent/child/${child.id}`}>
+                {t("guardian.actions.fullReport", { defaultValue: "Full Report" })}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              disabled={isRecapping}
+              onClick={handleVoiceRecap}
+              className="h-12 w-14 rounded-xl border-primary/20 hover:bg-primary/5 transition-all text-primary shrink-0"
+              title={t("guardian.actions.voiceRecap", { defaultValue: "Send Voice Recap" })}
+            >
+              {isRecapping ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Mic className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </motion.div>

@@ -4,15 +4,16 @@ import { Button } from "@/components/ui/button";
 import { X, Tv, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import {} from "@/lib/utils";
+import { useLowBandwidth } from "@/hooks/use-low-bandwidth";
 
 export const PromotionMiniPlayer = () => {
   const { t, i18n } = useTranslation();
   const { promotionTrailer, setPromotionTrailer, isJoined } = usePersistentLive();
+  const isLowBandwidth = useLowBandwidth();
   const isArr = i18n.language === "ar";
 
   // 🛡️ PRIORITY GUARD: Live Classes always take precedence over promotional trailers
-  if (isJoined || !promotionTrailer.url) return null;
+  if (isJoined || !promotionTrailer.url || isLowBandwidth) return null;
 
   return (
     <AnimatePresence>

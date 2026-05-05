@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { X, Play, Maximize2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import {} from "@/lib/utils";
+import { useLowBandwidth } from "@/hooks/use-low-bandwidth";
 
 export const VideoMiniPlayer = () => {
   const { t, i18n } = useTranslation();
   const { activeVideo, setActiveVideo, isJoined, promotionTrailer } = usePersistentLive();
+  const isLowBandwidth = useLowBandwidth();
   const isArr = i18n.language === "ar";
 
   // 🛡️ PRIORITY GUARD: Live Classes > Promotion > Recorded Videos
@@ -24,7 +25,12 @@ export const VideoMiniPlayer = () => {
       >
         {/* Video Container */}
         <div className="aspect-video relative overflow-hidden bg-black">
-          <video src={activeVideo.url} autoPlay controls className="w-full h-full object-contain" />
+          <video
+            src={activeVideo.url}
+            autoPlay={!isLowBandwidth}
+            controls
+            className="w-full h-full object-contain"
+          />
 
           {/* Close Button */}
           <Button

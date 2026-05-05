@@ -16,6 +16,7 @@ import { useCapabilities } from "@/hooks/use-capabilities";
 import { TodayLessonsWidget } from "./TodayLessonsWidget";
 import { TodayLecturesWidget } from "./TodayLecturesWidget";
 import { GpaPreviewWidget } from "./GpaPreviewWidget";
+import { StudyPulse } from "./student/StudyPulse";
 
 interface Props {
   identity: User | undefined;
@@ -160,6 +161,11 @@ export const StudentDashboard = ({ identity, data, isLoading, list, show }: Prop
             <TodayLessonsWidget />
           </div>
         ) : null}
+
+        {/* 🧠 Phase 3: AI Remediation Pulse */}
+        <div className="mt-8 max-w-4xl">
+          <StudyPulse />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16">

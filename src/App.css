@@ -408,3 +408,60 @@ html {
   background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
   animation: solved-shine 3s infinite;
 }
+
+/* ♿ ACCESSIBILITY: High Contrast Mode (Phase 10) */
+.high-contrast {
+  --background: #ffffff !important;
+  --foreground: #000000 !important;
+  --primary: #0000ff !important;
+  --primary-foreground: #ffffff !important;
+  --border: #000000 !important;
+  --input: #000000 !important;
+  --muted: #f0f0f0 !important;
+  --muted-foreground: #000000 !important;
+  --accent: #ffff00 !important;
+  --accent-foreground: #000000 !important;
+  --card: #ffffff !important;
+  --card-foreground: #000000 !important;
+  --ring: #0000ff !important;
+}
+
+.high-contrast.dark {
+  --background: #000000 !important;
+  --foreground: #ffffff !important;
+  --primary: #ffff00 !important;
+  --primary-foreground: #000000 !important;
+  --border: #ffffff !important;
+  --input: #ffffff !important;
+  --muted: #1a1a1a !important;
+  --muted-foreground: #ffffff !important;
+  --accent: #00ffff !important;
+  --accent-foreground: #000000 !important;
+  --card: #000000 !important;
+  --card-foreground: #ffffff !important;
+  --ring: #ffff00 !important;
+}
+
+.high-contrast *,
+.high-contrast *:before,
+.high-contrast *:after {
+  border-color: var(--border) !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.high-contrast .glass-card,
+.high-contrast .ai-card-premium,
+.high-contrast .sidebar-glass {
+  backdrop-filter: none !important;
+  background: var(--card) !important;
+  border: 2px solid var(--border) !important;
+}
+
+.high-contrast button,
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
+  border: 2px solid var(--border) !important;
+}
+

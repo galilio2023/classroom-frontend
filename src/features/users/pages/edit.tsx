@@ -49,8 +49,13 @@ import {
   Check,
   Users as UsersIcon,
   Sparkles,
+  Eye,
+  Type,
+  WifiOff,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import { userFormSchema } from "@/schemas/user";
 import { UserRole, User, UserStatus, Department } from "@/types";
 import usePageTitle from "@/hooks/use-page-title";
@@ -464,6 +469,112 @@ const UsersEdit = () => {
                             />
                           </FormControl>
                           <FormMessage className="text-xs font-bold" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* ♿ ACCESSIBILITY & REACH (Phase 10) */}
+                  <div className="space-y-6 pt-6 border-t border-primary/5">
+                    <div className="flex items-center gap-2 px-1">
+                      <Eye className="h-4 w-4 text-primary" />
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        {t("profile.sections.accessibility", {
+                          defaultValue: "Accessibility & Reach",
+                        })}
+                      </h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* High Contrast */}
+                      <FormField
+                        control={form.control}
+                        name="accessibilityPreferences.highContrast"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-primary/10 p-4 bg-background/50">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-sm font-bold">
+                                {t("profile.labels.highContrast", {
+                                  defaultValue: "High Contrast",
+                                })}
+                              </FormLabel>
+                              <CardDescription className="text-[10px]">
+                                {t("profile.descriptions.highContrast", {
+                                  defaultValue: "Enhance visual clarity",
+                                })}
+                              </CardDescription>
+                            </div>
+                            <FormControl>
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Low Bandwidth */}
+                      <FormField
+                        control={form.control}
+                        name="lowBandwidthMode"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-primary/10 p-4 bg-background/50">
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <FormLabel className="text-sm font-bold">
+                                  {t("profile.labels.lowBandwidth", {
+                                    defaultValue: "Low Bandwidth",
+                                  })}
+                                </FormLabel>
+                                <WifiOff className="h-3 w-3 text-amber-500" />
+                              </div>
+                              <CardDescription className="text-[10px]">
+                                {t("profile.descriptions.lowBandwidth", {
+                                  defaultValue: "Disable non-essential media",
+                                })}
+                              </CardDescription>
+                            </div>
+                            <FormControl>
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Font Size Scaling */}
+                    <FormField
+                      control={form.control}
+                      name="accessibilityPreferences.fontSize"
+                      render={({ field }) => (
+                        <FormItem className="space-y-4 rounded-2xl border border-primary/10 p-6 bg-background/50">
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <Type className="h-4 w-4 text-primary" />
+                                <FormLabel className="text-sm font-bold">
+                                  {t("profile.labels.fontScaling", {
+                                    defaultValue: "Font Scaling",
+                                  })}
+                                </FormLabel>
+                              </div>
+                              <CardDescription className="text-[10px]">
+                                {t("profile.descriptions.fontScaling", {
+                                  defaultValue: "Adjust base text size for better readability",
+                                })}
+                              </CardDescription>
+                            </div>
+                            <span className="text-xs font-black text-primary bg-primary/10 px-2 py-1 rounded-lg">
+                              {field.value}%
+                            </span>
+                          </div>
+                          <FormControl>
+                            <Slider
+                              min={100}
+                              max={150}
+                              step={25}
+                              value={[field.value || 100]}
+                              onValueChange={(vals) => field.onChange(vals[0])}
+                              className="py-4"
+                            />
+                          </FormControl>
                         </FormItem>
                       )}
                     />

@@ -16,6 +16,7 @@ import {
 import { XPProgressBar } from "@/features/engagement/components/xp-progress-bar";
 import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { ChildSchedule } from "./ChildSchedule";
+import { ChildGuardianPulse } from "./ChildGuardianPulse";
 import { cn } from "@/lib/utils";
 
 interface ChildCardProps {
@@ -133,6 +134,11 @@ export const ChildCard = ({ child, index, isAr, show, onContact }: ChildCardProp
 
           <ErrorBoundary>
             <ChildSchedule childId={child.id} childName={child.name} show={show} />
+          </ErrorBoundary>
+
+          {/* 🛡️ Phase 4: AI Guardian Pulse */}
+          <ErrorBoundary>
+            <ChildGuardianPulse childId={child.id} childName={child.name} />
           </ErrorBoundary>
 
           <div className="flex flex-col sm:flex-row gap-4 pt-4 lg:pt-6">

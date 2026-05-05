@@ -4,7 +4,16 @@ import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Info, BookText, GraduationCap, Sparkles, UserRound, Activity, Zap } from "lucide-react";
+import {
+  Info,
+  BookText,
+  GraduationCap,
+  Sparkles,
+  UserRound,
+  Activity,
+  Zap,
+  ShieldCheck,
+} from "lucide-react";
 
 interface ClassTabNavigationProps {
   activePrimaryTab: string;
@@ -58,6 +67,12 @@ export const ClassTabNavigation: React.FC<ClassTabNavigationProps> = ({
           id: "automations",
           label: t("classes.show.tabs.automations", { defaultValue: "Automations" }),
           icon: Zap,
+          staffOnly: true,
+        },
+        {
+          id: "governance",
+          label: t("classes.show.tabs.governance", { defaultValue: "Governance" }),
+          icon: ShieldCheck,
           staffOnly: true,
         },
         { id: "info", label: t("classes.show.tabs.info"), icon: Info },

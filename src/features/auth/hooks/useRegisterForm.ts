@@ -116,7 +116,7 @@ export const useRegisterForm = ({
       name: "",
       email: "",
       password: "",
-      role: (isInstitutionFlow ? "admin" : "student"),
+      role: isInstitutionFlow ? "admin" : "student",
       phoneNumber: "",
       nationalId: "",
       bio: "",

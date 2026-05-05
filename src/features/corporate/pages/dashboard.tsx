@@ -66,7 +66,7 @@ const CorporateDashboard: React.FC = () => {
         method: "post",
         values: {
           studentId: employee.id,
-          classId: 0, // Not applicable in corporate context but required by API
+          classId: employee.programId,
           reason: "overdue_training",
         },
       },

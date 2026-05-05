@@ -70,6 +70,11 @@ export interface User {
   aiTokensUsed?: number;
   aiMonthlyLimit?: number;
   aiConsentVersion?: string;
+  accessibilityPreferences?: {
+    highContrast?: boolean;
+    fontSize?: number;
+  } | null;
+  lowBandwidthMode?: boolean;
   metadata?: {
     rejectionReason?: string;
     rejectedAt?: string;
