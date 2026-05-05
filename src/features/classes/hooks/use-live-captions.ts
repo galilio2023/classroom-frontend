@@ -26,7 +26,7 @@ export const useLiveCaptions = (classId?: string, isActive: boolean = false) => 
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`, // Standard Tablawy auth
           },
-          onmessage(ev) {
+          onmessage(ev: { data: string }) {
             if (ev.data === "[DONE]") {
               setIsStreaming(false);
               return;
@@ -43,7 +43,7 @@ export const useLiveCaptions = (classId?: string, isActive: boolean = false) => 
               console.error("Failed to parse live caption", err);
             }
           },
-          onerror(err) {
+          onerror(err: unknown) {
             console.error("Caption stream error", err);
             setIsStreaming(false);
           },

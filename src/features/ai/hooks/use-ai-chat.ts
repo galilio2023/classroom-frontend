@@ -137,6 +137,16 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     }
   }, [abortStream]);
 
+  // 🛡️ RULE #1: AbortController Cleanup (Rural Connectivity Hardening)
+  useEffect(() => {
+    return () => {
+      abortStream();
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [abortStream]);
+
   // 1. 📜 HISTORY: Standard Refine v5 GET
   const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
     url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,

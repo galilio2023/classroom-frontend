@@ -53,7 +53,10 @@ export const useTusUpload = () => {
 
       const upload = new tus.Upload(file, {
         endpoint: TUS_ENDPOINT,
-        retryDelays: [0, 1, 2, 3, 4, 5].map((attempt) => calculateBackoff(attempt, 5000, 31000)),
+        // 📡 RURAL RESILIENCE: Base delays + 100-500ms jitter (Review Findings)
+        retryDelays: [5000, 10000, 20000, 40000, 60000].map(
+          (d) => d + Math.floor(Math.random() * 400) + 100
+        ),
         removeFingerprintOnSuccess: true,
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

@@ -1,5 +1,6 @@
 import { Resource } from "@/types";
 import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
 import {
   Link as LinkIcon,
   Video,

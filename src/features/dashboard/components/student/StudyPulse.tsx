@@ -1,22 +1,22 @@
 import React from "react";
 import { useCustom } from "@refinedev/core";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BrainCircuit, CheckCircle2, ChevronRight, Loader2, Sparkles, Target } from "lucide-react";
+import { BrainCircuit, Loader2, Sparkles, Target, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
 /**
  * 🛰️ STUDY PULSE WIDGET
  * Phase 3.3: Personalized AI Remediation Dashboard for Students.
  */
 export const StudyPulse: React.FC = () => {
-  const { data, isLoading } = useCustom<any>({
-    url: "/infrastructure/study-plans/my", // We'll need this route
+  const { query } = useCustom<any>({
+    url: "/infrastructure/study-plans/my",
     method: "get",
   });
 
-  const plan = data?.data?.content;
+  const { data: result, isLoading } = query;
+  const plan = result?.data?.content;
 
   if (isLoading) {
     return (

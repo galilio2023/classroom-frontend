@@ -3,7 +3,7 @@ import { useCustom, useCustomMutation } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/switch"; // Wait, check import
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { ShieldCheck, History, Undo2, BrainCircuit } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface GovernanceTabProps {
   classId: string;
@@ -27,19 +28,22 @@ export const GovernanceTab: React.FC<GovernanceTabProps> = ({ classId }) => {
   const { mutate } = useCustomMutation();
 
   // Fetch Settings
-  const { data: settingsData, refetch: refetchSettings } = useCustom({
-    url: "/teacher/intelligence/settings",
+  const { query: settingsQuery } = useCustom<any[]>({
+    url: `/teacher/intelligence/settings`,
     method: "get",
   });
 
   // Fetch Actions Log
-  const { data: actionsData, refetch: refetchActions } = useCustom({
-    url: "/teacher/intelligence/actions",
+  const { query: actionsQuery } = useCustom<any[]>({
+    url: `/teacher/intelligence/actions`,
     method: "get",
+    config: {
+      query: { classId },
+    },
   });
 
-  const settings = settingsData?.data || [];
-  const actions = actionsData?.data || [];
+  const settings = settingsQuery.data?.data || [];
+  const actions = actionsQuery.data?.data || [];
 
   const handleToggle = (category: string, current: boolean) => {
     mutate(
@@ -50,8 +54,8 @@ export const GovernanceTab: React.FC<GovernanceTabProps> = ({ classId }) => {
       },
       {
         onSuccess: () => {
-          toast.success(t("governance.settings_updated"));
-          refetchSettings();
+          toast.success(t("governance.settings_updated", { defaultValue: "Settings updated" }));
+          settingsQuery.refetch();
         },
       }
     );
@@ -66,8 +70,8 @@ export const GovernanceTab: React.FC<GovernanceTabProps> = ({ classId }) => {
       },
       {
         onSuccess: () => {
-          toast.success(t("governance.action_reversed"));
-          refetchActions();
+          toast.success(t("governance.action_reversed", { defaultValue: "Action reversed" }));
+          actionsQuery.refetch();
         },
         onError: (err: any) => {
           toast.error(err?.response?.data?.error || "Failed to reverse action");
@@ -252,6 +256,4 @@ export const GovernanceTab: React.FC<GovernanceTabProps> = ({ classId }) => {
   );
 };
 
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
-}
+export default GovernanceTab;

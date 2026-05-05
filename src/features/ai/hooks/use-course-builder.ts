@@ -12,12 +12,15 @@ export interface CourseDraft {
 }
 
 export const useCourseBuilder = () => {
-  const { mutate: generateDraft, overtimeLoading: isGenerating } = useCustomMutation<{
+  const { mutate: generateDraft, mutation: genMutation } = useCustomMutation<{
     data: CourseDraft;
   }>();
-  const { mutate: commitDraft, overtimeLoading: isCommitting } = useCustomMutation<{
+  const { mutate: commitDraft, mutation: commitMutation } = useCustomMutation<{
     data: unknown;
   }>();
+
+  const isGenerating = genMutation.isPending;
+  const isCommitting = commitMutation.isPending;
 
   const startDrafting = (resourceId: string, onSuccess?: (draft: CourseDraft) => void) => {
     generateDraft(

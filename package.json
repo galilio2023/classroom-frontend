@@ -7,6 +7,7 @@
     "@excalidraw/excalidraw": "^0.18.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^5.0.1",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-alert-dialog": "^1.1.11",
     "@radix-ui/react-aspect-ratio": "^1.1.4",

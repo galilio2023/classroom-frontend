@@ -1,9 +1,8 @@
 import React from "react";
 import { useCustom } from "@refinedev/core";
-import { BrainCircuit, Loader2, PlayCircle, ShieldCheck, Sparkles, Volume2 } from "lucide-react";
+import { BrainCircuit, Loader2, Sparkles, Volume2, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 interface ChildGuardianPulseProps {
   childId: string;
@@ -15,12 +14,13 @@ interface ChildGuardianPulseProps {
  * Phase 4.3: Parent-facing AI insights for child progress.
  */
 export const ChildGuardianPulse: React.FC<ChildGuardianPulseProps> = ({ childId, childName }) => {
-  const { data, isLoading } = useCustom<any>({
-    url: `/ai/parent-recap/${childId}`, // We'll add this route
+  const { query } = useCustom<any>({
+    url: `/ai/parent-recap/${childId}`,
     method: "get",
   });
 
-  const recap = data?.data;
+  const { data: result, isLoading } = query;
+  const recap = result?.data;
 
   if (isLoading) {
     return (
@@ -87,17 +87,3 @@ export const ChildGuardianPulse: React.FC<ChildGuardianPulseProps> = ({ childId,
     </div>
   );
 };
-
-const Activity = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-  </svg>
-);

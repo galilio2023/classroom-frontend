@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { offlineDB as db, BehavioralSignal } from "@/lib/offline-db";
+import { offlineDB as db } from "@/lib/offline-db";
 import { toast } from "sonner";
 import { useCustom, useGetIdentity } from "@refinedev/core";
 
@@ -12,7 +12,7 @@ export const useEdgeIntelligence = () => {
   const { data: identity } = useGetIdentity<any>();
 
   // 1. Sync Patterns from Backend
-  const { data: patternsData } = useCustom<any[]>({
+  const { query } = useCustom<any[]>({
     url: "/analytics/behavior/patterns",
     method: "get",
     queryOptions: {
@@ -20,9 +20,11 @@ export const useEdgeIntelligence = () => {
     },
   });
 
+  const patternsData = query.data;
+
   // Sync to local Dexie for offline use
   useEffect(() => {
-    if (patternsData?.data) {
+    if (patternsData?.data && Array.isArray(patternsData.data)) {
       const syncPatterns = async () => {
         for (const p of patternsData.data) {
           await db.cached_patterns.put({
@@ -31,7 +33,7 @@ export const useEdgeIntelligence = () => {
           });
         }
       };
-      syncPatterns();
+      void syncPatterns();
     }
   }, [patternsData]);
 
