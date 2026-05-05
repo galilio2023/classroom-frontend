@@ -57,7 +57,9 @@ export const TeacherChannelView = ({ user, teacherClasses }: Props) => {
             </h2>
             <div className="flex flex-wrap items-center gap-4">
               <Badge className="bg-primary text-white border-none rounded-full px-4 py-1.5 font-black uppercase tracking-widest text-[10px] shadow-sm">
-                {t("teacherChannel.labels.officialChannel" as any)}
+                {t("teacherChannel.labels.officialChannel" as any, {
+                  defaultValue: "Official Channel",
+                })}
               </Badge>
               {user.teacherChannel.trailerVideoUrl && (
                 <Button
@@ -67,7 +69,7 @@ export const TeacherChannelView = ({ user, teacherClasses }: Props) => {
                   onMouseLeave={() => setIsPreviewHovered(false)}
                 >
                   <Tv className="h-4 w-4" />
-                  {t("teacherChannel.labels.trailer" as any)}
+                  {t("teacherChannel.labels.trailer" as any, { defaultValue: "Watch Trailer" })}
                 </Button>
               )}
             </div>
@@ -83,7 +85,7 @@ export const TeacherChannelView = ({ user, teacherClasses }: Props) => {
               <FileText className="h-5 w-5" />
             </div>
             <CardTitle className="text-xl md:text-2xl font-black tracking-tight">
-              {t("teacherChannel.labels.bio" as any)}
+              {t("teacherChannel.labels.bio" as any, { defaultValue: "Channel Biography" })}
             </CardTitle>
           </div>
         </CardHeader>
@@ -102,7 +104,7 @@ export const TeacherChannelView = ({ user, teacherClasses }: Props) => {
               <GraduationCap className="h-6 w-6" />
             </div>
             <h2 className="text-xl md:text-2xl font-black tracking-tight">
-              {t("dashboard.stats.activeClasses" as any)}
+              {t("dashboard.stats.activeClasses" as any, { defaultValue: "Active Classes" })}
             </h2>
           </div>
           <Badge
@@ -111,6 +113,7 @@ export const TeacherChannelView = ({ user, teacherClasses }: Props) => {
           >
             {t("teacherChannel.labels.activeModules" as any, {
               count: teacherClasses.length,
+              defaultValue: "Modules",
             })}
           </Badge>
         </div>
@@ -127,7 +130,7 @@ export const TeacherChannelView = ({ user, teacherClasses }: Props) => {
                     classItem.bannerUrl ||
                     "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1000"
                   }
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   alt={classItem.name}
                 />
                 <div className="absolute inset-0 bg-black/20" />
@@ -143,7 +146,7 @@ export const TeacherChannelView = ({ user, teacherClasses }: Props) => {
                   <div className="flex items-center gap-2 text-muted-foreground text-xs md:text-sm font-bold">
                     <Users className="h-3.5 w-3.5" />
                     {(classItem as any).enrollments?.length || 0} / {classItem.capacity}{" "}
-                    {t("classes.list.studentsLabel" as any)}
+                    {t("classes.list.studentsLabel" as any, { defaultValue: "Students" })}
                   </div>
                 </div>
                 <Button
@@ -151,7 +154,7 @@ export const TeacherChannelView = ({ user, teacherClasses }: Props) => {
                   className="w-full h-12 md:h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/10"
                 >
                   <Link to={`/classes/show/${classItem.id}`}>
-                    {t("buttons.joinClass" as any)}
+                    {t("buttons.joinClass" as any, { defaultValue: "Join Class" })}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>

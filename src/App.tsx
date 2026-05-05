@@ -21,7 +21,10 @@ import { Toaster } from "./components/ui/sonner";
 import { ErrorBoundary } from "./components/guards/error-boundary";
 import { AppRouter } from "./routes";
 import { usePulseNotifications } from "./features/engagement/hooks/use-pulse-notifications";
+import { useRageClick } from "./hooks/useRageClick";
+import { useEdgeIntelligence } from "./hooks/useEdgeIntelligence";
 import { GlobalLiveOverlay } from "./features/classes/components/global-live-overlay";
+import { UniversalAssistant } from "./features/ai/components/universal-assistant";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { HelmetProvider } from "react-helmet-async";
 
@@ -39,11 +42,14 @@ import { SchoolThemeProvider } from "./contexts/school-theme-context";
  */
 const PulseProvider = ({ children }: { children: React.ReactNode }) => {
   usePulseNotifications();
+  useRageClick();
+  useEdgeIntelligence();
   return (
     <TooltipProvider>
       <XPCelebration />
       <GlobalLiveOverlay />
       <Toaster />
+      <UniversalAssistant />
       {children}
     </TooltipProvider>
   );

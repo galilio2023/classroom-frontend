@@ -206,6 +206,8 @@ function Sidebar({
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
+      role="navigation"
+      aria-label={t("sidebar.title")}
       {...props}
     >
       <div
@@ -255,6 +257,8 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
+      aria-expanded={state === "expanded"}
+      aria-label={t("sidebar.toggle")}
       className={cn(
         "h-10 w-10 rounded-xl bg-muted/20 hover:bg-primary/10 hover:text-primary transition-all duration-300 shadow-sm",
         className

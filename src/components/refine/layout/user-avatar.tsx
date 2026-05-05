@@ -3,9 +3,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
+import { useLowBandwidth } from "@/hooks/use-low-bandwidth";
 
 export function UserAvatar({ className }: { className?: string }) {
   const { data: user, isLoading: userIsLoading } = useGetIdentity<User>();
+  const isLowBandwidth = useLowBandwidth();
 
   if (userIsLoading || !user) {
     return <Skeleton className={cn("h-10 w-10 rounded-full", className)} />;
@@ -43,7 +45,7 @@ export function UserAvatar({ className }: { className?: string }) {
 
   return (
     <Avatar className={cn("h-10 w-10", className)}>
-      {image && <AvatarImage src={image} alt={name} />}
+      {image && !isLowBandwidth && <AvatarImage src={image} alt={name} />}
       <AvatarFallback className={cn("text-white font-bold", getBackgroundColor(name))}>
         {getInitials(name)}
       </AvatarFallback>

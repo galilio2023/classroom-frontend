@@ -92,13 +92,12 @@ export const StudentPerformanceView = ({ user, displayBadges, isSelf, isAdmin }:
                   </div>
                   <div className="space-y-1">
                     <CardTitle className="text-2xl md:text-3xl font-black tracking-tight">
-                      {t("profile.sections.learningDNA" as any, "Learning DNA")}
+                      {t("profile.sections.learningDNA" as any, { defaultValue: "Learning DNA" })}
                     </CardTitle>
                     <p className="text-indigo-200/60 font-medium text-sm">
-                      {t(
-                        "profile.dna.subtitle" as any,
-                        "Synthesized by AI from your learning behavior"
-                      )}
+                      {t("profile.dna.subtitle" as any, {
+                        defaultValue: "Synthesized by AI from your learning behavior",
+                      })}
                     </p>
                   </div>
                 </div>
@@ -115,11 +114,11 @@ export const StudentPerformanceView = ({ user, displayBadges, isSelf, isAdmin }:
                       ) : (
                         <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                       )}
-                      {t("profile.dna.pivot" as any, "Instructional Pivot")}
+                      {t("profile.dna.pivot" as any, { defaultValue: "Instructional Pivot" })}
                     </Button>
                   )}
                   <Badge className="bg-indigo-500 text-white border-none font-black px-5 py-2 rounded-full text-[10px] uppercase tracking-[0.2em] shadow-2xl h-10 flex items-center">
-                    {t("profile.dna.active" as any, "AI Optimized")}
+                    {t("profile.dna.active" as any, { defaultValue: "AI Optimized" })}
                   </Badge>
                 </div>
               </div>
@@ -137,7 +136,7 @@ export const StudentPerformanceView = ({ user, displayBadges, isSelf, isAdmin }:
                   <div className="flex items-center gap-3 text-amber-400">
                     <Target className="h-5 w-5" />
                     <h4 className="font-black uppercase tracking-widest text-xs">
-                      {t("profile.dna.struggles" as any, "Conceptual Hurdles")}
+                      {t("profile.dna.struggles" as any, { defaultValue: "Conceptual Hurdles" })}
                     </h4>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -165,7 +164,7 @@ export const StudentPerformanceView = ({ user, displayBadges, isSelf, isAdmin }:
                   <div className="flex items-center gap-3 text-indigo-400">
                     <Zap className="h-5 w-5" />
                     <h4 className="font-black uppercase tracking-widest text-xs">
-                      {t("profile.dna.tone" as any, "Preferred Tone")}
+                      {t("profile.dna.tone" as any, { defaultValue: "Preferred Tone" })}
                     </h4>
                   </div>
                   <Badge className="bg-indigo-400/20 text-indigo-300 border-indigo-400/20 px-4 py-1.5 rounded-xl font-bold capitalize">
@@ -234,11 +233,11 @@ export const StudentPerformanceView = ({ user, displayBadges, isSelf, isAdmin }:
                   <GraduationCap className="h-5 w-5" />
                 </div>
                 <CardTitle className="text-xl md:text-2xl font-black tracking-tight">
-                  {t("profile.sections.report" as any)}
+                  {t("profile.sections.report" as any, { defaultValue: "Report Card" })}
                 </CardTitle>
               </div>
               <Badge className="bg-primary/10 text-primary border border-primary/20 font-black px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest shadow-sm">
-                {t("profile.labels.currentTerm" as any)}
+                {t("profile.labels.currentTerm" as any, { defaultValue: "Current Term" })}
               </Badge>
             </div>
           </CardHeader>
@@ -250,10 +249,12 @@ export const StudentPerformanceView = ({ user, displayBadges, isSelf, isAdmin }:
                 <Shield className="h-12 w-12 text-muted-foreground/20" />
                 <div className="space-y-1">
                   <p className="font-black uppercase tracking-widest text-xs text-muted-foreground">
-                    {t("profile.privacy.note" as any)}
+                    {t("profile.privacy.note" as any, { defaultValue: "Privacy Guard" })}
                   </p>
                   <p className="text-sm text-muted-foreground/60 font-medium">
-                    {t("profile.privacy.reportHidden" as any)}
+                    {t("profile.privacy.reportHidden" as any, {
+                      defaultValue: "Detailed performance metrics are restricted.",
+                    })}
                   </p>
                 </div>
               </div>
@@ -276,7 +277,7 @@ export const StudentPerformanceView = ({ user, displayBadges, isSelf, isAdmin }:
                   <Trophy className="h-5 w-5" />
                 </div>
                 <CardTitle className="text-xl md:text-2xl font-black tracking-tight">
-                  {t("profile.sections.achievements" as any)}
+                  {t("profile.sections.achievements" as any, { defaultValue: "Achievements" })}
                 </CardTitle>
               </div>
               <Badge
@@ -286,6 +287,7 @@ export const StudentPerformanceView = ({ user, displayBadges, isSelf, isAdmin }:
                 {t("profile.labels.earned" as any, {
                   count: displayBadges.filter((b) => b.unlocked).length,
                   total: displayBadges.length,
+                  defaultValue: "Earned",
                 })}
               </Badge>
             </div>
@@ -314,7 +316,7 @@ export const StudentPerformanceView = ({ user, displayBadges, isSelf, isAdmin }:
                   <Award className="h-5 w-5" />
                 </div>
                 <CardTitle className="text-xl md:text-2xl font-black tracking-tight">
-                  {t("profile.sections.certificates" as any)}
+                  {t("profile.sections.certificates" as any, { defaultValue: "Certificates" })}
                 </CardTitle>
               </div>
             </div>

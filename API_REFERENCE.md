@@ -23,6 +23,8 @@ This document serves as the **Single Source of Truth** for frontend developers. 
 | `POST` | `/chat` | `useAIChat` | 20/hr | `AIResponse` |
 | `POST` | `/study-buddy` | `useAIChat` (SSE) | 20/hr | `Stream` |
 | `PATCH` | `/interact` | `useAILiveInteraction` (SSE) | 60/hr | `Stream` |
+| `POST` | `/parent-recap/:id/voice` | `useCustomMutation` | 1/day | - |
+| `POST` | `/intervention` | `useCustomMutation` | 10/day | - |
 | `POST` | `/generate-*` | `useCustomMutation` | 5/15m | `AIFeedbackResponse` |
 | `POST` | `/feedback` | `useCustomMutation` | 60/hr | - |
 | `GET` | `/health-report` | `useTable` | 1/hr | `SystemHealthReport` |
@@ -32,12 +34,12 @@ This document serves as the **Single Source of Truth** for frontend developers. 
 *   **`useAIChat`**: Production-grade wrapper for Study Buddy and General Chat. Includes Dexie-backed persistence and adaptive UI states.
 
 ### 📡 Hardened SSE Pattern
-All streaming endpoints (`/study-buddy`, `/interact`) MUST follow the **JSON Line Buffering** protocol:
-1.  **Transport:** Server-Sent Events (SSE).
-2.  **Format:** Each data chunk must be a valid JSON object prefixed with `data: ` and suffixed with `\n\n`.
-3.  **Buffering:** The frontend hook (`useAIChat`, `useAILiveInteraction`) implements line-buffering to prevent parsing errors from split network packets.
-4.  **Cleanup (Mandate):** Every streaming request MUST be bound to an `AbortController`. Ensure `.abort()` is called on component unmount to prevent memory leaks and dangling connections.
-5.  **Finalization:** The stream must end with a `data: {"done": true}` message.
+All streaming endpoints (`/study-buddy`, `/interact`) and high-latency AI requests (`/parent-recap/:id/voice`, `/intervention`) MUST follow the **Hardened Request** protocol:
+1.  **Transport:** SSE for streams, standard HTTP for mutations.
+2.  **Format:** JSON Line Buffering for streams.
+3.  **Buffering:** Frontend hooks implement line-buffering.
+4.  **Cleanup (Mandate):** Every AI request MUST be bound to an `AbortController`. Ensure `.abort()` is called on component unmount to prevent memory leaks and dangling connections, especially on rural/high-latency networks.
+5.  **Correlation:** All AI endpoints return an `X-Correlation-ID`. Use `handleError` to expose this in UI toasts.
 
 ### 🧠 Response Metadata
 All AI endpoints return a usage and metadata block. Handle it in your hooks:

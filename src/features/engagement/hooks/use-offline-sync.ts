@@ -144,6 +144,11 @@ export const useOfflineSync = () => {
    * Flushes all pending data to the server when connection is restored.
    */
   const syncPendingData = async () => {
+    await syncPendingQuizzes();
+    await syncBehavioralSignals();
+  };
+
+  const syncPendingQuizzes = async () => {
     const pendingQuizzes = await db.quizzes.toArray();
 
     if (pendingQuizzes.length > 0) {
@@ -187,6 +192,38 @@ export const useOfflineSync = () => {
           }
         );
       }
+    }
+  };
+
+  /**
+   * 🛰️ BEHAVIOR SYNC: Reconciles offline behavioral signals.
+   * Phase 6.1 Mandate: Flush signals silently without notifying the user (background).
+   */
+  const syncBehavioralSignals = async () => {
+    const pendingSignals = await db.behavior_signals.toArray();
+    if (pendingSignals.length === 0) return;
+
+    // 📡 TELEMETRY: Log signal reconciliation
+    logEvent({
+      resource: "telemetry",
+      action: "reconcile_behavior_signals",
+      data: { count: pendingSignals.length },
+    });
+
+    for (const signal of pendingSignals) {
+      submitQuiz(
+        // We reuse useCustomMutation's mutate but renamed here for convenience
+        {
+          url: "/analytics/behavior/emit",
+          method: "post",
+          values: signal,
+        },
+        {
+          onSuccess: async () => {
+            if (signal.id) await db.behavior_signals.delete(signal.id);
+          },
+        }
+      );
     }
   };
 

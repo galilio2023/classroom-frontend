@@ -97,6 +97,28 @@ export interface AttachmentBlob {
   contentType: string;
 }
 
+export interface BehavioralSignal {
+  id?: number;
+  userId: string;
+  tenantId: string;
+  classId?: string | null;
+  signalType: string;
+  metadata: Record<string, unknown>;
+  sessionId?: string | null;
+  correlationId?: string | null;
+  createdAt: number;
+}
+
+export interface CachedPattern {
+  id: string;
+  requiredSignals: string[];
+  timeWindowHours: number;
+  occurrenceThreshold: number;
+  baseConfidence: string;
+  description: string;
+  updatedAt: number;
+}
+
 export class OfflineDB extends Dexie {
   lessons!: Table<CachedLesson>;
   quizzes!: Table<PendingQuizSubmission>;
@@ -109,10 +131,12 @@ export class OfflineDB extends Dexie {
   pending_xp!: Table<PendingXpGain>;
   resource_cache!: Table<ResourceCache>;
   attachment_blobs!: Table<AttachmentBlob>;
+  behavior_signals!: Table<BehavioralSignal>;
+  cached_patterns!: Table<CachedPattern>;
 
   constructor() {
     super("TablawyOfflineDB");
-    this.version(7)
+    this.version(9)
       .stores({
         lessons: "id, classId",
         quizzes: "++id, quizId, userId",
@@ -125,10 +149,12 @@ export class OfflineDB extends Dexie {
         pending_xp: "++id",
         resource_cache: "key",
         attachment_blobs: "++id, resourceId",
+        behavior_signals: "++id, userId, signalType, createdAt",
+        cached_patterns: "id",
       })
       .upgrade((tx) => {
-        // Version 7: Added attachment_blobs
-        return tx.table("attachment_blobs").toCollection().count();
+        // Version 9: Added cached_patterns
+        return tx.table("cached_patterns").toCollection().count();
       });
   }
 

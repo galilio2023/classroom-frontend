@@ -23,8 +23,11 @@ import {} from "@/lib/utils";
 import { Link } from "react-router-dom";
 import Big from "big.js";
 
+import { useLowBandwidth } from "@/hooks/use-low-bandwidth";
+
 const PublicClassCard = ({ aClass }: { aClass: Class }) => {
   const { t } = useTranslation();
+  const isLowBandwidth = useLowBandwidth();
   const primaryTeacher = aClass.teachers?.find((t) => t.isPrimary)?.teacher;
 
   return (
@@ -35,15 +38,21 @@ const PublicClassCard = ({ aClass }: { aClass: Class }) => {
       className="group"
     >
       <Card className="border-none shadow-2xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-card transition-all duration-500 hover:shadow-primary/10">
-        <div className="relative aspect-video overflow-hidden">
-          <img
-            src={
-              aClass.bannerUrl ||
-              "https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=1000"
-            }
-            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-            alt={aClass.name}
-          />
+        <div className="relative aspect-video overflow-hidden bg-muted">
+          {!isLowBandwidth ? (
+            <img
+              src={
+                aClass.bannerUrl ||
+                "https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=1000"
+              }
+              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+              alt={aClass.name}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-primary/5">
+              <GraduationCap className="h-12 w-12 text-primary/10" />
+            </div>
+          )}
           <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-60" />
 
           <div className="absolute top-6 left-6 flex gap-2">
@@ -62,7 +71,7 @@ const PublicClassCard = ({ aClass }: { aClass: Class }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8 border-2 border-background shadow-sm">
-                <AvatarImage src={primaryTeacher?.image || undefined} />
+                {!isLowBandwidth && <AvatarImage src={primaryTeacher?.image || undefined} />}
                 <AvatarFallback className="text-[10px] font-black">
                   {primaryTeacher?.name?.[0]}
                 </AvatarFallback>

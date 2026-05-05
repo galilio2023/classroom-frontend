@@ -20,6 +20,15 @@ export const baseUserSchema = z.object({
     .nullable(),
   parentName: z.string().max(255).optional().nullable(),
   parentPhone: z.string().regex(phoneRegex).max(20).optional().nullable(),
+  accessibilityPreferences: z
+    .object({
+      highContrast: z.boolean().default(false),
+      fontSize: z.number().default(100),
+    })
+    .optional()
+    .nullable(),
+  lowBandwidthMode: z.boolean().default(false),
+  version: z.number().int(),
 });
 
 // 2. Apply refinements to create the form schema

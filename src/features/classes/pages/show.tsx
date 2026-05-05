@@ -16,6 +16,7 @@ import { RosterTabWrapper } from "../components/roster-tab-wrapper";
 import { ProgressTabWrapper } from "../components/progress-tab-wrapper";
 import { InfoTabWrapper } from "../components/info-tab-wrapper";
 import { AutomationsTabWrapper } from "../components/automations-tab-wrapper";
+import { GovernanceTabWrapper } from "../components/governance-tab-wrapper";
 import { StaffActions } from "../components/staff-actions";
 import { ClassErrorView } from "../components/class-state-views";
 import { ClassTabNavigation } from "../components/class-tab-navigation";
@@ -203,6 +204,14 @@ const ClassesShow = () => {
                   <TabsContent value="automations" className="mt-0 focus-visible:outline-none">
                     {activePrimaryTab === "automations" && (
                       <AutomationsTabWrapper classId={classId} aClass={aClass} />
+                    )}
+                  </TabsContent>
+                )}
+
+                {isStaff && (
+                  <TabsContent value="governance" className="mt-0 focus-visible:outline-none">
+                    {activePrimaryTab === "governance" && (
+                      <GovernanceTabWrapper classId={classId} />
                     )}
                   </TabsContent>
                 )}

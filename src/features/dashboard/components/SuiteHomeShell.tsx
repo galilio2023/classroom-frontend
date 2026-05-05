@@ -138,10 +138,15 @@ export const SuiteHomeShell: React.FC = () => {
                 Tablawy {suiteType.charAt(0).toUpperCase() + suiteType.slice(1)} Mode
               </div>
               <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-[1.1]">
-                {t(`dashboard.welcome.${suiteType}` as any, { name: identity?.name })}
+                {t(`dashboard.welcome.${suiteType}` as any, {
+                  name: identity?.name,
+                  defaultValue: `Welcome to Tablawy ${suiteType}`,
+                })}
               </h1>
               <p className="text-muted-foreground text-lg font-medium leading-relaxed max-w-lg">
-                {t(`dashboard.welcome.${suiteType}.desc` as any)}
+                {t(`dashboard.welcome.${suiteType}.desc` as any, {
+                  defaultValue: "Manage your academic journey with autonomous precision.",
+                })}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Button className="h-12 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20">
