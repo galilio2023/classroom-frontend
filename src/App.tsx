@@ -34,7 +34,7 @@ import "./i18n/i18n";
 
 import { XPCelebration } from "./features/engagement/components/xp-celebration";
 import { SchoolThemeProvider } from "./contexts/school-theme-context";
-import { TermProvider } from "./contexts/term-context";
+import { TermProvider } from "@/contexts/term-context";
 
 /**
  * 🚀 REAL-TIME BRIDGE: PulseProvider
@@ -154,16 +154,16 @@ function App() {
                 },
               }}
             >
-              <PulseProvider>
-                <TermProvider>
+              <TermProvider>
+                <PulseProvider>
                   <SchoolThemeProvider>
                     <AppRouter />
                   </SchoolThemeProvider>
-                </TermProvider>
-                <UnsavedChangesNotifier />
-                <TitleManager />
-                <RefineKbar />
-              </PulseProvider>
+                  <UnsavedChangesNotifier />
+                  <TitleManager />
+                  <RefineKbar />
+                </PulseProvider>
+              </TermProvider>
             </Refine>
           </ErrorBoundary>
         </DevtoolsProvider>

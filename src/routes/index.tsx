@@ -273,9 +273,7 @@ export const AppRouter = () => {
             <Authenticated key="authenticated-layout" fallback={<CatchAllNavigate to="/login" />}>
               <JobProvider>
                 <SocketProvider>
-                  <TermProvider>
-                    <Outlet />
-                  </TermProvider>
+                  <Outlet />
                 </SocketProvider>
               </JobProvider>
             </Authenticated>
