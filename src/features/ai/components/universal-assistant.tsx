@@ -39,9 +39,11 @@ export const UniversalAssistant: React.FC<UniversalAssistantProps> = ({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  // 🛡️ SECURITY: Do not show the assistant on the landing page or to unauthenticated guests
-  const isLandingPage = pathname === "/";
-  if (isLandingPage || (!identityLoading && !identity)) return null;
+  // 🛡️ SECURITY: Strictly hide the assistant on public-facing pages and for unauthenticated guests
+  const publicPaths = ["/", "/landing", "/pricing", "/login", "/register", "/forgot-password", "/reset-password", "/privacy", "/terms", "/discovery"];
+  const isPublicPage = publicPaths.some(path => pathname === path || pathname.startsWith(path + "/"));
+  
+  if (isPublicPage || (!identityLoading && !identity)) return null;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
