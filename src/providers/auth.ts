@@ -91,8 +91,6 @@ export const authProvider: AuthProvider = {
         (sanitizedParams as any).telemetrySessionId = telemetryId;
       }
 
-      console.log("Attempting registration for:", sanitizedParams.email);
-
       const { correlationId, ...payload } = sanitizedParams as any;
 
       const { error } = await authClient.signUp.email(payload as SignUpPayload, {
@@ -111,8 +109,6 @@ export const authProvider: AuthProvider = {
           },
         };
       }
-
-      console.log("Registration successful for:", sanitizedParams.email);
 
       // 🚀 AUTO-LOGIN: remove friction by logging the user in immediately
       const { data: loginData, error: loginError } = await authClient.signIn.email({

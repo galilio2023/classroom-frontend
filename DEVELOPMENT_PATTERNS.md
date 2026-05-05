@@ -58,6 +58,9 @@ To support students in internet-unstable areas, Tablawy OS uses a "Learning with
 - **Synchronized State**: For AI-generated assets (like Study Plans), use the `useStudyPlanSync` pattern. This pattern reconciles server data with local Dexie state on component mount and job completion, using an `updatedAt` timestamp to ensure the "Freshest Copy Wins."
 - **Service Worker (`sw.ts`)**: Implements a "Curriculum-First" caching strategy. Assets once downloaded are served locally with zero network latency.
 - **Visual Feedback**: A pulsing "Offline Mode" badge and a specialized "Download Lesson" toggle provide clear state indicators to the user.
+- **TUS Resilience (Review #15)**: Large file uploads use the TUS protocol with a specialized retry strategy.
+  - **Logic**: Base delays (5s, 10s, 20s, 40s, 60s) + a dynamic **100-500ms jitter** implemented in `useTusUpload`.
+  - **Purpose**: Prevents "thundering herd" issues during reconnection in rural or high-latency environments. Developers must use the `useTusUpload` hook rather than raw XHR/Fetch for all media assets.
 - **Hager Mode (PDF Handouts)**: For Rule 7 (High-Fidelity Handouts), use `html2canvas` + `jspdf` only for simple LTR snapshots. **Mandate**: For any document containing Arabic typography or LaTeX formulas, the frontend MUST delegate generation to the backend PDF engine. Client-side rendering of complex Arabic text shaping is brittle and forbidden for official high-fidelity handouts.
 
 ---

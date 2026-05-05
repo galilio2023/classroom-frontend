@@ -29,6 +29,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { handleError } from "@/providers/utils/api-errors";
 
 interface CorporateDashboardData {
   metrics: {
@@ -73,6 +74,9 @@ const CorporateDashboard: React.FC = () => {
       {
         onSuccess: () => {
           toast.success(`Compliance reminder dispatched to ${employee.name}.`);
+        },
+        onError: (err) => {
+          handleError(err);
         },
       }
     );

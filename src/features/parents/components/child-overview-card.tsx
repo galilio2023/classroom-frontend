@@ -23,6 +23,7 @@ import { useCustom, useCustomMutation } from "@refinedev/core";
 import { ChildCardSkeleton } from "./parent-skeletons";
 import { formatGrade } from "@/lib/numeric";
 import { toast } from "sonner";
+import { handleError } from "@/providers/utils/api-errors";
 
 interface Props {
   child: {
@@ -69,8 +70,8 @@ export const ChildOverviewCard = ({ child }: Props) => {
         onSuccess: () => {
           toast.success("Voice recap is being synthesized and will be sent to your WhatsApp.");
         },
-        onError: () => {
-          toast.error("Failed to generate voice recap. Please try again later.");
+        onError: (err) => {
+          handleError(err);
         },
       }
     );
