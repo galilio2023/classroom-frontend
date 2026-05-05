@@ -47,6 +47,7 @@ Vite performs static replacement of `import.meta.env.VITE_*` variables during th
 - **Mandate**: Strictly use static property access (e.g., `import.meta.env.VITE_API_URL`).
 - **❌ AVOID DESTRUCTURING**: `const { VITE_API_URL } = import.meta.env;` will fail in production because Vite cannot statically replace destructured keys.
 - **Why**: Ensures the `validate-env.mjs` audit remains reliable and production builds don't ship with `undefined` configuration values.
+- **🛡️ RUNTIME GATEKEEPER**: The `docker-entrypoint.sh` script acts as the final gatekeeper in production, dynamically injecting these variables into the Nginx configuration and security headers to ensure consistency between the environment and the served bundle.
 
 ---
 
