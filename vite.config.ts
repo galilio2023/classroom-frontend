@@ -106,7 +106,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-refine": ["@refinedev/core", "@refinedev/react-router", "@refinedev/simple-rest"],
+          "vendor-refine": ["@refinedev/core", "@refinedev/react-router"],
           "vendor-ui": ["framer-motion", "lucide-react", "clsx", "tailwind-merge"],
           "vendor-charts": ["recharts"],
           "vendor-utils": ["date-fns", "dayjs", "zod", "i18next"],

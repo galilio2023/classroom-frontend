@@ -46,14 +46,20 @@ export const HelpHub = () => {
   const key = getPathKey();
 
   // FIX: Use 'as any' to bypass the complex i18next union type issues with returnObjects
-  const steps = t(`help.pages.${key}.steps` as any, {
-    returnObjects: true,
-    defaultValue: [] as any,
-  } as any) as unknown as HelpStep[];
-  const tips = t(`help.pages.${key}.tips` as any, {
-    returnObjects: true,
-    defaultValue: [] as any,
-  } as any) as unknown as string[];
+  const steps = t(
+    `help.pages.${key}.steps` as any,
+    {
+      returnObjects: true,
+      defaultValue: [] as any,
+    } as any
+  ) as unknown as HelpStep[];
+  const tips = t(
+    `help.pages.${key}.tips` as any,
+    {
+      returnObjects: true,
+      defaultValue: [] as any,
+    } as any
+  ) as unknown as string[];
 
   const handleAskAi = () => {
     setIsOpen(false);
