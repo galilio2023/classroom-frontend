@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Sparkles, BrainCircuit, Send, Loader2 } from "lucide-react";
@@ -27,6 +27,7 @@ export const UniversalAssistant: React.FC<UniversalAssistantProps> = ({
 }) => {
   const { data: identity, isLoading: identityLoading } = useGetIdentity<User>();
   const { classId: routeClassId } = useParams();
+  const { pathname } = useLocation();
   const classId = propsClassId || routeClassId;
 
   const { messages, streamingMessage, input, setInput, handleSend, isLoading, scrollAreaRef } =
@@ -38,8 +39,9 @@ export const UniversalAssistant: React.FC<UniversalAssistantProps> = ({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  // 🛡️ SECURITY: Do not show the assistant to unauthenticated guests (Landing Page safety)
-  if (!identityLoading && !identity) return null;
+  // 🛡️ SECURITY: Do not show the assistant on the landing page or to unauthenticated guests
+  const isLandingPage = pathname === "/";
+  if (isLandingPage || (!identityLoading && !identity)) return null;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
