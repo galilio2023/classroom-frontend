@@ -135,7 +135,7 @@
   },
   "scripts": {
     "dev": "refine dev",
-    "build": "tsc && refine build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' tsc && NODE_OPTIONS='--max-old-space-size=4096' refine build",
     "start": "refine start",
     "refine": "refine",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
