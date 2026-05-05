@@ -8,6 +8,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { cn } from "@/lib/utils";
+import { useGetIdentity } from "@refinedev/core";
+import { User } from "@/types";
 
 interface UniversalAssistantProps {
   context?: Record<string, unknown>;
@@ -23,6 +25,7 @@ export const UniversalAssistant: React.FC<UniversalAssistantProps> = ({
   context,
   classId: propsClassId,
 }) => {
+  const { data: identity, isLoading: identityLoading } = useGetIdentity<User>();
   const { classId: routeClassId } = useParams();
   const classId = propsClassId || routeClassId;
 
@@ -34,6 +37,9 @@ export const UniversalAssistant: React.FC<UniversalAssistantProps> = ({
     });
 
   const [isOpen, setIsOpen] = useState(false);
+
+  // 🛡️ SECURITY: Do not show the assistant to unauthenticated guests (Landing Page safety)
+  if (!identityLoading && !identity) return null;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
