@@ -23,6 +23,8 @@ This document serves as the **Single Source of Truth** for frontend developers. 
 | `POST` | `/chat` | `useAIChat` | 20/hr | `AIResponse` |
 | `POST` | `/study-buddy` | `useAIChat` (SSE) | 20/hr | `Stream` |
 | `PATCH` | `/interact` | `useAILiveInteraction` (SSE) | 60/hr | `Stream` |
+| `POST` | `/parent-recap/:id/voice` | `useCustomMutation` | 1/day | - |
+| `POST` | `/intervention` | `useCustomMutation` | 10/day | - |
 | `POST` | `/generate-*` | `useCustomMutation` | 5/15m | `AIFeedbackResponse` |
 | `POST` | `/feedback` | `useCustomMutation` | 60/hr | - |
 | `GET` | `/health-report` | `useTable` | 1/hr | `SystemHealthReport` |
