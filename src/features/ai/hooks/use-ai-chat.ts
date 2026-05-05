@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import axios from "axios";
 import {
   useCustom,
   useNotification,
@@ -14,7 +13,7 @@ import { BasePermissions, UserRole, User } from "@/types";
 import { ChatSource, Message } from "@/types/ai";
 import { offlineDB } from "@/lib/offline-db";
 import { useAiAccess } from "./use-ai-access";
-import { AiStreamClient } from "../lib/ai-stream-client";
+import { useAiStream } from "./use-ai-stream";
 import { getCorrelationId } from "@/providers/utils/api-errors";
 
 interface UseAIChatProps {
@@ -72,7 +71,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     };
 
     void loadLocalCache();
-  }, [identity?.id, effectiveClassId]);
+  }, [identity?.id, effectiveClassId, isAiEnabled, isAllowed]);
 
   // 🛡️ AUTO-DRAFT: AI Assistant Persistence
   useEffect(() => {
@@ -98,25 +97,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [streamingSources, setStreamingSources] = useState<ChatSource[] | null>(null);
   const [isDryRun, setIsDryRun] = useState(false);
 
-  const stopStreaming = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
-    }
-    setIsLoading(false);
-    setStreamingMessage("");
-    setStreamingSources(null);
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-  }, []);
-
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
-  const lineBufferRef = useRef("");
   const animationFrameRef = useRef<number | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
   const hasLoadedHistoryFor = useRef<string | number | null>(null);
 
   const { open } = useNotification();
@@ -125,6 +108,34 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     isLoading: isPermissionsLoading,
     isError: isPermissionsError,
   } = usePermissions<BasePermissions>({});
+
+  // FOUNDATIONAL STREAMING HOOK
+  const finalUrl = effectiveClassId && effectiveClassId !== "global" ? "/ai/study-buddy" : url;
+
+  const {
+    stream,
+    abort: abortStream,
+    isLoading: isStreamLoading,
+  } = useAiStream(finalUrl, {
+    onChunk: (chunk) => {
+      accumulatorRef.current += chunk;
+      updateStreamingUI();
+    },
+    onError: (err) => {
+      handleChatError(err);
+    },
+  });
+
+  const stopStreaming = useCallback(() => {
+    abortStream();
+    setIsLoading(false);
+    setStreamingMessage("");
+    setStreamingSources(null);
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  }, [abortStream]);
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
   const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
@@ -137,13 +148,13 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
   // 1b. 🦾 NON-STREAMING FALLBACK
   const { mutate: sendSimpleChat } = useCustomMutation();
+  const { mutate: sendAlert } = useCustomMutation();
 
   // Handle Navigation & State Resets
   useEffect(() => {
     if (effectiveClassId !== hasLoadedHistoryFor.current) {
       setMessages([]);
       accumulatorRef.current = "";
-      lineBufferRef.current = "";
     }
   }, [effectiveClassId]);
 
@@ -159,24 +170,14 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       setMessages(history);
       hasLoadedHistoryFor.current = effectiveClassId;
 
-      // Update Dexie Cache
-      if (!abortControllerRef.current?.signal.aborted) {
-        void offlineDB.ai_history.put({
-          userId: identity.id,
-          classId: effectiveClassId,
-          messages: history,
-          timestamp: Date.now(),
-        });
-      }
+      void offlineDB.ai_history.put({
+        userId: identity.id,
+        classId: effectiveClassId,
+        messages: history,
+        timestamp: Date.now(),
+      });
     }
   }, [historyResult, effectiveClassId, identity?.id]);
-
-  // 2. 🧹 CLEANUP
-  useEffect(() => {
-    return () => {
-      stopStreaming();
-    };
-  }, [stopStreaming]);
 
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
@@ -202,10 +203,54 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     });
   }, []);
 
+  const handleChatError = useCallback(
+    (err: unknown) => {
+      console.error("Tablawy AI Error:", err);
+      const error = err as HttpError;
+      const correlationId = getCorrelationId(err);
+
+      const isGovernanceError =
+        error?.statusCode === 503 ||
+        error?.message?.includes("security") ||
+        error?.message?.includes("governance");
+
+      if (isGovernanceError && identity?.id) {
+        // 🛡️ USE REFINE PATTERN FOR ALERTS
+        sendAlert({
+          url: `${BACKEND_URL}/ai/alerts`,
+          method: "post",
+          values: {
+            type: "sanitizer_failure",
+            message: error.message || "Unknown Governance Failure",
+            metadata: { userId: identity.id, classId: effectiveClassId, correlationId },
+          },
+        });
+      }
+
+      open?.({
+        type: "error",
+        message: t("common.error"),
+        description: isGovernanceError
+          ? "System governance active. AI Buddy is temporarily resting. Please try again in a few minutes."
+          : `${error.message || t("aiHub.errors.serviceUnavailable")} (Trace: ${correlationId})`,
+      });
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "model",
+          parts: [{ text: t("aiHub.errors.friendlyFallback") }],
+        },
+      ]);
+      setIsLoading(false);
+    },
+    [identity?.id, effectiveClassId, open, sendAlert, t]
+  );
+
   // 3. 🚀 SEND: SSE Streaming Engine
   const handleSend = async () => {
     const cleanInput = input.trim();
-    if (!cleanInput || isLoading || isPermissionsLoading) return;
+    if (!cleanInput || isLoading || isPermissionsLoading || isStreamLoading) return;
 
     // 🛡️ Global Master Switch & RBAC
     if (!isAiEnabled || !isAllowed) {
@@ -246,11 +291,6 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       return;
     }
 
-    // Initialize Request Lifecycle
-    if (abortControllerRef.current) abortControllerRef.current.abort();
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
     const userMessage: Message = {
       role: "user",
       parts: [{ text: cleanInput }],
@@ -263,9 +303,6 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     setStreamingMessage("");
     setStreamingSources(null);
     accumulatorRef.current = "";
-    lineBufferRef.current = "";
-
-    const finalUrl = effectiveClassId && effectiveClassId !== "global" ? "/ai/study-buddy" : url;
 
     try {
       const correlationId = crypto.randomUUID();
@@ -298,7 +335,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
                 setMessages(updatedMessages);
 
                 // Update Cache
-                if (identity?.id && !abortControllerRef.current?.signal.aborted) {
+                if (identity?.id) {
                   void offlineDB.ai_history.put({
                     userId: identity.id,
                     classId: effectiveClassId,
@@ -311,43 +348,29 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
               setIsLoading(false);
             },
             onError: (err) => {
-              console.error("Simple Chat Error:", err);
-              setIsLoading(false);
-              const error = err as HttpError;
-              const correlationId = getCorrelationId(err);
-              open?.({
-                type: "error",
-                message: t("common.error"),
-                description: `${error.message || t("aiHub.errors.serviceUnavailable")} (Trace: ${correlationId})`,
-              });
+              handleChatError(err);
             },
           }
         );
         return;
       }
 
-      // Study Buddy (Streaming) using AiStreamClient
-      const finalResponseText = await AiStreamClient.fetchStream(
-        finalUrl,
-        {
-          message: cleanInput,
-          history: messages.map((m) => ({ role: m.role, parts: m.parts })),
-          context,
-          classId: effectiveClassId,
-          correlationId,
-        },
-        {
-          signal: controller.signal,
-          onChunk: (chunk) => {
-            accumulatorRef.current += chunk;
-            updateStreamingUI();
-          },
-        }
-      );
+      // Study Buddy (Streaming) using the FOUNDATIONAL hook
+      const finalResponseText = await stream({
+        message: cleanInput,
+        history: messages.map((m) => ({ role: m.role, parts: m.parts })),
+        context,
+        classId: effectiveClassId,
+        correlationId,
+      });
 
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
 
-      if (finalResponseText.trim().length > 0) {
+      if (
+        finalResponseText &&
+        typeof finalResponseText === "string" &&
+        finalResponseText.trim().length > 0
+      ) {
         const modelMessage: Message = {
           role: "model",
           parts: [{ text: finalResponseText.trim() }],
@@ -357,7 +380,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         setMessages(updatedMessages);
 
         // Persistent Cache update
-        if (identity?.id && !abortControllerRef.current?.signal.aborted) {
+        if (identity?.id) {
           void offlineDB.ai_history.put({
             userId: identity.id,
             classId: effectiveClassId,
@@ -365,56 +388,14 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
             timestamp: Date.now(),
           });
         }
-      } else {
-        throw new Error("EMPTY_RESPONSE");
       }
 
       setStreamingMessage("");
       setStreamingSources(null);
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === "AbortError") return;
-
-      // 🛡️ SECURITY: Fail-Fast & Notify Admins (Strike 2)
-      console.error("Tablawy AI Error:", err);
-      const error = err as HttpError;
-      const correlationId = getCorrelationId(err);
-
-      const isGovernanceError =
-        error?.statusCode === 503 ||
-        error?.message?.includes("security") ||
-        error?.message?.includes("governance");
-
-      if (isGovernanceError && identity?.id) {
-        // Asynchronously notify admins via the new alert endpoint
-        axios
-          .post(`${BACKEND_URL}/ai/alerts`, {
-            type: "sanitizer_failure",
-            message: error.message || "Unknown Governance Failure",
-            metadata: { userId: identity.id, classId: effectiveClassId, correlationId },
-          })
-          .catch(() => {}); // Suppress alert-of-alert failures
-      }
-
-      open?.({
-        type: "error",
-        message: t("common.error"),
-        description: isGovernanceError
-          ? "System governance active. AI Buddy is temporarily resting. Please try again in a few minutes."
-          : `${error.message || t("aiHub.errors.serviceUnavailable")} (Trace: ${correlationId})`,
-      });
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "model",
-          parts: [{ text: t("aiHub.errors.friendlyFallback") }],
-        },
-      ]);
+      handleChatError(err);
     } finally {
-      if (abortControllerRef.current === controller) {
-        setIsLoading(false);
-        abortControllerRef.current = null;
-      }
+      setIsLoading(false);
     }
   };
 
@@ -426,7 +407,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     setInput,
     handleSend,
     stopStreaming,
-    isLoading: isLoading || historyQuery?.isLoading || isPermissionsLoading,
+    isLoading: isLoading || historyQuery?.isLoading || isPermissionsLoading || isStreamLoading,
     scrollAreaRef,
     isDryRun,
   };

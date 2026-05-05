@@ -103,7 +103,7 @@ export interface BehavioralSignal {
   tenantId: string;
   classId?: string | null;
   signalType: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   sessionId?: string | null;
   correlationId?: string | null;
   createdAt: number;

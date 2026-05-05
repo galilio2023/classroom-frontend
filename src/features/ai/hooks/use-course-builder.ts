@@ -1,10 +1,25 @@
 import { useCustomMutation } from "@refinedev/core";
 
-export const useCourseBuilder = () => {
-  const { mutate: generateDraft, overtimeLoading: isGenerating } = useCustomMutation<any>();
-  const { mutate: commitDraft, overtimeLoading: isCommitting } = useCustomMutation<any>();
+export interface CourseModuleDraft {
+  title: string;
+  description: string;
+  learningObjectives: string[];
+}
 
-  const startDrafting = (resourceId: string, onSuccess?: (draft: any) => void) => {
+export interface CourseDraft {
+  id: string | number;
+  content: CourseModuleDraft[];
+}
+
+export const useCourseBuilder = () => {
+  const { mutate: generateDraft, overtimeLoading: isGenerating } = useCustomMutation<{
+    data: CourseDraft;
+  }>();
+  const { mutate: commitDraft, overtimeLoading: isCommitting } = useCustomMutation<{
+    data: unknown;
+  }>();
+
+  const startDrafting = (resourceId: string, onSuccess?: (draft: CourseDraft) => void) => {
     generateDraft(
       {
         url: `/ai/course-builder/draft`,
@@ -17,12 +32,12 @@ export const useCourseBuilder = () => {
         },
       },
       {
-        onSuccess: (data) => onSuccess?.(data.data),
+        onSuccess: (data) => onSuccess?.(data.data.data),
       }
     );
   };
 
-  const publishCourse = (draftId: string, onSuccess?: (modules: any) => void) => {
+  const publishCourse = (draftId: string, onSuccess?: (modules: unknown) => void) => {
     commitDraft(
       {
         url: `/ai/course-builder/commit`,
@@ -30,7 +45,7 @@ export const useCourseBuilder = () => {
         values: { draftId },
       },
       {
-        onSuccess: (data) => onSuccess?.(data.data),
+        onSuccess: (data) => onSuccess?.(data.data.data),
       }
     );
   };

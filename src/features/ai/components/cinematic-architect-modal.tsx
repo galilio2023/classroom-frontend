@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { BrainCircuit, Loader2, Wand2, CheckCircle, Trash2 } from "lucide-react";
-import { useCourseBuilder } from "../hooks/use-course-builder";
+import { useCourseBuilder, type CourseDraft } from "../hooks/use-course-builder";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useNotification } from "@refinedev/core";
@@ -30,10 +30,10 @@ export const CinematicArchitectModal: React.FC<CinematicArchitectModalProps> = (
 }) => {
   const { open } = useNotification();
   const { startDrafting, publishCourse, isGenerating, isCommitting } = useCourseBuilder();
-  const [draft, setDraft] = useState<any>(null);
+  const [draft, setDraft] = useState<CourseDraft | null>(null);
 
   const handleGenerate = () => {
-    startDrafting(resourceId, (newDraft: any) => {
+    startDrafting(resourceId, (newDraft) => {
       setDraft(newDraft);
       open?.({
         type: "success",
@@ -115,7 +115,7 @@ export const CinematicArchitectModal: React.FC<CinematicArchitectModalProps> = (
                 </div>
 
                 <div className="space-y-4">
-                  {(draft.content as any[]).map((m, i) => (
+                  {draft.content.map((m, i) => (
                     <div
                       key={i}
                       className="p-5 rounded-2xl border bg-card hover:border-purple-200 transition-colors group"
@@ -140,7 +140,7 @@ export const CinematicArchitectModal: React.FC<CinematicArchitectModalProps> = (
                       </div>
 
                       <div className="mt-4 flex flex-wrap gap-2">
-                        {m.learningObjectives?.slice(0, 3).map((obj: string, j: number) => (
+                        {m.learningObjectives?.slice(0, 3).map((obj, j) => (
                           <Badge
                             key={j}
                             variant="secondary"

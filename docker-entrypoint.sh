@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 # 🚀 Tablawy OS - Frontend Entrypoint
 # Dynamically injects environment variables into Nginx configuration
 
