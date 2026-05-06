@@ -29,7 +29,7 @@ const PeerReviewBoard = () => {
   const isAr = i18n.language === "ar";
   usePageTitle("Peer Review Board");
 
-  const [selectedReviewId, setSelectedReviewId] = useState<number | null>(null);
+  const [selectedReviewId, setSelectedReviewId] = useState<string | number | null>(null);
 
   const { result: data, query } = useList<PeerReview>({
     resource: "peer-reviews",

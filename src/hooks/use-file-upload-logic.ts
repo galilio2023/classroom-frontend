@@ -65,8 +65,10 @@ export const useFileUploadLogic = ({
   }, []);
 
   const isResumable = useMemo(() => {
-    return file && bytesToMb(file.size) > MAX_SYNC_UPLOAD_SIZE_MB && !!TUS_ENDPOINT;
-  }, [file]);
+    // 🛡️ REMEDIATION: Standardize on TUS for ALL uploads if endpoint is available.
+    // This ensures protocol consistency and high reliability even for small files.
+    return !!TUS_ENDPOINT;
+  }, []);
 
   const handleUpload = useCallback(async () => {
     if (!file || isUploading) return;

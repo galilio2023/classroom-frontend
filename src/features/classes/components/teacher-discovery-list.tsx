@@ -21,7 +21,7 @@ export const TeacherDiscoveryList = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   const { show } = useNavigation();
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { mutate: recordView } = useCustomMutation();

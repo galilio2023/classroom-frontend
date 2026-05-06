@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 
 interface PinnedAnnouncementsProps {
   announcements: Announcement[];
-  dismissedAnnouncements: number[];
-  handleDismissAnnouncement: (id: number) => void;
+  dismissedAnnouncements: (string | number)[];
+  handleDismissAnnouncement: (id: string | number) => void;
 }
 
 export const PinnedAnnouncements = ({

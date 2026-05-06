@@ -3,15 +3,15 @@ import { UserRole } from "@/types";
 import { socket, connectSocket } from "@/lib/socket";
 
 interface AgentAlertData {
-  classId: number;
+  classId: string | number;
   [key: string]: unknown;
 }
 
 export const useAssignmentSocket = (
   userId?: string,
   userRole?: UserRole,
-  classId?: number,
-  submissionId?: number, // 🚀 NEW: Join specific submission room
+  classId?: string | number,
+  submissionId?: string | number, // 🚀 NEW: Join specific submission room
   onAlert?: () => void
 ) => {
   useEffect(() => {

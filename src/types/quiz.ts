@@ -1,6 +1,6 @@
 export interface QuizQuestion {
-  id: number;
-  quizId: number;
+  id: string | number;
+  quizId: string | number;
   question: string;
   options: string[];
   correctAnswer?: string; // Hidden for students
@@ -10,14 +10,14 @@ export interface QuizQuestion {
 }
 
 export interface Quiz {
-  id: number;
+  id: string | number;
   title: string;
   description?: string;
   dueDate?: string;
   timeLimit?: number;
-  classId: number;
-  moduleId?: number | null;
-  categoryId?: number | null;
+  classId: string | number;
+  moduleId?: string | number | null;
+  categoryId?: string | number | null;
   maxAttempts?: number;
   gradingPolicy?: "highest" | "latest" | "average";
   shuffleQuestions?: boolean;
@@ -30,14 +30,14 @@ export interface Quiz {
   updatedAt: string;
   questions?: QuizQuestion[];
   class?: {
-    id: number;
+    id: string | number;
     name: string;
   };
 }
 
 export interface QuizAttempt {
-  id: number;
-  quizId: number;
+  id: string | number;
+  quizId: string | number;
   studentId: string;
   score: number;
   answers: Record<number, string>;

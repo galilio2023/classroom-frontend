@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useList, useCreate, useUpdate, useDelete, useCustomMutation } from "@refinedev/core";
 import { Announcement } from "@/types";
 import { toast } from "sonner";
@@ -6,12 +6,14 @@ import { useTranslation } from "react-i18next";
 import { useUserRole } from "@/features/users/hooks/use-user-role";
 import { STORAGE_KEYS } from "@/config";
 
+import { useTusUpload } from "@/hooks/use-tus-upload";
+import { getAuthToken } from "@/lib/auth-helper";
+
 export const useAnnouncementTab = (classId: string) => {
   const { t } = useTranslation();
   const { identity, isStaff } = useUserRole();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [newAnnouncement, setNewAnnouncement] = useState({
     title: "",
     content: "",
@@ -19,6 +21,27 @@ export const useAnnouncementTab = (classId: string) => {
     fileUrl: null as string | null,
     fileCldPubId: null as string | null,
   });
+
+  const {
+    startUpload: startTusUpload,
+    status: uploadStatus,
+    uploadUrl: tusUrl,
+    tusPublicId,
+  } = useTusUpload();
+
+  const isUploading = uploadStatus === "uploading";
+
+  // Handle successful TUS upload
+  useEffect(() => {
+    if (uploadStatus === "success" && tusPublicId) {
+      setNewAnnouncement((prev) => ({
+        ...prev,
+        fileUrl: tusUrl || null,
+        fileCldPubId: tusPublicId,
+      }));
+      toast.success(t("common.upload.success"));
+    }
+  }, [uploadStatus, tusPublicId, tusUrl, t]);
 
   const { query } = useList<Announcement>({
     resource: "announcements",
@@ -34,7 +57,7 @@ export const useAnnouncementTab = (classId: string) => {
   const { mutate: deleteAnnouncement } = useDelete();
   const { mutate: markAsRead } = useCustomMutation();
 
-  const handleMarkAsRead = (id: number) => {
+  const handleMarkAsRead = (id: string | number) => {
     markAsRead(
       { url: `announcements/${id}/read`, method: "post", values: {} },
       {
@@ -46,45 +69,12 @@ export const useAnnouncementTab = (classId: string) => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setIsUploading(true);
-    try {
-      const sigRes = await fetch(
-        `${import.meta.env.VITE_API_URL}/upload/signature?folder=announcements`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)}`,
-          },
-        }
-      );
-      const { data: sigData } = await sigRes.json();
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("api_key", sigData.apiKey);
-      formData.append("timestamp", sigData.timestamp);
-      formData.append("signature", sigData.signature);
-      formData.append("folder", sigData.folder);
 
-      const cloudRes = await fetch(
-        `https://api.cloudinary.com/v1_1/${sigData.cloudName}/auto/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      const result = await cloudRes.json();
-      if (result.secure_url) {
-        setNewAnnouncement((prev) => ({
-          ...prev,
-          fileUrl: result.secure_url,
-          fileCldPubId: result.public_id,
-        }));
-        toast.success(t("common.upload.success"));
-      }
-    } catch {
-      toast.error(t("common.upload.error"));
-    } finally {
-      setIsUploading(false);
-    }
+    const token = getAuthToken();
+    startTusUpload(file, token, {
+      folder: "announcements",
+      classId,
+    });
   };
 
   const handleCreate = () => {
@@ -124,7 +114,7 @@ export const useAnnouncementTab = (classId: string) => {
     );
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string | number) => {
     deleteAnnouncement({ resource: "announcements", id }, { onSuccess: () => query.refetch() });
   };
 

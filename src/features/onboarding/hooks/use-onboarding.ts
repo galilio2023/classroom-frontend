@@ -17,7 +17,9 @@ export const useOnboarding = () => {
       values: { suiteType },
       onSuccess: () => {
         toast.success(t("onboarding.suiteSuccess", "Suite activated successfully!"));
-        refetchIdentity();
+        refetchIdentity().then(() => {
+          push("/dashboard");
+        });
       },
       onError: (error: any) => {
         toast.error(error?.message || t("onboarding.suiteError", "Failed to activate suite."));

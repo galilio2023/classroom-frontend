@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { BACKEND_URL, STORAGE_KEYS } from "@/config";
 import { useTranslation } from "react-i18next";
+import { useTusUpload } from "@/hooks/use-tus-upload";
+import { getAuthToken } from "@/lib/auth-helper";
 
 interface VerificationUploadProps {
   url?: string;
@@ -15,50 +17,41 @@ interface VerificationUploadProps {
 
 export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploadProps) => {
   const { t } = useTranslation();
-  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    startUpload: startTusUpload,
+    status: uploadStatus,
+    progress: uploadProgress,
+    currentUploadId,
+    tusPublicId,
+  } = useTusUpload();
+
+  const isUploading = uploadStatus === "uploading";
+
+  React.useEffect(() => {
+    if (uploadStatus === "success" && tusPublicId) {
+      // 💡 NOTE: In this unified flow, the tusPublicId (TUS ID) is used by the frontend.
+      // The backend janitor will sync it to Cloudinary.
+      onUpload(tusPublicId, tusPublicId);
+      toast.success(t("auth.register.verification.success"));
+    }
+  }, [uploadStatus, tusPublicId, t, onUpload]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Simple validation (5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Simple validation (10MB for TUS)
+    if (file.size > 10 * 1024 * 1024) {
       toast.error(t("common.upload.tooLarge"));
       return;
     }
 
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("folder", "verification");
-
-    try {
-      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      const response = await fetch(`${BACKEND_URL}/upload`, {
-        method: "POST",
-        body: formData,
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-
-      if (!response.ok) {
-        toast.error(t("auth.register.verification.error"));
-        setIsUploading(false);
-        return;
-      }
-
-      const result = await response.json();
-
-      onUpload(result.data.url, result.data.publicId);
-      toast.success(t("auth.register.verification.success"));
-    } catch (error) {
-      console.error(error);
-      toast.error(t("auth.register.verification.error"));
-    } finally {
-      setIsUploading(false);
-    }
+    const token = getAuthToken();
+    startTusUpload(file, token, {
+      folder: "verification",
+    });
   };
 
   const handleClear = () => {
@@ -127,7 +120,7 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
               {isUploading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin me-2" />
-                  {t("buttons.uploading")}
+                  {t("buttons.uploading")} {Math.round(uploadProgress)}%
                 </>
               ) : (
                 t("buttons.selectFile")

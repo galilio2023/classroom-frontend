@@ -106,7 +106,7 @@ export default function TermsList() {
     resolver: zodResolver(termSchema),
   });
 
-  const handleActivate = (id: number) => {
+  const handleActivate = (id: string | number) => {
     update(
       {
         resource: "academic-terms",
@@ -120,7 +120,7 @@ export default function TermsList() {
     );
   };
 
-  const handleArchive = (id: number) => {
+  const handleArchive = (id: string | number) => {
     update(
       {
         resource: "academic-terms",
@@ -134,7 +134,7 @@ export default function TermsList() {
     );
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string | number) => {
     if (window.confirm(t("terms.deleteDialog.title") + " " + t("terms.deleteDialog.description"))) {
       deleteMutation(
         {

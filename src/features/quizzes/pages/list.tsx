@@ -135,7 +135,7 @@ const QuizzesListPage = () => {
     if (!quizzes.length) return { total: 0, aiGenerated: 0, active: 0 };
     return {
       total: quizzes.length,
-      aiGenerated: quizzes.filter((q: Quiz) => q.id % 2 === 0).length,
+      aiGenerated: quizzes.filter((q: Quiz) => Number(q.id) % 2 === 0).length,
       active: quizzes.filter((q: Quiz) => !q.dueDate || dayjs().isBefore(dayjs(q.dueDate))).length,
     };
   }, [quizzes]);

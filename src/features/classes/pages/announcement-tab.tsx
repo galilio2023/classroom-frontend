@@ -13,8 +13,8 @@ import { CreateAnnouncementDialog } from "../components/create-announcement-dial
 interface AnnouncementTabProps {
   classId: string;
   announcements: Announcement[];
-  dismissedAnnouncements: number[];
-  handleDismissAnnouncement: (id: number) => void;
+  dismissedAnnouncements: (string | number)[];
+  handleDismissAnnouncement: (id: string | number) => void;
 }
 
 export const AnnouncementTab = ({
@@ -27,7 +27,9 @@ export const AnnouncementTab = ({
   const { isLoading, isCreating, isUploading, isStaff, state, actions } =
     useAnnouncementTab(classId);
 
-  const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<number | null>(null);
+  const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<string | number | null>(
+    null
+  );
   const [isReadsModalOpen, setIsReadsModalOpen] = useState(false);
 
   if (isLoading)
@@ -168,7 +170,7 @@ export const AnnouncementTab = ({
                 onTogglePin={actions.togglePin}
                 onDelete={actions.handleDelete}
                 onMarkAsRead={actions.handleMarkAsRead}
-                onViewReads={(id: number) => {
+                onViewReads={(id: string | number) => {
                   setSelectedAnnouncementId(id);
                   setIsReadsModalOpen(true);
                 }}

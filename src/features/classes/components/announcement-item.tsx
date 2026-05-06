@@ -20,9 +20,9 @@ interface Props {
   announcement: Announcement;
   isStaff: boolean;
   onTogglePin: (a: Announcement) => void;
-  onDelete: (id: number) => void;
-  onMarkAsRead: (id: number) => void;
-  onViewReads: (id: number) => void;
+  onDelete: (id: string | number) => void;
+  onMarkAsRead: (id: string | number) => void;
+  onViewReads: (id: string | number) => void;
 }
 
 export const AnnouncementItem = ({

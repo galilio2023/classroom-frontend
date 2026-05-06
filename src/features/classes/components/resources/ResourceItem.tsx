@@ -36,9 +36,9 @@ interface ResourceItemProps {
   res: Resource;
   classId: string;
   isTeacher: boolean;
-  onDelete: (id: number) => void;
+  onDelete: (id: string | number) => void;
   onToggleAiPin: (res: Resource) => void;
-  onFeature: (id: number) => void;
+  onFeature: (id: string | number) => void;
 }
 
 export const ResourceItem = ({

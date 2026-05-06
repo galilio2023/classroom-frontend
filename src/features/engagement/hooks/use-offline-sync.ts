@@ -125,14 +125,18 @@ export const useOfflineSync = () => {
 
   /**
    * Stores a quiz attempt in IndexedDB when offline.
+   * 🛡️ REMEDIATION: Now uses central outbox for consistent reconciliation.
    */
   const saveQuizOffline = async (quizId: string, userId: string, answers: any) => {
     try {
-      await db.quizzes.add({
-        quizId,
-        userId,
-        answers,
-        submittedAt: Date.now(),
+      await db.queue({
+        resource: "custom",
+        action: "custom",
+        variables: {
+          url: `/quizzes/${quizId}/submit`,
+          method: "post",
+          payload: { answers, userId },
+        },
       });
       toast.info(t("offline.quizSavedOffline"));
     } catch (error) {
@@ -142,13 +146,21 @@ export const useOfflineSync = () => {
 
   /**
    * Flushes all pending data to the server when connection is restored.
+   * 🛡️ REMEDIATION: Consolidated into central outbox for unified reconciliation.
    */
   const syncPendingData = async () => {
+    // 1. Sync Central Outbox (Mutations/CRUD)
+    const { flushOutbox } = await import("@/providers/data");
+    await flushOutbox();
+
+    // 2. Specialized Syncs (Remaining legacy or high-volume background streams)
     await syncPendingQuizzes();
     await syncBehavioralSignals();
   };
 
   const syncPendingQuizzes = async () => {
+    // 🛡️ DEPRECATED: Quizzes are now routed through central outbox.
+    // This maintains backward compatibility for legacy items still in IndexedDB.
     const pendingQuizzes = await db.quizzes.toArray();
 
     if (pendingQuizzes.length > 0) {
@@ -197,9 +209,10 @@ export const useOfflineSync = () => {
 
   /**
    * 🛰️ BEHAVIOR SYNC: Reconciles offline behavioral signals.
-   * Phase 6.1 Mandate: Flush signals silently without notifying the user (background).
+   * 🛡️ REMEDIATION: Now uses central outbox for consistent reconciliation.
    */
   const syncBehavioralSignals = async () => {
+    // 🛡️ DEPRECATED: Behavioral signals are now routed through central outbox.
     const pendingSignals = await db.behavior_signals.toArray();
     if (pendingSignals.length === 0) return;
 
@@ -211,19 +224,16 @@ export const useOfflineSync = () => {
     });
 
     for (const signal of pendingSignals) {
-      submitQuiz(
-        // We reuse useCustomMutation's mutate but renamed here for convenience
-        {
+      await db.queue({
+        resource: "custom",
+        action: "custom",
+        variables: {
           url: "/analytics/behavior/emit",
           method: "post",
-          values: signal,
+          payload: signal,
         },
-        {
-          onSuccess: async () => {
-            if (signal.id) await db.behavior_signals.delete(signal.id);
-          },
-        }
-      );
+      });
+      if (signal.id) await db.behavior_signals.delete(signal.id);
     }
   };
 

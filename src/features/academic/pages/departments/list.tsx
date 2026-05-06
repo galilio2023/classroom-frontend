@@ -63,7 +63,7 @@ const DepartmentsList = () => {
   const isAdmin = identity?.role === UserRole.ADMIN;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | number | null>(null);
 
   const { edit, create } = useNavigation();
   const { mutate: deleteMutation } = useDelete();

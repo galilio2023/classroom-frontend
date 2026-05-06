@@ -43,7 +43,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const { data: identity } = useGetIdentity<User>();
   const { isStaff } = useUserRole();
   const [newPost, setNewPost] = useState("");
-  const [replyTo, setReplyTo] = useState<number | null>(null);
+  const [replyTo, setReplyTo] = useState<string | number | null>(null);
 
   // 🛡️ AUTO-DRAFT: Discussion Persistence
   useEffect(() => {
@@ -86,7 +86,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const { mutate: createPost, mutation } = useCreate<
     Discussion,
     HttpError,
-    { content: string; classId: number; parentId: number | null }
+    { content: string; classId: number; parentId: string | number | null }
   >();
   const { mutate: deletePost } = useDelete();
   const { mutate: solvePost } = useCustomMutation();
@@ -156,7 +156,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
     );
   };
 
-  const handleSolve = (postId: number, solverId: string) => {
+  const handleSolve = (postId: string | number, solverId: string) => {
     solvePost(
       {
         url: `/discussions/${postId}/solve`,

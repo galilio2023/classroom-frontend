@@ -27,7 +27,7 @@ export const useTelemetry = () => {
   };
 
   const trackEvent = (
-    classId: number,
+    classId: string | number,
     type: "view" | "preview_click" | "registration_attempt" | "enrollment"
   ) => {
     mutate({

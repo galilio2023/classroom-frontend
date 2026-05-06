@@ -15,9 +15,9 @@ import { useDiscussion } from "@/contexts/discussion-context";
 interface ChatBubbleProps {
   post: Discussion & { repliesCount?: number };
   isOwn: boolean;
-  onDelete: (id: number) => void;
-  onReply: (id: number) => void;
-  onSolve?: (postId: number, solverId: string) => void;
+  onDelete: (id: string | number) => void;
+  onReply: (id: string | number) => void;
+  onSolve?: (postId: string | number, solverId: string) => void;
 }
 
 /**

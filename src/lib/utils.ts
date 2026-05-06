@@ -2,6 +2,21 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 /**
+ * 📶 RURAL HARDENING: Detects poor bandwidth conditions.
+ * Used to conditionally limit heavy payloads or downgrade quality.
+ */
+export function isPoorBandwidth(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const conn =
+    (navigator as any).connection ||
+    (navigator as any).mozConnection ||
+    (navigator as any).webkitConnection;
+  if (!conn) return false;
+
+  return conn.effectiveType === "2g" || conn.effectiveType === "3g" || conn.downlink < 1;
+}
+
+/**
  * 🛠️ Standard conversion utilities for file sizes.
  */
 export const mbToBytes = (mb: number) => mb * 1024 * 1024;

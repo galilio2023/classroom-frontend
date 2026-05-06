@@ -13,8 +13,8 @@ import { Announcement } from "@/types";
 interface EngagementTabWrapperProps {
   classId: string;
   announcements: Announcement[];
-  dismissedAnnouncements: number[];
-  handleDismissAnnouncement: (id: number) => void;
+  dismissedAnnouncements: (string | number)[];
+  handleDismissAnnouncement: (id: string | number) => void;
   isLiveIndicator: boolean;
   activeSubTab: string;
   setSearchParams: (

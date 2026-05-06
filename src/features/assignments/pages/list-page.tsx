@@ -65,7 +65,7 @@ const AssignmentsListPage = () => {
   const { selectedTerm } = useTerm();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | number | null>(null);
   const [view, setView] = useState<"discovery" | "my">(
     identity?.role === UserRole.STUDENT ? "discovery" : "my"
   );

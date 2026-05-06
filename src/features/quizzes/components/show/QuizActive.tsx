@@ -22,12 +22,12 @@ interface QuizActiveProps {
   quiz: Quiz;
   currentQuestionIndex: number;
   setCurrentQuestionIndex: (index: number | ((prev: number) => number)) => void;
-  answers: Record<number, string>;
-  onAnswer: (questionId: number, option: string) => void;
+  answers: Record<string, string>;
+  onAnswer: (questionId: string | number, option: string) => void;
   timeLeft: number | null;
   onFinish: () => void;
   isSubmitting: boolean;
-  setAnswers: (answers: Record<number, string>) => void;
+  setAnswers: (answers: Record<string, string>) => void;
 }
 
 export const QuizActive = ({
@@ -146,12 +146,12 @@ export const QuizActive = ({
             </CardHeader>
             <CardContent className="p-8 md:p-10 pt-4">
               <RadioGroup
-                value={answers[currentQuestion.id] || ""}
+                value={answers[String(currentQuestion.id)] || ""}
                 onValueChange={(val) => onAnswer(currentQuestion.id, val)}
                 className="grid gap-4 md:gap-6"
               >
                 {currentQuestion.options.map((option: string, idx: number) => {
-                  const isSelected = answers[currentQuestion.id] === option;
+                  const isSelected = answers[String(currentQuestion.id)] === option;
                   return (
                     <div
                       key={idx}
@@ -198,7 +198,7 @@ export const QuizActive = ({
                 <Button
                   size="lg"
                   onClick={onFinish}
-                  disabled={isSubmitting || !answers[currentQuestion.id]}
+                  disabled={isSubmitting || !answers[String(currentQuestion.id)]}
                   className="w-full sm:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 bg-green-600 hover:bg-green-700 shadow-xl shadow-green-600/20 text-white"
                 >
                   {isSubmitting ? (
@@ -212,7 +212,7 @@ export const QuizActive = ({
                 <Button
                   size="lg"
                   onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
-                  disabled={!answers[currentQuestion.id]}
+                  disabled={!answers[String(currentQuestion.id)]}
                   className="w-full sm:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 shadow-xl shadow-primary/20"
                 >
                   {t("classes.quiz.nextQuestion")} <ChevronRight className="ms-2 h-4 w-4" />

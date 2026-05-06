@@ -40,9 +40,22 @@ export const UniversalAssistant: React.FC<UniversalAssistantProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   // 🛡️ SECURITY: Strictly hide the assistant on public-facing pages and for unauthenticated guests
-  const publicPaths = ["/", "/landing", "/pricing", "/login", "/register", "/forgot-password", "/reset-password", "/privacy", "/terms", "/discovery"];
-  const isPublicPage = publicPaths.some(path => pathname === path || pathname.startsWith(path + "/"));
-  
+  const publicPaths = [
+    "/",
+    "/landing",
+    "/pricing",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    "/privacy",
+    "/terms",
+    "/discovery",
+  ];
+  const isPublicPage = publicPaths.some(
+    (path) => pathname === path || pathname.startsWith(path + "/")
+  );
+
   if (isPublicPage || (!identityLoading && !identity)) return null;
 
   return (
