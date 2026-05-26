@@ -149,8 +149,11 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
   const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
-    url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,
+    url: "/ai-activity-logs",
     method: "get",
+    config: {
+      query: { classId: effectiveClassId },
+    },
     queryOptions: {
       enabled: !!identity?.id && hasLoadedHistoryFor.current !== effectiveClassId,
     },

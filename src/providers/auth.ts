@@ -34,16 +34,16 @@ const syncToken = (token?: string | null) => {
   }
 };
 
-export const getFreshSession = async () => {
+export const getFreshSession = async (forceFetch = false) => {
   const now = Date.now();
 
-  // 1. Return success cache
-  if (cachedSessionData && now - lastFetchTime < CACHE_TTL) {
+  // 1. Return success cache if not forced and within TTL
+  if (!forceFetch && cachedSessionData && now - lastFetchTime < CACHE_TTL) {
     return { data: cachedSessionData, error: null };
   }
 
   // 2. Throttle repeat attempts after a failure
-  if (!cachedSessionData && now - lastFailedFetchTime < FAILED_TTL) {
+  if (!forceFetch && !cachedSessionData && now - lastFailedFetchTime < FAILED_TTL) {
     return { data: null, error: { message: "Throttled" } };
   }
 
@@ -65,7 +65,10 @@ export const getFreshSession = async () => {
           syncToken(sessionToken);
         }
       } else {
-        cachedSessionData = null;
+        // Only clear if we definitely got a "no session" response, not just a network error
+        if (result.error?.status === 401 || result.error?.status === 404) {
+          cachedSessionData = null;
+        }
         lastFailedFetchTime = Date.now();
       }
       return result;
@@ -81,6 +84,7 @@ export const getFreshSession = async () => {
 };
 
 export const authProvider: AuthProvider = {
+  // ... (register, login, logout remain same or slightly improved)
   register: async (params: Record<string, unknown>) => {
     try {
       const sanitizedParams = sanitizePayload(params);
@@ -161,7 +165,6 @@ export const authProvider: AuthProvider = {
         lastFetchTime = Date.now();
 
         // 🛡️ MOBILE STABILITY: Explicitly store token
-        // In signIn result, token is at the top level
         const sessionToken = (data as any).token;
         if (sessionToken) {
           syncToken(sessionToken);
@@ -177,7 +180,6 @@ export const authProvider: AuthProvider = {
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userWithVerified));
       }
 
-      // Fixed: Redirect to dashboard instead of landing page
       return { success: true, redirectTo: "/dashboard" };
     } catch (err: unknown) {
       const error = err as Error;
@@ -193,42 +195,31 @@ export const authProvider: AuthProvider = {
 
   logout: async () => {
     try {
-      // 🛡️ SECURITY Gap Fix: Clear sensitive offline data on logout
       await offlineDB.study_plans.clear();
-
       await authClient.signOut();
-      cachedSessionData = null;
-      lastFetchTime = 0;
-      localStorage.removeItem(STORAGE_KEYS.USER);
-      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.LIVE_SESSION);
-      localStorage.removeItem(STORAGE_KEYS.TELEMETRY_ID); // 🛡️ SECURITY: Clear telemetry on logout
-      return { success: true, redirectTo: "/login" };
     } catch {
-      // Still attempt cleanup even if network signOut fails
-      await offlineDB.study_plans.clear();
+      // Ignored
+    } finally {
       cachedSessionData = null;
       lastFetchTime = 0;
       localStorage.removeItem(STORAGE_KEYS.USER);
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.LIVE_SESSION);
       localStorage.removeItem(STORAGE_KEYS.TELEMETRY_ID);
-      return { success: true, redirectTo: "/login" };
     }
+    return { success: true, redirectTo: "/login" };
   },
 
   check: async () => {
     try {
+      // Force a fresh check if cache is old
       const { data: session, error } = await getFreshSession();
 
       if (error || !session?.user) {
-        // ... dev fallback ...
         if (import.meta.env.DEV) {
           const localUser = localStorage.getItem(STORAGE_KEYS.USER);
           if (localUser) return { authenticated: true };
         }
-
-        // In production, if session check failed, try to clear potential stale token
         localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       }
 
@@ -246,19 +237,21 @@ export const authProvider: AuthProvider = {
       }
 
       localStorage.removeItem(STORAGE_KEYS.USER);
-      return {
-        authenticated: false,
-      };
+      return { authenticated: false };
     } catch {
       localStorage.removeItem(STORAGE_KEYS.USER);
-      return {
-        authenticated: false,
-      };
+      return { authenticated: false };
     }
   },
 
   onError: async (error: HttpError | null) => {
     if (error?.status === 401) {
+      // Attempt a silent refresh before giving up
+      const { data: session } = await getFreshSession(true);
+      if (session?.user) {
+        return { logout: false };
+      }
+
       cachedSessionData = null;
       lastFetchTime = 0;
       localStorage.removeItem(STORAGE_KEYS.USER);
@@ -272,7 +265,6 @@ export const authProvider: AuthProvider = {
   },
 
   getPermissions: async () => {
-    // 🛡️ SECURITY: Prefer session over localStorage if possible
     const { data: session } = await getFreshSession();
     const role =
       (session?.user as unknown as User)?.role ||
@@ -281,7 +273,6 @@ export const authProvider: AuthProvider = {
   },
 
   getIdentity: async () => {
-    // 🛡️ SECURITY: Fetch fresh session to prevent local spoofing
     const { data: session } = await getFreshSession();
     if (session?.user) {
       return session.user as unknown as User;

@@ -30,7 +30,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
   const { canManageCurriculum: isTeacher } = useCapabilities();
 
   const [isAddResourceOpen, setIsAddResourceOpen] = useState(false);
-  const [activeModuleId, setActiveModuleId] = useState<number | null>(null);
+  const [activeModuleId, setActiveModuleId] = useState<string | number | null>(null);
 
   const { query } = useList<Module>({
     resource: "modules",
@@ -84,7 +84,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
     );
   };
 
-  const handleDeleteResource = (id: number) => {
+  const handleDeleteResource = (id: string | number) => {
     deleteResource(
       { resource: "resources", id },
       {
@@ -96,7 +96,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
     );
   };
 
-  const handleFeatureResource = (id: number) => {
+  const handleFeatureResource = (id: string | number) => {
     featureResource({
       url: "/channels/feature-resource",
       method: "post",

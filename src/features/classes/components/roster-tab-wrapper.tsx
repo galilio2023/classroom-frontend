@@ -13,10 +13,10 @@ interface RosterTabWrapperProps {
   pendingEnrollments: Enrollment[];
   isStaff: boolean;
   onInsight: (student: { id: string; name: string }) => void;
-  onUnenroll: (id: number) => void;
+  onUnenroll: (id: string | number) => void;
   onEnrollClick: () => void;
   onMessageAllClick: () => void;
-  onEnrollmentAction: (id: number, status: "approved" | "rejected") => void;
+  onEnrollmentAction: (id: string | number, status: "approved" | "rejected") => void;
   activeSubTab: string;
   setSearchParams: (
     setter: (prev: URLSearchParams) => URLSearchParams,

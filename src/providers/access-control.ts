@@ -45,18 +45,41 @@ export const accessControlProvider: AccessControlProvider = {
       };
     }
 
-    // 3. Action-based restrictions for STUDENT
-    // Students can view but usually not create/edit/delete academic structures.
-    if (role === UserRole.STUDENT) {
+    // 3. Action-based restrictions for STUDENT and PARENT
+    // Students/Parents can view but usually not create/edit/delete academic structures.
+    if (role === UserRole.STUDENT || role === UserRole.PARENT) {
       if (["create", "edit", "delete"].includes(action)) {
         // Exception: discussions and submissions (Students need to participate)
         const studentActionExceptions = ["discussions", "submissions"];
-        if (!studentActionExceptions.includes(resourceName)) {
-          return {
-            can: false,
-            reason: "Students are restricted from performing mutations on this resource.",
-          };
+        if (role === UserRole.STUDENT && studentActionExceptions.includes(resourceName)) {
+          return { can: true };
         }
+
+        return {
+          can: false,
+          reason: `${role === UserRole.PARENT ? "Parents" : "Students"} are restricted from performing mutations on this resource.`,
+        };
+      }
+    }
+
+    // 🛡️ PARENT SPECIFIC: Parents can only view their linked children's data
+    if (role === UserRole.PARENT) {
+      const allowedParentResources = [
+        "dashboard",
+        "guardian-portal",
+        "attendance",
+        "report-card",
+        "progress",
+        "announcements",
+        "timetable",
+        "meetings",
+      ];
+
+      if (!allowedParentResources.includes(resourceName)) {
+        return {
+          can: false,
+          reason: "Unauthorized: This resource is not accessible via the Guardian Portal.",
+        };
       }
     }
 

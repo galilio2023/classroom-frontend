@@ -37,10 +37,10 @@ interface StudentsTabProps {
   pendingEnrollments: Enrollment[];
   isStaff: boolean;
   onInsight: (student: { id: string; name: string }) => void;
-  onUnenroll: (id: number) => void;
+  onUnenroll: (id: string | number) => void;
   onEnrollClick: () => void;
   onMessageAllClick: () => void;
-  onEnrollmentAction: (id: number, status: "approved" | "rejected") => void;
+  onEnrollmentAction: (id: string | number, status: "approved" | "rejected") => void;
 }
 
 export const StudentsTab = ({
@@ -62,7 +62,10 @@ export const StudentsTab = ({
    * ARCHITECTURAL PATTERN: Optimistic Update Helper
    * Manually updates the React Query cache before the server responds.
    */
-  const handleOptimisticEnrollment = async (id: number, status: "approved" | "rejected") => {
+  const handleOptimisticEnrollment = async (
+    id: string | number,
+    status: "approved" | "rejected"
+  ) => {
     // 1. Trigger the actual mutation (which remains passed from the parent for consistency)
     onEnrollmentAction(id, status);
 

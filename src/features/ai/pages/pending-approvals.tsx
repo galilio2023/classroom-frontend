@@ -65,7 +65,7 @@ const PendingApprovalsPage = () => {
   const pendingPrompts = promptQuery.data?.data || [];
   const isLoadingPrompts = promptQuery.isLoading;
 
-  const handleApprove = (id: number, grade: number, feedback: string) => {
+  const handleApprove = (id: string | number, grade: number, feedback: string) => {
     updateSubmission({
       resource: "submissions",
       id,
@@ -83,7 +83,7 @@ const PendingApprovalsPage = () => {
     });
   };
 
-  const handleApprovePrompt = (id: number) => {
+  const handleApprovePrompt = (id: string | number) => {
     customMutation({
       url: `ai/prompts/${id}/approve`,
       method: "post",
@@ -96,7 +96,7 @@ const PendingApprovalsPage = () => {
     });
   };
 
-  const handleReject = (id: number) => {
+  const handleReject = (id: string | number) => {
     updateSubmission({
       resource: "submissions",
       id,

@@ -27,6 +27,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { socket, connectSocket } from "@/lib/socket";
 import { User } from "@/types";
+import { useTusUpload } from "@/hooks/use-tus-upload";
+import { getAuthToken } from "@/lib/auth-helper";
 
 interface BulkEnrollDialogProps {
   open: boolean;
@@ -53,112 +55,70 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
   const [results, setResults] = useState<BulkResults | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const {
+    startUpload: startTusUpload,
+    progress: tusProgress,
+    status: tusStatus,
+    currentUploadId,
+  } = useTusUpload();
+
   // --- REAL-TIME UPDATES ---
   useEffect(() => {
-    if (!open || !identity?.id) return;
+    if (tusStatus === "uploading") {
+      // Show internal progress during bitstream transfer
+      setProgress(Math.round(tusProgress * 0.4)); // First 40% is upload
+    }
+  }, [tusProgress, tusStatus]);
 
-    // Ensure socket is connected and authenticated
-    void connectSocket();
+  useEffect(() => {
+    if (tusStatus === "success" && currentUploadId && !jobId) {
+      // Bitstream finished, now trigger backend processing
+      void finalizeEnrollment(currentUploadId);
+    }
+  }, [tusStatus, currentUploadId, jobId]);
 
-    const handleProgress = (data: { jobId: string; progress: number }) => {
-      if (data.jobId === jobId) {
-        setProgress(data.progress);
+  const { mutate: uploadFile } = useCustomMutation();
+
+  const finalizeEnrollment = async (uploadId: string) => {
+    uploadFile(
+      {
+        url: `${apiUrl}/bulk-enroll/${classId}`,
+        method: "post",
+        values: { uploadId },
+      },
+      {
+        onSuccess: (response: any) => {
+          if (response.data?.data?.jobId) {
+            setJobId(response.data.data.jobId);
+          }
+        },
+        onError: (error: any) => {
+          setLoading(false);
+          const apiError = error.response?.data;
+          toast.error(apiError?.message || t("common.errors.processingFailed" as any));
+        },
       }
-    };
-
-    const handleCompleted = (data: { jobId: string; results: BulkResults }) => {
-      if (data.jobId === jobId) {
-        setResults(data.results);
-        setLoading(false);
-        setJobId(null);
-        toast.success(t("classes.show.students.bulk.success" as any));
-        invalidate({
-          resource: "enrollments",
-          invalidates: ["list"],
-        });
-      }
-    };
-
-    socket.on("bulk-enroll:progress", handleProgress);
-    socket.on("bulk-enroll:completed", handleCompleted);
-
-    return () => {
-      socket.off("bulk-enroll:progress", handleProgress);
-      socket.off("bulk-enroll:completed", handleCompleted);
-    };
-  }, [open, jobId, identity?.id, t, invalidate]);
+    );
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type !== "text/csv" && !selectedFile.name.endsWith(".csv")) {
-        toast.error(t("common.errors.invalidFileType" as any), {
-          description: t("common.errors.csvOnly" as any),
-        });
-        return;
-      }
       setFile(selectedFile);
-      setResults(null);
-      setProgress(0);
-      setJobId(null);
     }
   };
-
-  const { mutate: uploadFile } = useCustomMutation();
 
   const handleUpload = async () => {
     if (!file) return;
 
     setLoading(true);
     setProgress(0);
-    const formData = new FormData();
-    formData.append("file", file);
 
-    uploadFile(
-      {
-        url: `${apiUrl}/bulk-enroll/${classId}`,
-        method: "post",
-        values: formData,
-        meta: {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
-      },
-      {
-        onSuccess: (response: any) => {
-          // The backend returns 202 Accepted with a jobId
-          if (response.data?.data?.jobId) {
-            setJobId(response.data.data.jobId);
-            // Loading continues until socket 'completed' event
-          } else {
-            // Fallback for immediate response (legacy)
-            setResults(response.data?.data);
-            setLoading(false);
-            toast.success(t("classes.show.students.bulk.success" as any));
-            invalidate({
-              resource: "enrollments",
-              invalidates: ["list"],
-            });
-          }
-        },
-        onError: (error: any) => {
-          const apiError = error.response?.data;
-          if (apiError?.data?.errors) {
-            setResults({
-              created: 0,
-              enrolled: 0,
-              errors: apiError.data.errors,
-            });
-            toast.error(apiError.message || t("common.errors.uploadFailed" as any));
-          } else {
-            const message = apiError?.message || t("common.errors.uploadFailed" as any);
-            toast.error(message);
-          }
-          setLoading(false);
-        },
-      }
-    );
+    const token = getAuthToken();
+    startTusUpload(file, token, {
+      folder: "bulk-enroll",
+      classId,
+    });
   };
 
   const reset = () => {

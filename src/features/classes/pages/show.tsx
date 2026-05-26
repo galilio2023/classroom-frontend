@@ -63,7 +63,7 @@ const ClassesShow = () => {
   } = useClassDetails(classId);
 
   // --- Local UI State ---
-  const [unenrollTarget, setUnenrollTarget] = useState<number | null>(null);
+  const [unenrollTarget, setUnenrollTarget] = useState<string | number | null>(null);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [isMessageAllOpen, setIsMessageAllOpen] = useState(false);

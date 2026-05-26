@@ -61,16 +61,18 @@ export const useTerm = () => {
     // 🛡️ HARDENING: Instead of a hard crash, return a safe mock state and warn in DEV.
     // This prevents the 'useTerm must be used within a TermProvider' crash.
     if (import.meta.env.DEV) {
-       console.warn("🛡️ Technical Gap: useTerm called outside of TermProvider. Ensure proper wrapping in App.tsx.");
+      console.warn(
+        "🛡️ Technical Gap: useTerm called outside of TermProvider. Ensure proper wrapping in App.tsx."
+      );
     }
-    
+
     return {
       currentTerm: null,
       selectedTerm: null,
       setSelectedTerm: () => {},
       terms: [],
       isLoading: false,
-      refetch: async () => ({ data: { data: [] } } as any),
+      refetch: async () => ({ data: { data: [] } }) as any,
     };
   }
   return context;

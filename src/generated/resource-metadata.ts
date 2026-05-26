@@ -1,7 +1,7 @@
 /**
  * 🛡️ GENERATED FILE - DO NOT EDIT MANUALLY
  * This file is synchronized with the backend schemas.
- * Last Sync: 2026-03-28
+ * Last Sync: 2026-05-05
  */
 
 export const resourceFilterMappings: Record<string, Record<string, string>> = {
@@ -65,4 +65,13 @@ export const resourceFilterMappings: Record<string, Record<string, string>> = {
     teacher: "teacherId",
     class: "classId",
   },
+  schools: {
+    owner: "ownerId",
+  },
+  "academic-terms": {
+    academicYear: "academicYearId",
+    tenant: "tenantId",
+  },
 };
+
+export type ResourceName = keyof typeof resourceFilterMappings;

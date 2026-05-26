@@ -4,7 +4,7 @@
  */
 
 export interface ScheduleItem {
-  id: number;
+  id: string | number;
   name: string;
   description?: string;
   bannerUrl?: string;
@@ -12,7 +12,7 @@ export interface ScheduleItem {
   capacity?: number;
   status: "active" | "inactive" | "archived";
   subject?: {
-    id: number;
+    id: string | number;
     name: string;
   };
   teacher?: {
@@ -49,12 +49,12 @@ export interface GradeDistribution {
 }
 
 export interface PendingSubmission {
-  id: number;
+  id: string | number;
   content?: string;
   fileUrl?: string;
   fileCldPubId?: string;
   isLate: boolean;
-  assignmentId: number;
+  assignmentId: string | number;
   studentId: string;
   createdAt: string;
   updatedAt: string;
@@ -66,13 +66,13 @@ export interface PendingSubmission {
     phoneNumber?: string;
   };
   assignment: {
-    id: number;
+    id: string | number;
     title: string;
     description?: string;
     dueDate?: string;
-    classId: number;
+    classId: string | number;
     class: {
-      id: number;
+      id: string | number;
       name: string;
     };
   };
@@ -89,13 +89,13 @@ export interface AtRiskStudent {
 }
 
 export interface UpcomingAssignment {
-  id: number;
+  id: string | number;
   title: string;
   description?: string;
   dueDate: string;
-  classId: number;
+  classId: string | number;
   class: {
-    id: number;
+    id: string | number;
     name: string;
   };
 }
@@ -108,7 +108,7 @@ export interface GradeTrend {
 
 export interface SubjectMastery {
   subject: string;
-  subjectId?: number;
+  subjectId?: string | number;
   avgGrade: number;
   trend?: number;
 }
@@ -186,7 +186,7 @@ export interface MarketplaceEarnings {
 }
 
 export interface TransactionItem {
-  id: number;
+  id: string | number;
   amount: number;
   currency: string;
   studentName: string;

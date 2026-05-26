@@ -20,8 +20,8 @@ export interface AIStreamPayload {
 }
 
 export interface AIMetadata extends Partial<AIUsageMetadata> {
-  classId?: number;
-  conversationId?: number;
+  classId?: string | number;
+  conversationId?: string | number;
   isAborted?: boolean;
   errorName?: string;
   errorCode?: string;
@@ -30,7 +30,7 @@ export interface AIMetadata extends Partial<AIUsageMetadata> {
 }
 
 export interface ChatSource {
-  id?: number;
+  id?: string | number;
   title: string;
   url: string;
   type: string;
@@ -42,7 +42,7 @@ export interface StudyBlock {
   day: DayName;
   timeSlot: "Morning" | "Afternoon" | "Evening";
   task: string;
-  assignmentId?: number;
+  assignmentId?: string | number;
   duration: string;
 }
 

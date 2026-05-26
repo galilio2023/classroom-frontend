@@ -68,7 +68,7 @@ const ProfileRequestsList = () => {
   usePageTitle(t("profileRequests.title"));
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [rejectTarget, setRejectTarget] = useState<number | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<string | number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -107,7 +107,7 @@ const ProfileRequestsList = () => {
   const isLoading = query.isLoading;
   const hasData = requests.length > 0;
 
-  const handleApprove = (id: number) => {
+  const handleApprove = (id: string | number) => {
     approve(
       {
         url: `/profile-requests/${id}/approve`,

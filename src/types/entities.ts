@@ -40,7 +40,7 @@ export interface User {
   image: string | null;
   role: UserRole;
   status: UserStatus;
-  departmentId: number | null;
+  departmentId: string | number | null;
   department?: Department;
   imageCldPubId: string | null;
   phoneNumber: string | null;
@@ -135,7 +135,7 @@ export interface School extends BaseRecord {
 }
 
 export interface AcademicYear extends BaseRecord {
-  id: number;
+  id: string | number;
   tenantId: string;
   name: string;
   startDate: string;
@@ -146,13 +146,13 @@ export interface AcademicYear extends BaseRecord {
 }
 
 export interface TimetableSlot extends BaseRecord {
-  id: number;
+  id: string | number;
   tenantId: string;
-  academicYearId: number;
-  termId?: number;
+  academicYearId: string | number;
+  termId?: string | number;
   scheduleType: "bell" | "lecture" | "exam";
-  classId?: number;
-  subjectId?: number;
+  classId?: string | number;
+  subjectId?: string | number;
   teacherId: string;
   dayOfWeek: number;
   startTime: string;
@@ -214,7 +214,7 @@ export interface BackgroundJobRecord {
 }
 
 export interface Department {
-  id: number;
+  id: string | number;
   name: string;
   code: string;
   description: string | null;
@@ -226,14 +226,14 @@ export interface Department {
 }
 
 export interface Subject {
-  id: number;
+  id: string | number;
   name: string;
   code: string;
   description: string | null;
   credits: number;
-  departmentId: number;
+  departmentId: string | number;
   department: Department;
-  prerequisiteSubjectId: number | null;
+  prerequisiteSubjectId: string | number | null;
   prerequisite?: Subject;
   language?: string;
   version: number;
@@ -259,15 +259,15 @@ export interface AutomationRule {
   trigger: {
     type: "completion_threshold" | "date_reached" | "student_at_risk";
     threshold?: number;
-    moduleId?: number;
+    moduleId?: string | number;
     date?: string;
   };
   action: {
     type: "publish_module" | "send_announcement" | "award_badge";
-    targetModuleId?: number;
+    targetModuleId?: string | number;
     announcementTitle?: string;
     announcementMessage?: string;
-    badgeId?: number;
+    badgeId?: string | number;
   };
   isActive: boolean;
   lastTriggeredAt?: string | null;
@@ -276,8 +276,8 @@ export interface AutomationRule {
 export type Schedule = z.infer<typeof scheduleSchema>;
 
 export interface GradeCategory {
-  id: number;
-  classId: number;
+  id: string | number;
+  classId: string | number;
   name: string;
   weight: number;
   createdAt: string;
@@ -285,7 +285,7 @@ export interface GradeCategory {
 }
 
 export interface Submission {
-  id: number;
+  id: string | number;
   content: string | null;
   grade: number | null;
   feedback: string | null;
@@ -296,9 +296,9 @@ export interface Submission {
   requiresResubmission: boolean;
   teacherPrivateNotes: string | null;
   attemptNumber: number;
-  assignmentId: number;
+  assignmentId: string | number;
   studentId: string;
-  groupId?: number | null;
+  groupId?: string | number | null;
   approvalStatus?: "pending" | "approved" | "rejected";
   aiStatus: "idle" | "processing" | "completed" | "failed";
   aiError?: string | null;
@@ -320,16 +320,16 @@ export interface RubricItem {
 }
 
 export interface Assignment {
-  id: number;
+  id: string | number;
   title: string;
   description: string | null;
   dueDate: string | null;
   fileUrl: string | null;
   fileCldPubId: string | null;
-  classId: number;
+  classId: string | number;
   class?: Class;
-  moduleId: number | null;
-  categoryId: number | null;
+  moduleId: string | number | null;
+  categoryId: string | number | null;
   category?: GradeCategory;
   allowLateSubmissions: boolean;
   latePenaltyPercentage: number;
@@ -349,8 +349,8 @@ export interface Assignment {
 }
 
 export interface ProjectGroup {
-  id: number;
-  classId: number;
+  id: string | number;
+  classId: string | number;
   name: string;
   description: string | null;
   version: number;
@@ -359,10 +359,10 @@ export interface ProjectGroup {
 }
 
 export interface PeerReview {
-  id: number;
-  assignmentId: number;
+  id: string | number;
+  assignmentId: string | number;
   reviewerId: string;
-  submissionId: number;
+  submissionId: string | number;
   scores: Record<string, number>;
   feedback: string | null;
   createdAt: string;
@@ -373,15 +373,15 @@ export interface PeerReview {
 }
 
 export type Enrollment = {
-  id: number;
+  id: string | number;
   studentId: string;
-  classId: number;
+  classId: string | number;
   status: "pending" | "approved" | "rejected" | "waitlisted" | "dropped";
   waitlistPosition: number | null;
   createdAt: string;
   student: User;
   class: {
-    id: number;
+    id: string | number;
     name: string;
   };
   approvedBy?: User;
@@ -400,15 +400,15 @@ export type Enrollment = {
 };
 
 export interface Module {
-  id: number;
-  classId: number;
+  id: string | number;
+  classId: string | number;
   class?: Class;
   name: string;
   description: string | null;
   order: number;
   isPublished: boolean;
   publishedAt: string | null;
-  prerequisiteModuleId: number | null;
+  prerequisiteModuleId: string | number | null;
   prerequisite?: Module;
   assignments?: Assignment[];
   resources?: Resource[];
@@ -430,10 +430,10 @@ export enum AnnouncementPriority {
 }
 
 export interface Announcement {
-  id: number;
+  id: string | number;
   title: string;
   content: string;
-  classId: number;
+  classId: string | number;
   authorId: string;
   isPinned: boolean;
   priority: AnnouncementPriority;
@@ -450,13 +450,13 @@ export interface Announcement {
 }
 
 export interface Progress {
-  id: number;
+  id: string | number;
   userId: string;
-  classId: number;
-  moduleId: number | null;
-  resourceId: number | null;
-  assignmentId: number | null;
-  quizId: number | null;
+  classId: string | number;
+  moduleId: string | number | null;
+  resourceId: string | number | null;
+  assignmentId: string | number | null;
+  quizId: string | number | null;
   isCompleted: boolean;
   completedAt: string | null;
   lastViewedVersion: number;
@@ -466,7 +466,7 @@ export interface Progress {
 }
 
 export type Class = z.infer<typeof classFormSchema> & {
-  id: number;
+  id: string | number;
   inviteCode: string;
   bannerUrl?: string | null;
   bannerCldPubId?: string | null;
@@ -507,7 +507,7 @@ export type Class = z.infer<typeof classFormSchema> & {
     }[];
     studentWatchouts?: string;
   };
-  termId?: number;
+  termId?: string | number;
   term?: AcademicTerm;
 };
 
@@ -547,8 +547,8 @@ export enum AttendanceStatus {
 }
 
 export interface Attendance {
-  id: number;
-  classId: number;
+  id: string | number;
+  classId: string | number;
   studentId: string;
   date: string;
   status: AttendanceStatus;
@@ -563,7 +563,7 @@ export interface Attendance {
 }
 
 export interface Notification {
-  id: number;
+  id: string | number;
   userId: string;
   title: string;
   message: string;
@@ -575,11 +575,11 @@ export interface Notification {
 }
 
 export interface Discussion {
-  id: number;
+  id: string | number;
   content: string;
-  classId: number;
+  classId: string | number;
   userId: string;
-  parentId: number | null;
+  parentId: string | number | null;
   isEdited: boolean;
   lastEditedAt: string | null;
   isSolved: boolean;
@@ -594,15 +594,15 @@ export interface Discussion {
 }
 
 export interface Resource {
-  id: number;
+  id: string | number;
   title: string;
   description: string | null;
   type: "file" | "link" | "video" | "note" | "image" | "other";
   url: string;
   content: string | null;
   cldPubId: string | null;
-  classId: number | null;
-  moduleId: number | null;
+  classId: string | number | null;
+  moduleId: string | number | null;
   ownerId: string | null;
   isInternal: boolean;
   isRequired: boolean;
@@ -616,8 +616,8 @@ export interface Resource {
 }
 
 export interface ClassNote {
-  id: number;
-  classId: number;
+  id: string | number;
+  classId: string | number;
   userId: string;
   content: string;
   version: number;
@@ -626,7 +626,7 @@ export interface ClassNote {
 }
 
 export interface ProfileChangeRequest {
-  id: number;
+  id: string | number;
   userId: string;
   oldData: any;
   newData: any;
@@ -662,7 +662,7 @@ export interface GetOneResponse<T = BaseRecord> {
 }
 
 export interface AiLog {
-  id: number;
+  id: string | number;
   userId: string;
   action: string;
   prompt: string;
@@ -671,8 +671,8 @@ export interface AiLog {
   latencyMs: number;
   model: string;
   metadata: {
-    classId?: number;
-    conversationId?: number;
+    classId?: string | number;
+    conversationId?: string | number;
     isAborted?: boolean;
     errorName?: string;
     errorCode?: string;
@@ -683,7 +683,7 @@ export interface AiLog {
 }
 
 export interface ActivityLog {
-  id: number;
+  id: string | number;
   userId: string;
   action: string;
   details: any;
@@ -696,7 +696,7 @@ export interface ActivityLog {
 }
 
 export interface AcademicTerm {
-  id: number;
+  id: string | number;
   name: string;
   startDate: string;
   endDate: string;
@@ -707,9 +707,9 @@ export interface AcademicTerm {
 }
 
 export interface TeacherApplication {
-  id: number;
+  id: string | number;
   teacherId: string;
-  classId: number;
+  classId: string | number;
   status: "pending" | "approved" | "rejected";
   message: string | null;
   createdAt: string;
@@ -719,7 +719,7 @@ export interface TeacherApplication {
 }
 
 export interface TeacherChannel {
-  id: number;
+  id: string | number;
   teacherId: string;
   headline: string;
   bio: string;

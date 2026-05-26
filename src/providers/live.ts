@@ -19,9 +19,13 @@ export const liveProvider = (socketInstance: typeof socket): LiveProvider => ({
     const listenerName = `live-event:${channel}`;
     socketInstance.on(listenerName, onEvent);
 
+    // 🚀 UNIFIED SYNC: Inform backend we want to listen to this channel (joined room)
+    socketInstance.emit("subscribe", { channel });
+
     return {
       unsubscribe: () => {
         socketInstance.off(listenerName, onEvent);
+        socketInstance.emit("unsubscribe", { channel });
       },
     };
   },

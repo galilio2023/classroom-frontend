@@ -32,7 +32,7 @@ const QuizShow = () => {
   );
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [answers, setAnswers] = useState<Record<string | number, string>>({});
   const [isStarted, setIsStarted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [isFinished, setIsFinished] = useState(false);
@@ -59,7 +59,7 @@ const QuizShow = () => {
 
   const handleStart = () => setIsStarted(true);
 
-  const handleAnswer = (questionId: number, option: string) => {
+  const handleAnswer = (questionId: string | number, option: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: option }));
   };
 

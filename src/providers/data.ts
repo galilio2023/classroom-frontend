@@ -5,14 +5,9 @@ import { offlineDB } from "../lib/offline-db";
 import { toast } from "sonner";
 import { getResourcePath } from "./utils/resource-paths";
 import { handleError } from "./utils/api-errors";
-import { getUUID } from "@/lib/utils";
+import { getUUID, isPoorBandwidth } from "@/lib/utils";
 
 const BACKEND_BASE_URL = BACKEND_URL;
-
-/**
- * 🛰️ NETWORK SENSE: Helper to check for active connectivity.
- */
-const isOffline = () => !navigator.onLine;
 
 /**
  * 🚀 RESILIENT FETCH: Implements Exponential Backoff & Retry-After awareness.
@@ -30,6 +25,11 @@ const fetcherWithRetry = async (
     ...(options?.headers as Record<string, string>),
     "x-correlation-id": (options?.headers as any)?.["x-correlation-id"] || `client-${getUUID()}`,
   };
+
+  // 📶 RURAL HARDENING: Signal poor bandwidth to backend for payload optimization
+  if (isPoorBandwidth()) {
+    headers["X-Tablawy-Bandwidth"] = "poor";
+  }
 
   const isFormData = options?.body instanceof FormData;
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method) && !isFormData) {
@@ -49,6 +49,21 @@ const fetcherWithRetry = async (
       credentials: "include",
       headers,
     });
+
+    // 🛡️ AUTH REFRESH: Handle 401 by attempting a silent session refresh (Mandate #13)
+    if (response.status === 401 && !url.includes("/identity/session")) {
+      const { getFreshSession } = await import("./auth");
+      const { data: session } = await getFreshSession(true); // Force refresh
+
+      if (session?.user) {
+        const newToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+        if (newToken) {
+          headers["Authorization"] = `Bearer ${newToken}`;
+        }
+        // Retry once with the new token/session
+        return fetch(url, { ...options, credentials: "include", headers });
+      }
+    }
 
     // 🛡️ RATE LIMITING: Handle 429 with Retry-After Header (Mandate #2)
     if (response.status === 429 && retries > 0) {
@@ -87,11 +102,16 @@ const fetcherWithRetry = async (
   }
 };
 
+const isOffline = () => {
+  return typeof navigator !== "undefined" && !navigator.onLine;
+};
+
 /**
  * 📦 OUTBOX FLUSHER
  * Automatically replays pending mutations when the network returns.
  */
 export const flushOutbox = async () => {
+  // 🛡️ REMEDIATION: Basic online check before attempting flush
   if (isOffline()) return;
 
   const pending = await offlineDB.getPending();
@@ -167,10 +187,18 @@ export const flushOutbox = async () => {
       if (response) {
         await offlineDB.resolve(mutation.id!);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Failed to sync mutation ${mutation.id}`, err);
-      // Stop flushing if we hit a persistent error (e.g. 401) to avoid infinite loops
-      break;
+
+      // 🛡️ SYNC RESILIENCE: Only stop on fatal/persistent errors
+      // 401/403: Auth failure (wait for refresh or login)
+      // 400: Validation failure (mutation is broken and needs manual fix)
+      if (err.statusCode === 401 || err.statusCode === 403 || err.statusCode === 400) {
+        break;
+      }
+
+      // For network errors or 5xx, we skip and leave it in the outbox for next time
+      continue;
     }
   }
 
@@ -537,11 +565,10 @@ export const dataProvider: DataProvider = {
     let requestUrl = url;
 
     if (!url.startsWith("http")) {
-      if (url.startsWith("/")) {
-        requestUrl = `${BACKEND_BASE_URL}${url}`;
-      } else {
-        requestUrl = `${BACKEND_BASE_URL}/${url}`;
-      }
+      // 🚀 MODULAR ROUTING: Automatically apply prefixes to custom paths (e.g., "/quizzes" -> "/assessment/quizzes")
+      const path = url.startsWith("/") ? url.slice(1) : url;
+      const resourcePath = getResourcePath(path);
+      requestUrl = `${BACKEND_BASE_URL}/${resourcePath}`;
     }
 
     if (query) {

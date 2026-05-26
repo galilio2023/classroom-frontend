@@ -29,8 +29,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface StaffActionsProps {
   classId: string;
-  unenrollTarget: number | null;
-  setUnenrollTarget: (id: number | null) => void;
+  unenrollTarget: string | number | null;
+  setUnenrollTarget: (id: string | number | null) => void;
   handleConfirmUnenroll: () => void;
   isDeleting: boolean;
 

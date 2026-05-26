@@ -13,13 +13,13 @@ import { Loader2, Eye } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface AnnouncementReadsModalProps {
-  announcementId: number | null;
+  announcementId: string | number | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 interface ReadReceipt {
-  id: number;
+  id: string | number;
   readAt: string;
   student: {
     name: string;

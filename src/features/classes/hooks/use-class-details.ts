@@ -49,7 +49,7 @@ export const useClassDetails = (classId: string) => {
   });
   const announcements = announcementsResult?.data ?? [];
 
-  const [dismissedAnnouncements, setDismissedAnnouncements] = useState<number[]>([]);
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState<(string | number)[]>([]);
   useEffect(() => {
     if (identity?.id) {
       const dismissed = localStorage.getItem(`dismissed_announcements_${identity.id}`);
@@ -57,7 +57,7 @@ export const useClassDetails = (classId: string) => {
     }
   }, [identity?.id]);
 
-  const handleDismissAnnouncement = (id: number) => {
+  const handleDismissAnnouncement = (id: string | number) => {
     const updated = [...dismissedAnnouncements, id];
     setDismissedAnnouncements(updated);
     localStorage.setItem(`dismissed_announcements_${identity?.id}`, JSON.stringify(updated));
@@ -100,7 +100,7 @@ export const useClassDetails = (classId: string) => {
   const { mutate: createMutation, mutation: createMutationObj } = useCreate();
   const { mutate: updateClass } = useUpdate();
 
-  const handleEnrollmentAction = async (id: number, status: "approved" | "rejected") => {
+  const handleEnrollmentAction = async (id: string | number, status: "approved" | "rejected") => {
     // Optimistic Update
     const queryKey = ["classes", "show", classId];
     await queryClient.cancelQueries({ queryKey });
@@ -182,7 +182,7 @@ export const useClassDetails = (classId: string) => {
     );
   };
 
-  const handleConfirmUnenroll = (unenrollTarget: number | null, callback: () => void) => {
+  const handleConfirmUnenroll = (unenrollTarget: string | number | null, callback: () => void) => {
     if (unenrollTarget) {
       deleteMutation(
         { resource: "enrollments", id: unenrollTarget },
